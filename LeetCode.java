@@ -194,3 +194,25 @@ public class Solution {
         return result;
     }
 }
+
+491. Increasing Subsequences
+public class Solution {
+    public List<List<Integer>> findSubsequences(int[] nums) {
+        Set<List<Integer>> list = new HashSet<>();
+        List<Integer> item = new ArrayList<>();
+        helper(list,item,nums,0);
+        //Key:set to arraylist
+        return new ArrayList<>(list);
+    }
+    public void helper(Set<List<Integer>> list,List<Integer> item,int[] nums,int index){
+        for(int i = index;i<=nums.length-1;i++){
+            if(item.size() == 0 || nums[i]>=item.get(item.size()-1)){
+                item.add(nums[i]);
+                if(item.size()>=2) list.add(new ArrayList<>(item));
+                helper(list,item,nums,i+1);
+                item.remove(item.size()-1);
+            }
+            
+        }
+    }
+} 
