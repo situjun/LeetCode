@@ -1,3 +1,45 @@
+516. Longest Palindromic Subsequence
+public class Solution {
+    public int longestPalindromeSubseq(String s) {
+        //Key:subsequence's子序列，不能调整顺序....
+        /**
+        
+        if(s == null || s.equals("")) return 0;
+        int oddMax = 0,count = 0;
+        Map<Character,Integer> map = new HashMap<>();
+        for(int i =0;i<=s.length()-1;i++){
+            map.put(s.charAt(i),map.getOrDefault(s.charAt(i),0)+1);
+        }
+        for(Map.Entry<Character,Integer> entry:map.entrySet()){
+            count += entry.getValue()%2 == 0?entry.getValue():0;
+            if(entry.getValue()%2 == 1)oddMax = Math.max(oddMax,entry.getValue());
+        }
+        return count+maxOdd;
+        
+        ****/
+        //DP
+        //Key:这道DP要整体思考，思考的太细容易绕在里头.....
+        int length = s.length();
+        int[][] F = new int[length][length];
+        for(int i = 0;i<=length-1;i++) F[i][i] = 1;
+        //Key:Important！！！！如果从前往后，即i递增，那么之前存的DP[i][j]就不会被用上
+        //因为F[i+1][j-1]是一个需要内部存储的过程，所以i需要--，而j++
+        //下面这句是错误的
+        //for(int i = 0;i<=length-1;i++){
+        //如果非要从前往后，就该写成F[i-1][j+1]
+        for(int i = length-1;i>=0;i--){
+            for(int j = i+1;j<=length-1;j++){
+                if(s.charAt(i) == s.charAt(j)){
+                    F[i][j] = F[i+1][j-1]+2;
+                } else {
+                    F[i][j] = Math.max(F[i+1][j],F[i][j-1]);
+                }
+            }
+        }
+        return F[0][length-1];
+    }
+}
+
 508. Most Frequent Subtree Sum
 
 /**
@@ -105,5 +147,50 @@ public class Solution {
             helper(list,node.left,depth+1);
             helper(list,node.right,depth+1);
         }
+    }
+}
+
+503. Next Greater Element II
+public class Solution {
+    public int[] nextGreaterElements(int[] nums) {
+        
+        int[] result = new int[nums.length];
+        if(nums.length == 0) return result;
+        Arrays.fill(result,-1);
+        Stack<Integer> stack = new Stack<>();
+        //Key:push index,而非nums[index]
+        //stack.push(nums[0]);
+        stack.push(0);
+        for(int i = 1;i<=nums.length-1;i++){
+            while(!stack.empty() && nums[i]>nums[stack.peek()]){
+                result[stack.pop()] = nums[i];
+            }
+            stack.push(i);
+        }
+        for(int i = 0;i<=nums.length-1;i++){
+            while(!stack.empty() && nums[i]>nums[stack.peek()]){
+                result[stack.pop()] = nums[i];
+            }
+        }
+        return result;
+    }
+}
+
+496. Next Greater Element I
+public class Solution {
+    public int[] nextGreaterElement(int[] findNums, int[] nums) {
+        Stack<Integer> stack = new Stack<>();
+        int[] result = new int[findNums.length];
+        Map<Integer,Integer> map = new HashMap<>();
+        for(int i =0;i<=nums.length-1;i++){
+            while(!stack.empty() && stack.peek()<nums[i]){
+                map.put(stack.pop(),nums[i]);
+            }
+            stack.push(nums[i]);
+        }
+        for(int i = 0;i<=findNums.length-1;i++){
+            result[i] = map.getOrDefault(findNums[i],-1);
+        }
+        return result;
     }
 }
