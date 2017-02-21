@@ -216,3 +216,80 @@ public class Solution {
         }
     }
 } 
+
+526. Beautiful Arrangement
+public class Solution {
+    int count =  0;
+    public int countArrangement(int N) {
+        List<Integer> list = new ArrayList<>();
+		if(N==0) return 0;
+        int[] arr = new int[N];
+        for(int i =1;i<=N;i++) arr[i-1] = N;
+        boolean[] used = new boolean[N];
+        helper(list,N,used);
+        return count;
+    }
+    public void helper(List<Integer> list,int target,boolean[] used){
+        if(list.size() == target){
+			
+            count++;
+			System.out.println(list);
+        } else {
+            for(int i = 1;i<=target;i++){
+                if(used[i-1]) continue;
+                if((list.size()+1)%i == 0 || i%(list.size()+1) == 0){
+                    list.add(i);
+                    used[i-1] = true;
+                    helper(list,target,used);
+                    used[i-1] = false;
+                    list.remove(list.size()-1);
+                }
+            }
+        }
+    }
+}
+
+520. Detect Capital
+public class Solution {
+    public boolean detectCapitalUse(String word) {
+        if(word == null || word.length() == 0) return false;
+        if(word.length() == 1) return true;
+        boolean first = false,sec = false;
+        if(word.charAt(0)-'A' <= 25 && word.charAt(0)-'A' >= 0) first = true;
+        if(word.charAt(1)-'A' <= 25 && word.charAt(1)-'A' >= 0) sec = true;
+		if(!first && sec) return false;
+        for(int i = 2;i<=word.length()-1;i++){
+            if(!first && word.charAt(i)-'A' <= 25 && word.charAt(i)-'A' >= 0) return false;
+            if(first && !sec && word.charAt(i)-'A' <= 25 && word.charAt(i)-'A' >= 0) return false;
+            if(first && sec&& word.charAt(i)-'a' <= 25 && word.charAt(i)-'a' >= 0) return false;
+        }
+        return true;
+    }
+}
+
+525. Contiguous Array
+public class Solution {
+    public int findMaxLength(int[] nums) {
+        if(nums == null || nums.length == 0) return 0;
+        int sum[] = new int[nums.length];
+		sum[0] = nums[0] == 0? -1 : 1;
+		for(int i=1; i < sum.length; i++){
+			sum[i] = sum[i-1] + (nums[i] == 0? -1 : 1);
+		}
+		Map<Integer,Integer> pos = new HashMap<Integer,Integer>();
+		int maxLen = 0;
+		int i = 0;
+		for(int s : sum){
+			if(s == 0){
+				maxLen = Math.max(maxLen, i+1);
+			}
+			if(pos.containsKey(s)){
+				maxLen = Math.max(maxLen, i-pos.get(s));
+			}else{
+				pos.put(s, i);
+			}
+			i++;
+		}
+		return maxLen;
+    }
+}
