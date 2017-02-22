@@ -293,3 +293,42 @@ public class Solution {
 		return maxLen;
     }
 }
+
+482. License Key Formatting
+public class Solution {
+    public String licenseKeyFormatting(String S, int K) {
+        /***
+        
+        //TLE
+        
+        String result = "";
+        int count = 0;
+        for(int i = S.length()-1;i>=0;i--){
+            if(S.charAt(i) == '-') continue;
+            //Must convert to UpperCase
+            result = String.valueOf(S.charAt(i)>='a'?(char)(S.charAt(i)-'a'+'A'):S.charAt(i))+result;
+            count++;
+            if(count == K){
+                result = "-"+result;
+                count = 0;
+            }
+        }
+        //Key:corner case
+        //"---",3
+        while(result.length() > 0 && result.charAt(0) == '-') result = result.substring(1);    
+        
+        return result;
+        
+        ***/
+        //Key:difficulties are corner cases
+        String s = S.replaceAll("-",""),result = "";
+        int count = 0,i = 0;
+        for(i = s.length();i>=K;i=i-K){
+            //Must convert to UpperCase
+            result = "-"+s.substring(i-K,i)+result;
+        }
+        result = s.substring(0,i)+result;
+        while(s.length() >= 1 && result.charAt(0) == '-') result = result.substring(1);
+        return result.toUpperCase();
+    }
+}
