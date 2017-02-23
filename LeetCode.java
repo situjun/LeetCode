@@ -437,3 +437,156 @@ public class Solution {
         
     }
 }
+
+473. Matchsticks to Square
+public class Solution {
+    int count = 0;
+    public boolean makesquare(int[] nums) {
+        if(nums.length<4) return false;
+        //Key:下面的思路错误
+        //Corner case:[3,3,3,3,4,4,4,4,5,5,5,5]
+        /*****
+        
+        int sum = 0;
+        for(int i:nums) sum+=i;
+        if(sum%4 != 0) return false;
+        Arrays.sort(nums);
+        if(sum/4 < nums[nums.length-1] || nums[0] == 0) return false;
+        int count = 0;
+        int index1=0,index2 = nums.length-1,tmp = 0;
+        while(index1<=index2){
+            if(tmp+nums[index2] > sum/4){
+                tmp += nums[index1++];
+            } else {
+                tmp += nums[index2--];
+            }
+            if(tmp == sum/4) {
+                count++;
+                tmp = 0;
+            }
+        }
+        
+        return count == 4?true:false;
+        
+        ******/
+        
+        //Permutations那个方法也没法用，因为
+        //Corner case：[3,3,3,3,4,4,4,4,5,5,5,5] 会导致3,3,3,3和4,4,4这样的也满足条件，所以不成
+        /***
+        
+        //Key:DFS试出来....
+        //similar to 4sums
+        int sum = 0,side = 0;
+        for(int i:nums) sum+=i;
+        if(sum%4 != 0) return false;
+        Arrays.sort(nums);
+        side = sum/4;
+        if(nums[nums.length-1]>side || nums[0] == 0) return false;
+        //因为需要清空，所以最好不用List<Integer> item = new ArrayList<>();。否则的话不知道要怎么写了
+        List<Integer> item = new ArrayList<>();
+        boolean[] used = new boolean[nums.length];
+        System.out.println("log");
+        helper(item,nums,used,side,0);
+        if(count != 4) return false;
+        return true;
+    }
+    public void helper(List<Integer> item,int[] nums,boolean[] used,int side,int tmp){
+        if(tmp == side && item.size() != 0){
+            System.out.println(item);
+            count++;
+        } else {
+            for(int i = 0;i<=nums.length-1;i++){
+                if(tmp+nums[i]>side) break;
+                if(used[i]) continue;
+                item.add(nums[i]);
+                int tag = count;
+                used[i] = true;
+                helper(item,nums,used,side,tmp+nums[i]);
+                if(count == tag){
+                    used[i] = false;
+                    item.remove(item.size()-1);
+                } else {
+                    //Key:clear 与 removeAll用法！！
+                    item.clear();
+                }
+            }
+        }
+        
+        ***/
+        
+        //Key:Just copy
+        //这个方法比最高的那个方法好理解
+        int sum=0;
+        for(int x:nums){
+            sum=sum+x;
+        }
+        if(sum%4!=0||nums.length<4) return false;
+        int width=(sum/4);
+        Arrays.sort(nums);
+        int sum1=0,sum2=0,sum3=0,sum4=0;
+        return helper(nums,nums.length-1,sum1,sum2,sum3,sum4,width);
+    }
+    public boolean helper(int[] a, int i,int sum1,int sum2,int sum3,int sum4, int width){
+        if(sum1>width||sum2>width||sum3>width||sum4>width) return false;
+        if(i==-1){
+            if(sum1==width&&sum2==width&&sum3==width&&sum4==width) return true;
+            else return false;
+        }
+        //check a[i]  belonging to side1,side2,side3,side4
+        return helper(a,i-1,sum1+a[i],sum2,sum3,sum4,width)||
+        helper(a,i-1,sum1,sum2+a[i],sum3,sum4,width)||
+        helper(a,i-1,sum1,sum2,sum3+a[i],sum4,width)||
+        helper(a,i-1,sum1,sum2,sum3,sum4+a[i],width);
+    }
+}
+
+467. Unique Substrings in Wraparound String
+public class Solution {
+    public int findSubstringInWraproundString(String p) {
+        //Key:just copy
+        // count[i] is the maximum unique substring end with ith letter.
+        // 0 - 'a', 1 - 'b', ..., 25 - 'z'.
+        /**
+        //Key:一开始的，错误版本
+        if(p == null || p.length() == 0) return 0;
+        int[] arr = new int[26];
+        int max = 1,sum = 1;
+        arr[p.charAt(0)-'a'] = 1;
+        for(int i = 1;i<=p.length()-1;i++){
+            //Corner case:abaab  会把首尾的ab算成两次
+            //Key:need to consider za
+            if(p.charAt(i)-p.charAt(i-1) == 1 || p.charAt(i-1) - p.charAt(i) == 25){
+                max++;
+            } else {
+                max = 1;
+            }
+            arr[p.charAt(i)-'a'] += 1;
+            sum+=max;
+        }
+        for(int i:arr){
+            if(i>1) sum = sum-(i-1);
+        }
+        return sum;
+        ***/
+        
+        int[] count = new int[26];
+        int maxLengthCur = 0;
+        for (int i = 0; i < p.length(); i++) {
+            int len = 1;
+            if (i > 0 && (p.charAt(i) - p.charAt(i - 1) == 1 || (p.charAt(i - 1) - p.charAt(i) == 25)))
+                maxLengthCur++;
+            else
+                maxLengthCur = 1;
+    
+            int index = p.charAt(i) - 'a';
+            count[index] = Math.max(count[index], maxLengthCur);
+        }
+        // Sum to get result
+        int sum = 0;
+        for (int i = 0; i < 26; i++) {
+            sum += count[i];
+        }
+        return sum;
+        
+    }
+}
