@@ -332,3 +332,108 @@ public class Solution {
         return result.toUpperCase();
     }
 }
+
+475. Heaters
+//Key:这道题不太好！！！
+public class Solution {
+    public int findRadius(int[] houses, int[] heaters) {
+        //Key:不行，Corner case 太大，所以brute force TLE
+        /****
+        
+        //Key:brute force O(mn)
+        if(houses.length == 0 || heaters.length == 0) return 0;
+        int length1 = houses.length,length2 = heaters.length;
+        int result = 0,tmp = Integer.MAX_VALUE;
+        for(int i = 0;i<=length1-1;i++){
+            tmp = Integer.MAX_VALUE;
+            for(int j = 0;j<=length2-1;j++){
+                tmp = Math.min(tmp,Math.abs(houses[i]-heaters[j]));
+            }
+            result = Math.max(result,tmp);
+        }
+        return result;
+        
+        //Key:下面的是他人的，但他内部循环做了个优化，所以复杂度应该要低些
+        Arrays.sort(houses);
+        Arrays.sort(heaters);
+        int i = 0, j = 0, res = 0;
+        while (i < houses.length) {
+            while (j < heaters.length - 1
+                && Math.abs(heaters[j + 1] - houses[i]) <= Math.abs(heaters[j] - houses[i])) {
+                j++;
+            }
+            res = Math.max(res, Math.abs(heaters[j] - houses[i]));
+            i++;
+        }
+        return res;
+        
+        //Key:另一个自己的，解法太乱了...而且是错的
+        if(houses.length == 0 || heaters.length == 0) return 0;
+        int outer = Integer.MAX_VALUE,inner = 0;
+        for(int i = 0;i<=heaters.length-1;i++){
+            if(i == 0 || heaters[i] <houses[0] || heaters[i]>houses[houses.length-1]){
+                outer = Math.min(outer,Math.max(Math.abs(heaters[i]-houses[0]),Math.abs(heaters[i]-houses[houses.length-1])));
+                continue;
+            }
+            if(heaters[i] >=houses[0] && heaters[i]<=houses[houses.length-1] && heaters[i-1] >=houses[0] && heaters[i-1]<=houses[houses.length-1]){
+                inner = Math.max(heaters[i]-heaters[i-1],inner);
+            }
+        }
+       
+        //Key:找出最大的加热radius就可以
+        inner = Math.max(inner/2,Math.max(Math.abs(heaters[0]-houses[0]),Math.abs(houses[houses.length-1]-heaters[heaters.length-1])));
+        
+        return Math.min(inner,outer);
+        
+        ******/
+        
+        //这道题真是服了....，优化了还是无法通过.思路明明和别人一样的....
+        /***
+        
+        //Key:brute force O(mn)  -->O(mn)通过不了，所以inner loop做了个小优化
+        Arrays.sort(houses);
+        Arrays.sort(heaters);
+        if(houses.length == 0 || heaters.length == 0) return 0;
+        int length1 = houses.length,length2 = heaters.length;
+        int result = 0,tmp = Integer.MAX_VALUE,j=0;
+        for(int i = 0;i<=length1-1;i++){
+            tmp = Integer.MAX_VALUE;
+            //for(int j = 0;j<=length2-1;j++){
+            //    tmp = Math.min(tmp,Math.abs(houses[i]-heaters[j]));
+            //}
+            j = 0;
+            //IMPORTANT!!!这道题有些Corner case不好，
+            //[1,2,3,4,4,4,5,6,6,7] [1,2,3,4,4,4,5,6,6,7] 因为有重复的数字，所以如果比较重复数字后面的数字时（例如7），如果仅判断>，就会因为4,4,4导致没法往后进行了
+            //while(j<=length2-1 && tmp > Math.abs(houses[i]-heaters[j])){
+            while(j<=length2-1 && tmp >= Math.abs(houses[i]-heaters[j])){
+                tmp = Math.abs(houses[i]-heaters[j++]);
+            }
+            result = Math.max(result,tmp);
+        }
+        return result;
+        
+        ***/
+        Arrays.sort(houses);
+        Arrays.sort(heaters);
+        if(houses.length == 0 || heaters.length == 0) return 0;
+        int length1 = houses.length,length2 = heaters.length;
+        int result = 0,j = 0;
+        for(int i = 0;i<=length1-1;i++){
+            //for(int j = 0;j<=length2-1;j++){
+            //    tmp = Math.min(tmp,Math.abs(houses[i]-heaters[j]));
+            //}
+           
+            //IMPORTANT!!!这道题有些Corner case不好，
+            //[1,2,3,4,4,4,5,6,6,7] [1,2,3,4,4,4,5,6,6,7] 因为有重复的数字，所以如果比较重复数字后面的数字时（例如7），如果仅判断>，就会因为4,4,4导致没法往后进行了
+            //while(j<=length2-1 && tmp > Math.abs(houses[i]-heaters[j])){
+            //Key:j直接往后延，不用重新从0开始。TLE的关键！！！
+            //j = 0;
+            while(j<=length2-2 &&  Math.abs(houses[i]-heaters[j+1]) <= Math.abs(houses[i]-heaters[j])){
+                j++;
+            }
+            result = Math.max(result, Math.abs(houses[i]-heaters[j]));
+        }
+        return result;
+        
+    }
+}
