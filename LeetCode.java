@@ -590,3 +590,140 @@ public class Solution {
         
     }
 }
+
+450. Delete Node in a BST
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    public TreeNode deleteNode(TreeNode root, int key) {
+        return helper(root,key);
+    }
+    //Key:写的太乱了
+    //思路：current node == target时，将左右子树重组，返回至上层。
+    //!=，则根据打下继续往下走，并把重新得到的子树重新赋值
+    //Key:关键在于如何重新调整新的子二叉树，因为如果子二叉树分别有两个节点很麻烦
+    public TreeNode helper(TreeNode node,int target){
+        if(node == null) return null;
+        TreeNode left,right;
+        if(node.val == target){
+            left = helper(node.left,target);
+            right = helper(node.right,target);
+            boolean tag = left == null?false:true;
+            TreeNode tmp = tag?left:right;
+            if(tag){
+                while(tmp != null && tmp.right != null){
+                    tmp = tmp.right;
+                }
+            } else {
+                while(tmp != null && tmp.left != null){
+                    tmp = tmp.left;
+                }
+            }
+            //Corner case:[0] 0
+            if(tmp == null) return null;
+            if(tag) tmp.right = right;
+            else  tmp.left = left;
+            return tag?left:right;
+        } else if(node.val<target){
+            node.right = helper(node.right,target);
+            return node;
+        } else {
+            node.left = helper(node.left,target);
+            return node;
+        }
+       
+    }
+}
+
+451. Sort Characters By Frequency
+public class Solution {
+    public String frequencySort(String s) {
+        //Key:不用Collection.sort的话，一个特别机智的方法
+        /****
+        char[] arr = s.toCharArray();
+        // bucket sort
+        //Key:Unicode最多只有256个字符
+        int[] count = new int[256];
+        for(char c : arr) count[c]++;
+        
+        // count values and their corresponding letters
+        Map<Integer, List<Character>> map = new HashMap<>();
+        for(int i = 0; i < 256; i++){
+            if(count[i] == 0) continue;
+            int cnt = count[i];
+            if(!map.containsKey(cnt)){
+                map.put(cnt, new ArrayList<Character>());
+            }
+            map.get(cnt).add((char)i);
+        }
+    
+        // loop throught possible count values
+        StringBuilder sb = new StringBuilder();
+        //Key:不用Collection.sort的话，一个特别机智的方法
+        //因为s最大长度也就是s.length()，所以从最后往前递减，找出来
+        for(int cnt = arr.length; cnt > 0; cnt--){ 
+            if(!map.containsKey(cnt)) continue;
+            List<Character> list = map.get(cnt);
+            for(Character c: list){
+                for(int i = 0; i < cnt; i++){
+                    sb.append(c);
+                }
+            }
+        }
+        return sb.toString();
+        
+        ***/
+        Map<Character,Integer> map = new HashMap<>();
+        char c;
+        for(int i = 0;i<=s.length()-1;i++){
+            c = s.charAt(i);
+            map.put(c,map.getOrDefault(c,0)+1);
+        }
+        List<Map.Entry<Character,Integer>> list = new ArrayList<>(map.entrySet());
+        //Key:Collection.sort的用法！！！！关键
+        /**
+        public interface Comparator<T>
+        A comparison function, which imposes a total ordering on some collection of objects. Comparators can be passed to a sort method (such as Collections.sort or Arrays.sort) to allow precise control over the sort order. Comparators can also be used to control the order of certain data structures (such as sorted sets or sorted maps), or to provide an ordering for collections of objects that don't have a natural ordering.
+        **/
+        //Key:Comparator也是一个Collction，所以也要传泛型
+        //Key:是Collections！！！而不是Collection!!
+        //Collection.sort(list,new Comparator<Map.Entry<Character,Integer>>(){
+        Collections.sort(list,new Comparator<Map.Entry<Character,Integer>>(){
+            public int compare(Map.Entry<Character,Integer> e1,Map.Entry<Character,Integer> e2){
+                //Key!!!!!
+                //Key:比较时第一个值在前面，即为升序（默认）
+                //第二个值在前面，即为降序  
+                return e2.getValue().compareTo(e1.getValue());
+            }
+        });
+        StringBuilder sb = new StringBuilder();
+        for(Map.Entry<Character,Integer> entry:list){
+            c = entry.getKey();
+            for(int i = 0;i<=entry.getValue()-1;i++) sb.append(c);
+        }
+        return sb.toString();
+    }
+}
+
+517. Super Washing Machines
+public class Solution {
+    public int findMinMoves(int[] machines) {
+        //Just copy
+        int total = 0; 
+        for(int i: machines) total+=i;
+        if(total%machines.length!=0) return -1;
+        int avg = total/machines.length, cnt = 0, max = 0;
+        for(int load: machines){
+            cnt += load-avg; //load-avg is "gain/lose"
+            max = Math.max(Math.max(max, Math.abs(cnt)), load-avg);
+        }
+        return max;
+    }
+}
