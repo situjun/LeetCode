@@ -727,3 +727,28 @@ public class Solution {
         return max;
     }
 }
+
+347. Top K Frequent Elements
+public class Solution {
+    public List<Integer> topKFrequent(int[] nums, int k) {
+        //Key:Collections.sort
+        
+        Map<Integer,Integer> map = new HashMap<>();
+        for(int i:nums) map.put(i,map.getOrDefault(i,0)+1);
+        List<Map.Entry<Integer,Integer>> list = new ArrayList<>(map.entrySet());
+        //Key:别漏了一开始的list!!!
+        //public static <T> void sort(List<T> list,Comparator<? super T> c)
+        //public static <T extends Comparable<? super T>> void sort(List<T> list)
+        Collections.sort(list,new Comparator<Map.Entry<Integer,Integer>>(){
+            public int compare(Map.Entry<Integer,Integer> e1,Map.Entry<Integer,Integer> e2){
+                return e2.getValue().compareTo(e1.getValue());
+            }
+        });
+        List<Integer> result = new ArrayList<>();
+        if(nums.length<k) return result;
+        for(int i = 0;i<=k-1;i++){
+            result.add(list.get(i).getKey());
+        }
+        return result;
+    }
+}
