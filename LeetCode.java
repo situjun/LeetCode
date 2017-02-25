@@ -752,3 +752,72 @@ public class Solution {
         return result;
     }
 }
+
+459. Repeated Substring Pattern
+public class Solution {
+    public boolean repeatedSubstringPattern(String s) {
+        //Just Copy
+        int len = s.length();
+    	for(int i=len/2 ; i>=1 ; i--) {
+    		if(len%i == 0) {
+    			int m = len/i;
+    			String subS = s.substring(0,i);
+    			int j;
+    			for(j=1;j<m;j++) {
+    				if(!subS.equals(s.substring(j*i,i+j*i))) break;
+    			}
+    			if(j==m)
+    			    return true;
+    		}
+    	}
+    	return false;
+    }
+}
+
+456. 132 Pattern
+public class Solution {
+    //Case 太大，TLE
+    /**
+    boolean tag = false;
+    public boolean find132pattern(int[] nums) {
+        //Key:similar to permutations
+        //Corner case:因为给的case太大，只是全局变量的话太浪费了，所以不如直接返回boolean....TLE
+        if(nums.length ==0) return false;
+        List<Integer> item = new ArrayList<>();
+        Arrays.sort(nums);
+        if(nums[nums.length-1]-nums[0]<=1) return false;
+        helper(item,nums,0);
+        return tag;
+    }
+    public void helper(List<Integer> item,int[] nums,int index){
+        if(item.size() == 3){
+            if(item.get(0) < item.get(2) && item.get(2)<item.get(1)) tag = true;
+        } else {
+            for(int i = index;i<=nums.length-1;i++){
+                if(item.size() == 1 && nums[i]<=item.get(0)) continue;
+                item.add(nums[i]);
+                helper(item,nums,i+1);
+                item.remove(item.size()-1);
+            }
+        }
+    }
+    **/
+    public boolean find132pattern(int[] nums) {
+        //Just Copy
+        int[] arr = Arrays.copyOf(nums, nums.length);
+    
+        for (int i = 1; i < nums.length; i++) {
+            arr[i] = Math.min(nums[i - 1], arr[i - 1]);
+        }
+        
+        for (int j = nums.length - 1, top = nums.length; j >= 0; j--) {
+            if (nums[j] <= arr[j]) continue;
+            while (top < nums.length && arr[top] <= arr[j]) top++;
+            if (top < nums.length && nums[j] > arr[top]) return true;
+            arr[--top] = nums[j];
+        }
+            
+        return false;
+        
+    }
+}
