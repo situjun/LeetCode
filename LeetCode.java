@@ -821,3 +821,201 @@ public class Solution {
         
     }
 }
+
+530. Minimum Absolute Difference in BST
+//V1
+public class Solution {
+	//Key:错误思路！！！
+    //Coner  case:[100,1,null,null,99] 100和99min最小,但是并未相邻....
+    /***
+    public int getMinimumDifference(TreeNode root) {
+        //Key:错误思路！！！-->因为BST，所以child只需要和parent比较即可，因为永远是leftChild<parent<rightChild
+        helper(root);
+        return min;
+    }
+    public void helper(TreeNode node){
+        if(node != null){
+            if(node.left != null) min = Math.min(node.val-node.left.val,min);
+            if(node.right != null) min = Math.min(node.right.val-node.val,min);
+            helper(node.left);
+            helper(node.right);
+        }
+    }
+    /****
+    
+    int result;
+    public int getMinimumDifference(TreeNode root) {
+        if(root == null) return 0;
+        result = root.val;
+        helper(root,Integer.MAX_VALUE,Integer.MIN_VALUE);
+        return result;
+    }
+    public void helper(TreeNode node,int min,int max){
+        if(node != null){
+            if(min>node.val) min = node.val;
+            if(max<node.val) max = node.val;
+            if(min - node.val == 0) result = Math.min(Math.abs(max-node.val),result);
+            else if(max-node.val == 0) result = Math.min(Math.abs(min-node.val),result);
+            else result = Math.min(Math.min(Math.abs(min-node.val),Math.abs(max-node.val)),result);
+            helper(node.left,min,max);
+            helper(node.right,min,max);
+        }
+    }
+    
+    *****/
+	//Key:brute force-->全取出来再比较(Complexity 很高)，discuss里用的是InOrder中序遍历的方法
+	//Key:糊涂了，中序遍历
+    public int getMinimumDifference(TreeNode root) {
+        List<Integer> list = new ArrayList<>();
+        if(root == null) return 0;
+        if(root.left == null && root.right == null) return root.val;
+        helper(list,root);
+        Collections.sort(list,new Comparator<Integer>(){
+           public int compare(Integer i1,Integer i2){
+               return i1.compareTo(i2);
+           } 
+        });
+        int min = Integer.MAX_VALUE;
+        for(int i = 1;i<=list.size()-1;i++){
+            int tmp = list.get(i)-list.get(i-1);
+            if(min > tmp) min = tmp;
+            //System.out.println(min);
+        }
+        return min;
+    }
+    public void helper(List<Integer> list,TreeNode node){
+        if(node != null){
+            list.add(node.val);
+            helper(list,node.left);
+            helper(list,node.right);
+        }
+    }
+}
+//Version 2:Just Copy
+public class Solution {
+    //Key:对于BST,In Order，本身就是按照顺序来的....
+    int min = Integer.MAX_VALUE;
+    Integer prev = null;
+    public int getMinimumDifference(TreeNode root) {
+        if (root == null) return min;
+        getMinimumDifference(root.left);
+        if (prev != null) min = Math.min(min, root.val - prev);
+        prev = root.val;
+        getMinimumDifference(root.right);
+        return min;
+    }
+}
+
+
+523. Continuous Subarray Sum
+public class Solution {
+    public boolean checkSubarraySum(int[] nums, int k) {
+        if(nums.length == 0) return false;
+        int sum = 0,index = 0;
+        for(int i = 1;i<=nums.length-1;i++){
+            index = i;
+            sum = nums[index-1];
+            while(index<=nums.length-1){
+                if(k == 0 && nums[index] == 0 && nums[index-1] == 0) return true;
+                sum+= nums[index++];
+                //Corner case:[23,2,6,4,7] 0  不能除以0！！！
+                if(k!= 0 && sum%k == 0) return true;
+            }
+        }
+        return false;
+    }
+}
+
+524. Longest Word in Dictionary through Deleting
+public class Solution {
+    //TLE
+    /***
+    String result = "";
+    public String findLongestWord(String s, List<String> d) {
+        if(s == null || s.length()==0) return "";
+        if(d.size() == 0) return "";
+        helper(s,"",d,0);
+        
+        int index = 0;
+        String result = "";
+        Map<Character,Integer> map = new HashMap<>();
+        for(int i = 0;i<=s.length()-1;i++){
+            map.put(s.charAt(i),i);
+        }
+        for(String str:d){
+            boolean tag = true;
+            index = 0;
+            while(index<=str.length()-2){
+                if(map.get(str.charAt(index)) == null || map.get(str.charAt(index))>map.get(str.charAt(index+1))){
+                    tag = false;
+                    break;
+                }
+                index++;
+            }
+            if(tag){
+                result = check(result,str);
+                System.out.println(result);
+            }
+        }
+        
+        
+        return result;
+    }
+    public void helper(String s,String tmp,List<String> list,int index){
+        for(int i = index;i<=s.length()-1;i++){
+            tmp = tmp+s.charAt(index);
+            //System.out.println(tmp);
+            if(list.contains(tmp)) result = check(result,tmp);
+            helper(s,tmp,list,i+1);
+            //Key:还有一个从""开始加的....
+            helper(s,"",list,i+1);
+            tmp = tmp.substring(0,tmp.length()-1);
+        }
+    }
+    public String check(String s1,String s2){
+        if(s1.length() < s2.length()) {
+            return s2;
+        }
+        else if(s1.length() > s2.length()){
+            return s1;
+        }
+        else {
+            int index2 = 0;
+            while(index2 <= s1.length()-1){
+                if(s1.charAt(index2)-s2.charAt(index2)<0) return s1;
+                //Key:Coner case:"bab" ["ba","ab","a","b"]
+                //必须加下面那个else 
+                else if(s1.charAt(index2)-s2.charAt(index2)>0) return s2;
+                index2++;
+            }
+            return s2;
+        }
+    }
+    ***/
+    public String findLongestWord(String s, List<String> d) {
+        //Key:很NB的一种写法,应该就相当于重写了compare方法了
+        Collections.sort(d,new Comparator<String>(){
+            public int compare(String a,String b){
+                return a.length()==b.length()?a.compareTo(b):b.length()-a.length();
+            }
+        });
+        String result = "";
+        int index1 = 0,index2 = 0;
+        for(String str:d){
+            index1 = 0;
+            index2 = 0;
+            if(str.length() > s.length()) continue;
+            //Key:check if str belong to s's substring
+            while(index1<=s.length()-1 && index2 <= str.length()-1){
+                if(s.charAt(index1) == str.charAt(index2)){
+                    index1++;
+                    index2++;
+                } else {
+                    index1++;
+                }
+            }
+            if(index2 == str.length()) return str;
+        }
+        return result;
+    }
+}
