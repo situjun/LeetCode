@@ -1019,3 +1019,30 @@ public class Solution {
         return result;
     }
 }
+
+506. Relative Ranks
+public class Solution {
+    public String[] findRelativeRanks(int[] nums) {
+        String[] result = new String[nums.length];
+        if(nums.length == 0) return result;
+        Map<Integer,Integer> map = new HashMap<>();
+        for(int i = 0;i<=nums.length-1;i++){
+            map.put(i,nums[i]);
+        }
+        List<Map.Entry<Integer,Integer>> list = new ArrayList<>(map.entrySet());
+        Collections.sort(list,new Comparator<Map.Entry<Integer,Integer>>(){
+            public int compare(Map.Entry<Integer,Integer> e1,Map.Entry<Integer,Integer> e2){
+                return e2.getValue().compareTo(e1.getValue());
+            }
+        });
+        int count = 0;
+        for(Map.Entry<Integer,Integer> entry:list){
+            if(count==0) result[entry.getKey()] = "Gold Medal";
+            else if(count==1) result[entry.getKey()] = "Silver Medal";
+            else if(count==2) result[entry.getKey()] = "Bronze Medal";
+            else result[entry.getKey()] = count+1+"";
+            count++;
+        }
+        return result;
+    }
+}
