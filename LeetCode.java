@@ -1259,3 +1259,113 @@ public class Solution {
         return max;
     }
 }
+36. Valid Sudoku
+public class Solution {
+    public boolean isValidSudoku(char[][] board) {
+        //Key:分别判断每一行，每一列，以及每一个块。写起来有些麻烦....
+        //Key:Just copy
+        for(int i = 0; i<9; i++){
+            //这总共创建了27次.....
+            HashSet<Character> rows = new HashSet<Character>();
+            HashSet<Character> columns = new HashSet<Character>();
+            HashSet<Character> cube = new HashSet<Character>();
+            for (int j = 0; j < 9;j++){
+                if(board[i][j]!='.' && !rows.add(board[i][j]))
+                    return false;
+                if(board[j][i]!='.' && !columns.add(board[j][i]))
+                    return false;
+                int RowIndex = 3*(i/3);
+                int ColIndex = 3*(i%3);
+                if(board[RowIndex + j/3][ColIndex + j%3]!='.' && !cube.add(board[RowIndex + j/3][ColIndex + j%3]))
+                    return false;
+            }
+        }
+        return true;
+    }
+}
+
+78. Subsets
+public class Solution {
+    public List<List<Integer>> subsets(int[] nums) {
+        //Key:Genaral solution https://discuss.leetcode.com/topic/46159/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partitioning
+        List<List<Integer>> list = new ArrayList<>();
+        //Key:注意他这种写法，传参时传new ArrayList<>()，接收时写List<Integer>也能通过!!
+        helper(list,new ArrayList<>(),nums,0);
+        return list;    
+    }
+    public void helper(List<List<Integer>> list,List<Integer> item,int[] nums,int start){
+        list.add(new ArrayList<>(item));
+        for(int i = start;i<=nums.length-1;i++){
+            item.add(nums[i]);
+            helper(list,item,nums,i+1);
+            item.remove(item.size()-1);
+        }
+    }
+}
+
+75. Sort Colors
+public class Solution {
+    public void sortColors(int[] nums) {
+        //Key:Arrays.fill(tmp,1);然后用0和2来覆盖
+        //1st correct version
+        //Key:注意clone的用法
+        int[] tmp = nums.clone();
+        Arrays.fill(nums,1);
+        int index1 = 0,index2 = nums.length-1;
+        for(int i = 0;i<=nums.length-1;i++){
+            if(tmp[i] == 0) nums[index1++] = 0;
+            else if(tmp[i] == 2) nums[index2--] = 2;
+        }
+        //Key:another version 只管把0和2分别移到首尾即可，1肯定就在正确的位置了
+        //Key:下面的是错误版本，不知道哪里出问题了....
+        /**
+        int index1 = 0,index2 = nums.length-1,tmp = 0;
+        for(int i = 0;i<=nums.length-1;i++){
+            if(nums[i] == 0){
+                tmp = nums[i];
+                nums[i] = nums[index1];
+                nums[index1++] = tmp;
+            }
+            //Key:下面这个i--是为了处理出现swap(2,2)这种情况
+            else if(i >= 0 && nums[i] == 2){
+                tmp = nums[i];
+                nums[i--] = nums[index2];
+                nums[index2--] = tmp;
+            }
+        }
+        **/
+    }
+    //Key:这么交换根本就改变不了array的值...
+    /**
+    public void swap(int a,int b){
+        int tmp = a;
+        a = b;
+        b = tmp;
+    }
+    **/
+}
+
+90. Subsets II
+public class Solution {
+    public List<List<Integer>> subsetsWithDup(int[] nums) {
+        Arrays.sort(nums);
+        List<List<Integer>> list = new ArrayList<>();
+        boolean[] used = new boolean[nums.length];
+        helper(list,new ArrayList<>(),nums,used,0);
+        return list;
+    }
+    public void helper(List<List<Integer>> list,List<Integer> item,int[] nums,boolean[] used,int start){
+        list.add(new ArrayList<>(item));
+        for(int i = start;i<=nums.length-1;i++){
+            //Key:another version without used array -->相当于把相同元素后边的循环都给continue了
+            //if(i>start && nums[i] == nums[i-1])
+            //Key:相当于相同的数字都当成了一个整体来考虑，只是数量不同而已
+            if(i > 0 && !used[i-1] && nums[i] == nums[i-1]) continue;
+            used[i] = true;
+            item.add(nums[i]);
+            helper(list,item,nums,used,i+1);
+            item.remove(item.size()-1);
+            used[i] = false;
+        }
+    }
+}
