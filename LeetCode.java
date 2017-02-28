@@ -1046,3 +1046,216 @@ public class Solution {
         return result;
     }
 }
+
+441. Arranging Coins
+public class Solution {
+    public int arrangeCoins(int n) {
+        if(n == 0) return 0;
+        int cur = 1,remain = n,result = 0;
+        while(remain>=cur){
+            remain = remain-cur;
+            cur++;
+        }
+        return cur-1;
+    }
+}
+
+500. Keyboard Row
+public class Solution {
+    //My 1st wrong version
+    /**
+    public String[] findWords(String[] words) {
+        Character[] c1 = {'q','w','e','r','t','y','u','i','o','p'};
+        Character[] c2 = {'a','s','d','f','g','h','j','k','l'};
+        Character[] c3 = {'z','x','c','v','b','n','m'};
+        int tag = 0;
+        List<String> list = new ArrayList<>();
+        //Key:下面的两种写法都不成，Arrays.asSet(c1);好像没有这种写法，new HashSet<>(c1)也不成，因为貌似只能在几个Collections间互相转...Array好像不成
+        //参考new ArrayList<>(item) 和 new ArrayList<>(set);
+        //Set<Character> set1 = Arrays.asSet(c1);
+        Set<Character> set2 = new HashSet<>(c2);
+        Set<Character> set3 = new HashSet<>(c3);
+        for(String s:words){
+            if(s.length() == 0) continue;
+            s = s.toLowerCase();
+            int i = 0;
+            boolean flag = true;
+            tag = set1.contains(s.charAt(0))?0:set2.contains(s.charAt(0))?1:2;
+            while(i<=s.length()-1){
+                if(tag == 0){
+                    if(!set1.contains(s.charAt(i))) {
+                        flag = false;
+                        break;
+                    }
+                }
+            }
+            if(flag) list.add(s);
+        }
+        return list.toArray(new String[list.size()]);
+    }
+    **/
+    //Just copy
+    public String[] findWords(String[] words) {
+        String[] strs = {"QWERTYUIOP","ASDFGHJKL","ZXCVBNM"};
+        Map<Character, Integer> map = new HashMap<>();
+        for(int i = 0; i<strs.length; i++){
+            for(char c: strs[i].toCharArray()){
+                map.put(c, i);//put <char, rowIndex> pair into the map
+            }
+        }
+        List<String> res = new LinkedList<>();
+        for(String w: words){
+            if(w.equals("")) continue;
+            int index = map.get(w.toUpperCase().charAt(0));
+            for(char c: w.toUpperCase().toCharArray()){
+                if(map.get(c)!=index){
+                    index = -1; //don't need a boolean flag. 
+                    break;
+                }
+            }
+            if(index!=-1) res.add(w);//if index != -1, this is a valid string
+        }
+        //Key:list.toArray(new String[0]) String[]大小无所谓，貌似它只是想知道要转化成的类型而已。size应该是由前边的list来确定
+        return res.toArray(new String[0]);
+    }
+}
+
+419. Battleships in a Board
+public class Solution {
+    public int countBattleships(char[][] board) {
+        //Key:这道题出的不好，它默认所有的input都是invalid-->就是说题中给的example 2根本就不是test case，根本就不应该考虑这种invalid condition......！！！！！！
+        //https://discuss.leetcode.com/topic/63294/confused-with-test-cases
+        //This is an invalid board that you will not receive !!!
+        /**
+        int row = board.length,col = board[0].length,count = 0;
+        if(row == 0 || col == 0) return 0; 
+        for(int i = 0;i<=row-1;i++){
+            for(int j = 0;j<=col-1;j++){
+                if(i-1>=0 && board[i-1][j] == '.' || i-1<0){
+                    if(i+1<=row-1 && board[i+1][j] == '.' || j+1>row-1){
+                        if(j-1>= 0 && board[i][j-1] == '.' || j-1<0){
+                            if(j+1<=col-1 && board[i][j+1] == '.' || j+1 > col-1) count++;
+                        }
+                    }
+                }
+            }
+        }
+        return count;
+        **/
+        int m = board.length;
+        if (m==0) return 0;
+        int n = board[0].length;
+        int count=0;
+        for (int i=0; i<m; i++) {
+            for (int j=0; j<n; j++) {
+                if (board[i][j] == '.' || i > 0 && board[i-1][j] == 'X' || j > 0 && board[i][j-1] == 'X') continue;
+                count++;
+            }
+        }
+        
+        return count;
+    }
+}
+
+406. Queue Reconstruction by Height
+public class Solution {
+    public int[][] reconstructQueue(int[][] people) {
+        // k is the number of people in front of this person who have a height greater than or equal to h 这道题表述的很不好，k表示正好有k个人在他前面.而不是最多有k人在他前面2
+        /**
+        思路： 
+        先按照高度从大到小排序，高度h相同的，将k比较小的放在前面。 
+        //Key point:如果从低往高拍，新插入的元素会影响已排好的顺序.... 
+        排完序之后的结果为[7,0],[7,1][6,1][5,0][5,2][4,4]
+        
+        接下来要调整整个队列，从第二个开始， 
+        1）如[7,1] 允许比其大的一个数在其前面，那么[7,1]的位置可以不变 
+        调整完后 
+        [7,0],[7,1][6,1][5,0][5,2][4,4]
+        
+        2）调整[6,1], 允许一个大于或者等于6的数在前面，那么就将[6,1] 
+        插入到索引为1的地方 
+        [7,0],[6,1][7,1][5,0][5,2][4,4]
+        
+        3）调整[5,0],允许0个大于或者等于5的数在前面，将[5,0]插入在索引为0的地方 
+        [5,0][7,0],[6,1][7,1][5,2][4,4]
+        
+        4）调整[5,2],允许2个大于或者等于5的数在前面，将[5,2]插入在索引为2的地方 
+        [5,0][7,0],[5,2][6,1][7,1][4,4]
+        
+        5）调整[4,4]，可允许4个大于或者等于4的数在前面，将[4,4]插入在索引为4的地方 
+        [5,0][7,0],[5,2][6,1][4,4][7,1]
+        */
+        //Key:hard!!!这道题的思路还是背吧，一开始不太容易转过弯来....
+        //配合Collections.sort()非常好用
+        //Key:int[]非Collection，作为参数的话，要用Arrays.sort。下面的不行
+        //Collections.sort(people,new Comparator<int[]>(){
+        Arrays.sort(people,new Comparator<int[]>(){
+            public int compare(int[] arr1,int[] arr2){
+                //Key:arr1[0].compareTo(arr2[0]) 是错误的...compareTo貌似比较的是int[]数组，而不能这样比较arr[0]这种单纯的int
+                //return arr1[1] == arr2[1]?arr1[0].compareTo(arr2[0]):arr2[1]-arr1[1];
+                return arr1[0] == arr2[0]?Integer.compare(arr1[1],arr2[1]):arr2[0]-arr1[0];
+            }
+        });
+        //Key:因为List<Object>，int[] 也是object，所以直接写int[]就可以，不必飞的写成写Integer[]。
+        //而且如果非得写成Integer[]的话，如果其他地方不变，不将int[] 转为Integer[]的话，会导致 Line 43: error: incompatible types: int[] cannot be converted to Integer[]
+        //List<Integer[]> list = new ArrayList<>();
+        List<int[]> list = new ArrayList<>();
+        for(int[] i:people){
+            list.add(i[1],i);
+        }
+        return list.toArray(new int[0][0]);
+    }
+}
+
+413. Arithmetic Slices
+public class Solution {
+    public int numberOfArithmeticSlices(int[] A) {
+        //Key:Just copy  Math
+        //这个sol需要发现之间的规律，否则不太好做
+        int curr = 0, sum = 0;
+        for (int i=2; i<A.length; i++)
+            if (A[i]-A[i-1] == A[i-1]-A[i-2]) {
+                curr += 1;
+                sum += curr;
+            } else {
+                curr = 0;
+            }
+        return sum;
+    }
+}
+
+62. Unique Paths
+public class Solution {
+    public int uniquePaths(int m, int n) {
+        //Typical DP
+        if(n == 0 || m == 0) return 0;
+        int[][] arr = new int[m][n];
+        //Key:Arrays.fill(Object[] ary, Object val)，不能填充二维数组!!!。所以下面的是错误的
+        //Arrays.fill(arr,0);
+        for(int i = 0;i<=m-1;i++) arr[i][0] = 1;
+        for(int i = 0;i<=n-1;i++) arr[0][i] = 1;
+        for(int i = 1;i<=m-1;i++){
+            for(int j = 1;j<=n-1;j++){
+                arr[i][j]=arr[i-1][j]+arr[i][j-1];
+            }
+        }
+        return arr[m-1][n-1];
+    }
+}
+
+53. Maximum Subarray
+public class Solution {
+    public int maxSubArray(int[] nums) {
+        int n = nums.length;
+        int[] dp = new int[n];//dp[i] means the maximum subarray ending with A[i];
+        dp[0] = nums[0];
+        int max = dp[0];
+        
+        for(int i = 1; i < n; i++){
+            dp[i] = nums[i] + (dp[i - 1] > 0 ? dp[i - 1] : 0);
+            max = Math.max(max, dp[i]);
+        }
+        
+        return max;
+    }
+}
