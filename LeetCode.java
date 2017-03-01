@@ -1369,3 +1369,118 @@ public class Solution {
         }
     }
 }
+
+334. Increasing Triplet Subsequence
+public class Solution {
+    public boolean increasingTriplet(int[] nums) {
+        //Key:wrong
+        /**
+        int tag = 1;
+        if(nums.length<3) return false;
+        for(int i = 1;i<=nums.length-1;i++){
+            if(nums[i]>nums[i-1]) tag++;
+        }
+        return tag>=3?true:false;
+        **/
+        //Key:持有两个最小的值即可
+        int min = Integer.MAX_VALUE,secMin = Integer.MAX_VALUE;
+        for(int i = 0;i<=nums.length-1;i++){
+            //Key:这道题还真有有重复数字....Corner case:[1,1,-2,6]
+            if(min>=nums[i]) min = nums[i];
+            else if(secMin>nums[i]) secMin = nums[i];
+            else if(secMin<nums[i]) return true;
+        }
+        return false;
+    }
+}
+
+240. Search a 2D Matrix II
+public class Solution {
+    //Key:my binary search version
+    /**
+    public boolean searchMatrix(int[][] matrix, int target) {
+        //Key:similar to one dimision array
+        if(matrix.length == 0 || matrix[0].length == 0) return false;
+        int lowR = 0,lowC = 0,highR = matrix.length-1,highC = matrix[0].length-1;
+        return helper(matrix,target,lowR,highR,lowC,highC);
+    }
+    public boolean helper(int[][] matrix, int target,int lowR,int highR,int lowC,int highC){
+        //System.out.println(lowR+"-"+highR+"-"+lowC+"-"+highC+"-"+"^^^^^^^");
+        if(lowR<=highR && lowC<=highC){
+            int midR = (lowR+highR)/2;
+            int midC = (lowC+highC)/2;
+            int tmp = matrix[midR][midC];
+            
+            //System.out.println(tmp+"");
+            if(tmp == target) return true;
+            if(tmp < target){
+                //Key:!!!一定要记得在helper前加return!!!因为是层层返回，如果不加return，无法把true返回上去!!!!
+                //Key:加||
+                return helper(matrix,target,midR+1,highR,lowC,highC) || helper(matrix,target,lowR,highR,midC+1,highC);
+            } else {
+                //Key:test corner:[[1,2,3,4,5],[6,7,8,9,10],[11,12,13,14,15],[16,17,18,19,20],[21,22,23,24,25]] 5
+                return helper(matrix,target,lowR,midR-1,lowC,highC) || helper(matrix,target,lowR,highR,lowC,midC-1);
+            }
+        }
+        return false;
+    }
+    **/
+    
+    //Key:O(mn) version
+    //额，花的时间比我那个binary search 时间还少
+    public boolean searchMatrix(int[][] matrix, int target) {
+        if(matrix == null || matrix.length < 1 || matrix[0].length <1) {
+            return false;
+        }
+        int col = matrix[0].length-1;
+        int row = 0;
+        while(col >= 0 && row <= matrix.length-1) {
+            if(target == matrix[row][col]) {
+                return true;
+            } else if(target < matrix[row][col]) {
+                col--;
+            } else if(target > matrix[row][col]) {
+                row++;
+            }
+        }
+        return false;
+    }
+}
+
+300. Longest Increasing Subsequence
+public class Solution {
+    public int lengthOfLIS(int[] nums) {
+        //Just copy I
+        /**
+        if(nums==null || nums.length==0){
+            return 0;
+        }
+        int[] dp = new int[nums.length];
+        int max = 1;
+        for(int index=0; index<nums.length;index++){
+            dp[index]=1;
+            for(int dpIndex=0; dpIndex<index; dpIndex++){
+                if(nums[dpIndex]<nums[index]){
+                    dp[index]=Math.max(dp[index],dp[dpIndex]+1);
+                    max=Math.max(dp[index],max);
+                }
+            }
+        }
+        return max;
+        **/
+        
+        //Key:Just copy II --->using Arrays.binarySearch()
+        //效率上这个更好
+        int[] dp = new int[nums.length];
+        int len = 0;
+
+        for(int x : nums) {
+            int i = Arrays.binarySearch(dp, 0, len, x);
+            if(i < 0) i = -(i + 1);
+            dp[i] = x;
+            if(i == len) len++;
+        }
+
+        return len;
+    }
+}
