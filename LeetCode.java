@@ -1484,3 +1484,32 @@ public class Solution {
         return len;
     }
 }
+
+11. Container With Most Water
+public class Solution {
+    public int maxArea(int[] height) {
+        //Key:just copy  这道题需要背，思路不好证明正确性
+        //这个解法的难点在于如何证明正确性!!!!
+        //拿个case举例说明，[99,1,2,3,4,200,100]   
+        //max一开始等于99*length，然后left=1。容易担心的是99~200的影响，不过因为max受制于lower height，所以它永远是小于99*length的。然后剩下的可以想成一个递归的过程
+        
+        //Key:这个理解思路较容易理解
+        /**
+        Idea / Proof:
+        https://discuss.leetcode.com/topic/14940/simple-and-clear-proof-explanation/3
+        The widest container (using first and last line) is a good candidate, because of its width. Its water level is the height of the smaller one of first and last line.
+        All other containers are less wide and thus would need a higher water level in order to hold more water.
+        The smaller one of first and last line doesn't support a higher water level and can thus be safely removed from further consideration.
+        因为max一开始是由i0和in决定的，而要找一个更大的值，在width减小的情况下，height必须变大。所以i0和in中最小的那个就没必要考虑了
+        
+        ***/
+        int maxWater=0, left=0, right=height.length-1;
+        //Key:思路是length肯定在减小，所以就去寻找height最高
+		while(left<right) {
+			maxWater = Math.max(maxWater,(right-left)*Math.min(height[left], height[right]));
+			if(height[left]<height[right]) left++;
+			else right--;
+		}
+		return maxWater;
+    }
+}
