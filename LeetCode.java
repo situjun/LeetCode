@@ -1513,3 +1513,163 @@ public class Solution {
 		return maxWater;
     }
 }
+
+454. 4Sum II
+public class Solution {
+    public int fourSumCount(int[] A, int[] B, int[] C, int[] D) {
+        //Key:这道题也不能用回溯做了，TLE.....Brute force:O(n^4)
+        /**
+        
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        
+        ***/
+        
+        /**
+        //Key:下面是错的，即使A=[]，指的也是长度为0.但并不是null
+        //if(A == null || B == null ||C == null ||D == null) return 0;
+        //Corner case:[0] [0][0][0] ....我也是服了，这case给的
+        //all A, B, C, D have same length of N where 0 ≤ N ≤ 500.
+        if(A.length == 0 || B.length == 0 ||C.length == 0 ||D.length == 0) return 0;
+        List<Integer> list = new ArrayList<>();
+        helper(list,A,B,C,D);
+        return result;
+    }
+    public void helper(List<Integer> list,int[] A,int[] B,int[] C,int[] D){
+        if(list.size() == 4){
+            int tmp = 0;
+            for(int i:list) tmp += i;
+            //System.out.println(list);
+            if(tmp == 0) result++;
+        } else {
+            for(int i = 0;i<=A.length-1;i++){
+                if(list.size() == 0) list.add(A[i]);
+                else if(list.size() == 1) list.add(B[i]);
+                else if(list.size() == 2) list.add(C[i]);
+                else if(list.size() == 3) list.add(D[i]);
+                //System.out.println(list+"ddd");
+                helper(list,A,B,C,D);
+                list.remove(list.size()-1);
+            }
+        }
+    }           
+        **/
+        //Key:我自己想的另一个方法是，用个map存储前两个数组的组合值及出现次数，然后对另外两个数组求和，和等于0的话则加一次出现次数
+        //O(n^2),space O(n^2)
+        //和discuss中的想法一样  https://discuss.leetcode.com/topic/67593/clean-java-solution-o-n-2/7
+        if(A.length == 0) return 0;
+        Map<Integer,Integer> map = new HashMap<>();
+        int length = A.length,sum = 0,result = 0;
+        for(int i = 0;i<=length-1;i++){
+            for(int j = 0;j<=length-1;j++) {
+                sum = A[i] + B[j];
+                map.put(sum,map.getOrDefault(sum,0)+1);
+            }
+        }
+        for(int i = 0;i<=length-1;i++){
+            for(int j = 0;j<=length-1;j++){
+                result += map.getOrDefault(-C[i]-D[j],0);
+            }
+        }
+        return result;
+    }
+}
+
+42. Trapping Rain Water
+public class Solution {
+    public int trap(int[] height) {
+        //Key:my 1st version -- correctness
+        //分别找出每个点左右两边的最高值，然后其中的最小值减去本身高度就是存水量
+        /**
+        if(height.length == 0) return 0;
+        int[] left = new int[height.length];
+        int[] right = new int[height.length];
+        int j = height.length,max = Integer.MIN_VALUE,max2 = Integer.MIN_VALUE;
+        left[0] = 0;
+        right[height.length-1] = 0;
+        for(int i = 1;i<=height.length-1;i++){
+            j = height.length-1-i;
+            max = Math.max(max,height[i-1]);
+            left[i] = max;
+            max2 = Math.max(max2,height[j+1]);
+            right[j] = max2;
+        }
+        int result = 0,min = Integer.MAX_VALUE;
+        for(int i = 0;i<=height.length-1;i++){
+            //System.out.println(left[i]+"--"+right[i]);
+            min = Math.min(left[i],right[i]);
+            if(height[i]<=min) result += min-height[i];
+        }
+        return result;
+        **/
+        
+        //Key:just copy 他这个解法更清晰些，但是真的不太容易想
+        //2 pointers
+        int a=0;
+        int b=height.length-1;
+        int max=0;
+        int leftmax=0;
+        int rightmax=0;
+        while(a<=b){
+            leftmax=Math.max(leftmax,height[a]);
+            rightmax=Math.max(rightmax,height[b]);
+            if(leftmax<rightmax){
+                max+=(leftmax-height[a]);       // leftmax is smaller than rightmax, so the (leftmax-A[a]) water can be stored
+                a++;
+            }
+            else{
+                max+=(rightmax-height[b]);
+                b--;
+            }
+        }
+        return max;
+    }
+}
+
+279. Perfect Squares
+public class Solution {
+    public int numSquares(int n) {
+        //Key:Just copy - 貌似还是得找规律
+        //https://discuss.leetcode.com/topic/26400/an-easy-understanding-dp-solution-in-java/2
+        /**
+         dp[n] indicates that the perfect squares count of the given n, and we have:
+
+        dp[0] = 0 
+        dp[1] = dp[0]+1 = 1
+        dp[2] = dp[1]+1 = 2
+        dp[3] = dp[2]+1 = 3
+        dp[4] = Min{ dp[4-1*1]+1, dp[4-2*2]+1 } 
+              = Min{ dp[3]+1, dp[0]+1 } 
+              = 1				
+        dp[5] = Min{ dp[5-1*1]+1, dp[5-2*2]+1 } 
+              = Min{ dp[4]+1, dp[1]+1 } 
+              = 2
+        						.
+        						.
+        						.
+        dp[13] = Min{ dp[13-1*1]+1, dp[13-2*2]+1, dp[13-3*3]+1 } 
+               = Min{ dp[12]+1, dp[9]+1, dp[4]+1 } 
+               = 2
+        						.
+        						.
+        						.
+        dp[n] = Min{ dp[n - i*i] + 1 },  n - i*i >=0 && i >= 1
+        and the sample code is like below:
+        **/
+        int[] dp = new int[n + 1];
+    	Arrays.fill(dp, Integer.MAX_VALUE);
+    	dp[0] = 0;
+    	for(int i = 1; i <= n; ++i) {
+    		int min = Integer.MAX_VALUE;
+    		int j = 1;
+    		while(i - j*j >= 0) {
+    			min = Math.min(min, dp[i - j*j] + 1);
+    			++j;
+    		}
+    		dp[i] = min;
+    	}		
+    	return dp[n];
+    }
+}
