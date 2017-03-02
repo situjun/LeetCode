@@ -1673,3 +1673,29 @@ public class Solution {
     	return dp[n];
     }
 }
+
+14. Longest Common Prefix
+public class Solution {
+    public String longestCommonPrefix(String[] strs) {
+        //Key:有点不理解了，这题不难啊，而且corner case应该也不太复杂，不知道为什么正确率那么低.....
+        if(strs.length == 0) return "";
+        if(strs.length == 1) return strs[0];
+        String result = strs[0];
+        int index = 0;
+        StringBuilder sb;
+        for(int i = 1;i<=strs.length-1;i++){
+            sb = new StringBuilder();
+            index = 0;
+            while(index<=result.length()-1 && index<=strs[i].length()-1){
+                if(result.charAt(index) == strs[i].charAt(index)){
+                    sb.append(result.charAt(index));
+                    index++;
+                } else {
+                    break;
+                }
+            }
+            result = sb.toString();
+        }
+        return result;
+    }
+}
