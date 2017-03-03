@@ -1699,3 +1699,76 @@ public class Solution {
         return result;
     }
 }
+
+73. Set Matrix Zeroes
+public class Solution {
+    public void setZeroes(int[][] matrix) {
+        //my Wrong version
+        /**
+        //Key:brute force 
+        if(matrix.length == 0 || matrix[0].length == 0) return;
+        int row = matrix.length-1,col = matrix[0].length-1;
+        Map<Integer,Integer> map = new HashMap<>();
+        int index1 = 0,index2 = 0;
+        for(int i = 0;i<=row;i++){
+            for(int j = 0;j<=col;j++){
+                if(matrix[i][j] == 0){
+                    //Key:这么做不成，因为前边的一行，一列置零后，会导致后边的置零出错.....
+                    //test case:
+                    //[[0,0,0,5],[4,3,1,4],[0,1,1,4],[1,2,1,3],[0,0,1,1]]
+                    //Your answer
+                    //[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+                    //Expected answer
+                    //[[0,0,0,0],[0,0,0,4],[0,0,0,0],[0,0,0,3],[0,0,0,0]]
+                    //Key:最简单的解决办法就是clone一个array，然后修改它。不过原题要求in place
+                    //用个map记下来0的位置，然后再处理???---->思路wrong,错误的(corner case:当某一行出现多个0时，如[6,0,7,8,1,0,1,6,8,1]，前边相同的key对应的value值会被覆盖....) 可以用List<List<Integer>> 来代替，不过显然space消耗大多了.....
+                    //这个不知道为什么，结果不对.........虽然也不符合题目要求的constant space
+                    //map.put(i,j);
+                    
+                    //for(index1 = 0;index1<=col;index1++) matrix[i][index1] = 0;
+                    //for(index1 = 0;index1<=row;index1++) matrix[index1][j] = 0;
+                }
+            }
+            
+        }
+        for(Map.Entry<Integer,Integer> entry:map.entrySet()){
+            //System.out.println(entry);
+            int i = entry.getKey(),j = entry.getValue();
+            System.out.println(i+"----"+j);
+            for(index1 = 0;index1<=col;index1++) matrix[i][index1] = 0;
+            for(index1 = 0;index1<=row;index1++) matrix[index1][j] = 0;
+        }
+        **/
+        
+        
+        //Key:just copy
+        boolean fr = false,fc = false;
+        for(int i = 0; i < matrix.length; i++) {
+            for(int j = 0; j < matrix[0].length; j++) {
+                if(matrix[i][j] == 0) {
+                    if(i == 0) fr = true;
+                    if(j == 0) fc = true;
+                    matrix[0][j] = 0;
+                    matrix[i][0] = 0;
+                }
+            }
+        }
+        for(int i = 1; i < matrix.length; i++) {
+            for(int j = 1; j < matrix[0].length; j++) {
+                if(matrix[i][0] == 0 || matrix[0][j] == 0) {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+        if(fr) {
+            for(int j = 0; j < matrix[0].length; j++) {
+                matrix[0][j] = 0;
+            }
+        }
+        if(fc) {
+            for(int i = 0; i < matrix.length; i++) {
+                matrix[i][0] = 0;
+            }
+        }
+    }
+}
