@@ -1793,3 +1793,96 @@ public class Solution {
         
     }
 }
+
+531. Lonely Pixel I
+public class Solution {
+    public int findLonelyPixel(char[][] picture) {
+        //My 1st version
+        int count = 0;
+        if(picture.length == 0 || picture[0].length == 0) return count;
+        Map<Integer,Integer> row = new HashMap<>();
+        Map<Integer,Integer> col = new HashMap<>();
+        int w = 0,b = 0;
+        for(int i = 0;i<=picture.length-1;i++){
+            for(int j = 0;j<=picture[0].length-1;j++){
+                if(picture[i][j] == 'B'){
+                    row.put(i,row.getOrDefault(i,0)+1);
+                    col.put(j,col.getOrDefault(j,0)+1);
+                }
+            }
+        }
+        for(int i = 0;i<=picture.length-1;i++){
+            for(int j = 0;j<=picture[0].length-1;j++){
+                if(picture[i][j] == 'B' && row.get(i) == 1 && col.get(j) == 1) count++;
+            }
+        }
+        return count;
+    }
+}
+
+533. Lonely Pixel II
+public class Solution {
+    public int findBlackPixel(char[][] picture, int N) {
+        //my 1st version:complexity O(m*n*m)
+        int m = picture.length,n = picture[0].length;
+        if(m == 0 || n == 0) return 0;
+        Map<Integer,Integer> row = new HashMap<>();
+        Map<Integer,Integer> col = new HashMap<>();
+        StringBuilder sb = new StringBuilder();
+        String[] strs = new String[m];
+        int result = 0;
+        for(int i = 0;i<=m-1;i++){
+            sb.delete(0,sb.length());
+            for(int j = 0;j<=n-1;j++){
+                sb.append(picture[i][j]);
+                if(picture[i][j] == 'B'){
+                    row.put(i,row.getOrDefault(i,0)+1);
+                    col.put(j,col.getOrDefault(j,0)+1);
+                }
+                
+            }
+            strs[i] = sb.toString(); 
+        }
+        /**
+        for(String s:strs) System.out.println(s);
+        for(Map.Entry<Integer,Integer> entry:row.entrySet()){
+            //System.out.println(entry.getKey()+"---"+entry.getValue());
+        }
+        **/
+        for(int i = 0;i<=m-1;i++){
+            for(int j = 0;j<=n-1;j++){
+                if(picture[i][j] == 'B' && row.get(i) == col.get(j) && row.get(i) == N){
+                    //System.out.println(row.get(i)+"...."+col.get(j));
+                    int count = 0;
+                    for(int k =0;k<=strs.length-1;k++){
+                        if(strs[i].equals(strs[k])) count++;
+                    }
+                    //System.out.println("count"+count);
+                    if(count == N) result++;
+                }
+            }
+        }
+        return result;
+    }
+}
+
+532. K-diff Pairs in an Array
+public class Solution {
+    public int findPairs(int[] nums, int k) {
+        //Brute force:O(n*n)
+        if(nums.length == 0 || nums.length == 1) return 0;
+		int count = 0,n = nums.length;
+		Map<Integer,Integer> map = new HashMap<>();
+		Arrays.sort(nums);
+		for (int i = 0; i < n; i++){       
+			// See if there is a pair of this picked element
+			for (int j = i+1; j < n; j++){
+				if (nums[j] - nums[i] == k ){
+					map.put(nums[i],nums[j]);
+				}	
+			}
+		}
+		return map.size();
+    }
+}
+
