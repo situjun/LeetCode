@@ -1909,3 +1909,55 @@ public class Solution {
     }
 }
 
+437. Path Sum III
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //Key:Difficulty!!!很多地方不太容易想对
+    //Just cp
+    //https://discuss.leetcode.com/topic/64461/simple-java-dfs/2
+    //https://discuss.leetcode.com/topic/64526/17-ms-o-n-java-prefix-sum-method/2
+    public int pathSum(TreeNode root, int sum) {
+        if (root == null) return 0;
+        return pathSumFrom(root, sum) + pathSum(root.left, sum) + pathSum(root.right, sum);
+    }
+    
+    private int pathSumFrom(TreeNode node, int sum) {
+        if (node == null) return 0;
+        return (node.val == sum ? 1 : 0) 
+            + pathSumFrom(node.left, sum - node.val) + pathSumFrom(node.right, sum - node.val);
+    }
+    /**
+    int count = 0;
+    public int pathSum(TreeNode root, int sum) {
+        //Key:两个递归，1个继续加上面的数，另一个从当前val重新开一个sum
+        //Corner  case:[] 1
+        if(root == null) return 0;
+        //Key:只有一个root时，要单独考虑.....
+        if(root.val == sum && root.left == null && root.right == null) return 1; 
+        helper(root,sum,0);
+        return count;
+    }
+    public void helper(TreeNode node,int target,int sum){
+        if(node != null){
+            
+            if(sum+node.val == target || node.val == target) count++;
+            helper(node.left,target,sum+node.val);
+            helper(node.right,target,sum+node.val);
+            //Key:记住，从下一个节点开始的话，就不能再把本节点加上了！！！
+            //helper(node.left,target,node.val);
+            helper(node.left,target,node.val);
+            //helper(node.right,target,node.val);
+            helper(node.right,target,node.val);
+            
+        }
+    }
+    **/
+}
