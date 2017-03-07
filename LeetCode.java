@@ -1961,3 +1961,137 @@ public class Solution {
     }
     **/
 }
+
+452. Minimum Number of Arrows to Burst Balloons
+public class Solution {
+    public int findMinArrowShots(int[][] points) {
+        //Key:对int[0]排序    
+        if(points.length == 0)return 0;
+        if(points.length == 1)return 1;
+        //思路和https://discuss.leetcode.com/topic/66579/java-greedy-soution一样
+        //Key:Arrays.sort(points,new Comparator<int[]>())  --->int[]是Object,所以也得指定<>泛型类型
+        Arrays.sort(points,new Comparator<int[]>(){
+            public int compare(int[] a,int[] b){
+                //Key:return a[0].compareTo(b[0]);int是基本数据类型,没有compareTo(int)方法,所以要么写成减法，要么封装为Integer，否则报错Line 10: error: int cannot be dereferenced
+                //Key:compareTo只能比较Object
+                //Key:Test case:,[0,9],[3,9],[0,6]还要考虑a[0]和b[0]相同的情况
+                //return Integer.valueOf(a[0]).compareTo(Integer.valueOf(b[0]));
+                return a[0] == b[0]?Integer.valueOf(a[1]).compareTo(Integer.valueOf(b[1])):Integer.valueOf(a[0]).compareTo(Integer.valueOf(b[0]));
+            }
+        });
+        
+        int res = 1,end = points[0][1],start = points[0][0];
+        for(int i = 1;i<=points.length-1;i++){
+            //Key:int[] 没实现toSting(),所以toString()和String.valueOf()只能打印出地址
+            //System.out.println(points[i].toString());
+            //[I@5cad8086
+            //[I@6e0be858
+            //[I@61bbe9ba
+            //[I@610455d6
+            //[I@511d50c0
+            //System.out.println(aa.toString()); //[I@103c520 注意这个写法是错误的，打印出来的是垃圾值。  
+            //可以用Arrays.toString()  System.out.println(Arrays.toString(aa)); //[1, 2, 3, 4, 5]  
+            //System.out.println(Arrays.toString(points[i]));
+            //Key:下面的不行，还要考虑正好内嵌这种
+            //if(points[i][0]>end){
+            if(points[i][0]>end){
+                res++;
+                //Key:Test case:[[9,12],[1,10],[4,11],[8,12],[3,9],[6,9],[6,7]] 下面的写法不全面,每次end都得内缩
+                //end = points[i][1];
+                end = points[i][1];
+                continue;
+            }
+            end = Math.min(end,points[i][1]);
+        }
+        return res;
+    }
+}
+
+447. Number of Boomerangs
+public class Solution {
+    public int numberOfBoomerangs(int[][] points) {
+        //Key:wrong
+        /**
+        int[] multiple = new int[points.length];
+        if(points.length == 0) return 0;
+        for(int i =0;i<=points.length-1;i++) multiple[i] = (int)(Math.pow(points[i][0],2)+Math.pow(points[i][1],2));
+        //Arrays.sort(multiple);
+        ArrayList<Integer> list = new ArrayList<>();
+        int index1 = 0,index2 = multiple.length-1;
+        while(index1<index2){
+            list.add(multiple[index1]+multiple[index2]-2*points[index1][0]*points[index2][0]-2*points[index1][1]*points[index2][1]);
+            list.add(multiple[index1+1]+multiple[index2]-2*points[index1+1][0]*points[index2][0]-2*points[index1+1][1]*points[index2][1]);
+            list.add(multiple[index1]+multiple[index2-1]-2*points[index1][0]*points[index2-1][0]-2*points[index1][1]*points[index2-1][1]);
+            index1++;
+            index2--;
+        }
+        int result = 0;
+        for(int i:multiple) if(list.contains(new Integer(i))) result++;
+        return result;
+        **/
+        //Just cp
+        Map<Integer,Integer> map = new HashMap();
+        int res = 0;
+        for(int i=0;i<points.length;i++){
+        	for(int j=0;j<points.length;j++){
+        		if(i == j) continue;
+        		int d = distance(points[i],points[j]);
+        		map.put(d, map.getOrDefault(d, 0) + 1);
+        	}
+            for(int val : map.values()) res += val * (val-1);
+            map.clear();
+        }
+        return res;
+    }
+    private int distance(int[] a, int[] b){
+    	int dx = a[0] - b[0];
+    	int dy = a[1] - b[1];
+    	return dx * dx + dy * dy;
+    }
+}
+
+438. Find All Anagrams in a String
+public class Solution {
+    public List<Integer> findAnagrams(String s, String p) {
+        //Key:just cp
+        //sliding problem有人总结了一个template,挺好的
+        //https://discuss.leetcode.com/topic/68976/sliding-window-algorithm-template-to-solve-all-the-leetcode-substring-search-problem/2
+        List<Integer> result = new LinkedList<>();
+        if(p.length()> s.length()) return result;
+        Map<Character, Integer> map = new HashMap<>();
+        for(char c : p.toCharArray()){
+            map.put(c, map.getOrDefault(c, 0) + 1);
+        }
+        int counter = map.size();
+        
+        int begin = 0, end = 0;
+        int head = 0;
+        int len = Integer.MAX_VALUE;
+        
+        
+        while(end < s.length()){
+            char c = s.charAt(end);
+            if( map.containsKey(c) ){
+                map.put(c, map.get(c)-1);
+                if(map.get(c) == 0) counter--;
+            }
+            end++;
+            
+            while(counter == 0){
+                char tempc = s.charAt(begin);
+                if(map.containsKey(tempc)){
+                    map.put(tempc, map.get(tempc) + 1);
+                    if(map.get(tempc) > 0){
+                        counter++;
+                    }
+                }
+                if(end-begin == p.length()){
+                    result.add(begin);
+                }
+                begin++;
+            }
+            
+        }
+        return result;
+    }
+}
