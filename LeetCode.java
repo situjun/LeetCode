@@ -2095,3 +2095,129 @@ public class Solution {
         return result;
     }
 }
+
+435. Non-overlapping Intervals
+/**
+ * Definition for an interval.
+ * public class Interval {
+ *     int start;
+ *     int end;
+ *     Interval() { start = 0; end = 0; }
+ *     Interval(int s, int e) { start = s; end = e; }
+ * }
+ */
+public class Solution {
+    //Key:我写的Wrong了.....
+    /**
+    public int eraseOverlapIntervals(Interval[] intervals) {
+        //Key point:Collections.sort();
+        //最初我用了个笨办法，直接把几种情况找了出来，分别处理
+        //非常非常关键!!!!!!
+        //Key point:Comparator 实现以及使用
+        //Corner case:[[1,99],[2,3][4,5],[7,9]]
+        int res = 0,prev = 0;
+        if(intervals.length <= 1) return 0;
+        Arrays.sort(intervals,new Comparator<Interval>(){
+            public int compare(Interval i1,Interval i2){
+                return i1.start!=i2.start?i1.start-i2.start:i1.end-i2.end;
+            }
+        });
+        for(int i = 1;i<=intervals.length-1;i++){
+            if(intervals[i].start<intervals[prev].end && intervals[i].end <= intervals[prev].end){
+                 res++;
+                 prev = i;
+            }
+            
+        }
+        return res;
+    }
+    **/
+    
+    public int eraseOverlapIntervals(Interval[] intervals) {
+       Arrays.sort(intervals, new Comparator<Interval>() {
+            @Override
+            public int compare(Interval o1, Interval o2) {
+                 return o1.end - o2.end;  //only sort by end
+            }
+        });
+
+        int end = Integer.MIN_VALUE;
+        int count = 0;
+        for (Interval interval : intervals) {
+            if (interval.start >= end) end = interval.end;
+            else count++;
+        }
+
+        return count; 
+    }
+}
+
+76. Minimum Window Substring
+public class Solution {
+    public String minWindow(String s, String t) {
+        //Key:模板方法  https://discuss.leetcode.com/topic/68976/sliding-window-algorithm-template-to-solve-all-the-leetcode-substring-search-problem
+        String res = "";
+        Map<Character,Integer> map = new HashMap<>();
+        int begin = 0,end = 0,start = 0,len = s.length()+1,count;
+        for(char c:t.toCharArray()) map.put(c,map.getOrDefault(c,0)+1);
+        count = map.size();
+        while(end<=s.length()-1){
+            char c = s.charAt(end);
+            char c2 = s.charAt(begin);
+            if(map.containsKey(c)){
+                map.put(c,map.get(c)-1);
+                if(map.get(c) == 0) count--;
+            }
+            end++;
+            while(count == 0){
+                c2 = s.charAt(begin);
+                //Key:有一个小优化，只保存起始位置和最小长度，sustring()放在最外边做
+                if(map.containsKey(c2)){
+                    map.put(c2,map.get(c2)+1);
+                    if(map.get(c2) > 0){
+                        count++;
+                        
+                    }
+                     
+                }
+                //Key:有一个小优化，只保存起始位置和最小长度，sustring()放在最外边做
+                //if(res.equals("")) res = s.substring(begin,end);
+                //else res = end-begin<res.length()?s.substring(begin,end):res;
+                if(end-begin<len){
+                    start = begin;
+                    len = end-begin;
+                }
+                begin++;
+            }
+        }
+        
+        return len > s.length()?"":s.substring(start,start+len);
+    }
+}
+
+3. Longest Substring Without Repeating Characters
+public class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        //Key:和这个模板不太像.....https://discuss.leetcode.com/topic/68976/sliding-window-algorithm-template-to-solve-all-the-leetcode-substring-search-problem
+        int repeat = 0,begin = 0,end = 0,res = 0;
+        Map<Character,Integer> map = new HashMap<>();
+        while(end<=s.length()-1){
+            char c = s.charAt(end);
+            map.put(c,map.getOrDefault(c,0)+1);
+            if(map.get(c) > 1) repeat++;
+            end++;
+            while(repeat>0){
+                char c2 = s.charAt(begin);
+                if(map.get(c2) > 1){
+                    repeat--;
+                    
+                }
+                map.put(c2,map.get(c2)-1);
+                begin++;
+            }
+            //Corner case:单字母"b"
+            res = Math.max(res,end-begin);
+        }
+        return res;
+    }
+}
