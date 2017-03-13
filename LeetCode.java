@@ -2239,3 +2239,402 @@ public class Solution {
         return res;
     }
 }
+
+541. Reverse String II
+public class Solution {
+    public String reverseStr(String s, int k) {
+        //My 1st version
+        if(s == null || s.length() == 0) return "";
+		if(k == 0) return s;
+        int start = 0,end = start+k-1,count = 0;
+		if(end>s.length()-1) end = s.length()-1;
+        StringBuilder sb = new StringBuilder();
+        while(end<=s.length()-1){
+			
+			//System.out.println("end"+end);
+            while(end>=start){
+                sb.append(s.charAt(end--));
+            }
+			if(sb.toString().length() == s.length()) break;
+            start += k;
+            count = 0;
+            
+            while(start<=s.length()-1 && count <= k-1){
+                sb.append(s.charAt(start++));
+                count++;
+            }
+			//System.out.println(""+start);
+			if(start >= s.length()-1) end = s.length()-1;
+            else end = start+k-1>s.length()-1?s.length()-1:start+k-1;
+			
+        }
+		//System.out.println(""+start+","+s.length());
+        return sb.toString();
+    }
+}
+
+536. Construct Binary Tree from String
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    public TreeNode str2tree(String s) {
+        //My 1st version
+        if(s == null || s.length() == 0) return null;
+        Stack<TreeNode> stack = new Stack<>();
+        //Key:corner case:"-4(2(3)(1))(6(5)(7))"  负数处理
+        //Key:Coner case:"51(232)(434)" 多位数
+        //Corner case:"4"
+        for(int i = 0;i<=s.length()-1;i++){
+            if(s.charAt(i) == '-'){
+                String tmp = "";
+                while(i<= s.length()-1 && s.charAt(i)!='(' && s.charAt(i) != ')'){
+                    tmp = tmp+String.valueOf(s.charAt(i++));
+                }
+                stack.push(new TreeNode(Integer.parseInt(tmp)));
+                i--;
+            }
+            else if(Character.isDigit(s.charAt(i))) {
+                 String tmp = "";
+                 while(i<= s.length()-1 && s.charAt(i)!='(' && s.charAt(i) != ')'){
+                    tmp = tmp+String.valueOf(s.charAt(i++));
+                }
+                //stack.push(new TreeNode(s.charAt(i)-'0'));
+                stack.push(new TreeNode(Integer.parseInt(tmp)));
+                i--;
+                //System.out.println(String.valueOf(stack.peek().val));
+            } else if (s.charAt(i) == ')'){
+                if(!stack.empty()){
+                    TreeNode tmp = stack.peek();
+                    TreeNode tmp2 = null;
+                    stack.pop();
+                    if(!stack.empty()){
+                        tmp2 = stack.peek();
+                        stack.pop();
+                        if(tmp2.left != null){
+                            tmp2.right = tmp;
+                        } else {
+                            tmp2.left = tmp;
+                        }
+                    }
+                    stack.push(tmp2);
+                }
+            }
+        }
+        //System.out.println(stack.peek().val+"");
+        return stack.peek();
+    }
+}
+
+539. Minimum Time Difference
+public class Solution {
+    public int findMinDifference(List<String> timePoints) {
+        //Key:这道题是真TMD不会做.....
+        //Key:Just cp
+         Collections.sort(timePoints);
+        int minDiff = Integer.MAX_VALUE;
+        String prev = timePoints.get(timePoints.size() -1);
+        for (String s : timePoints) {
+            int prevMins = Integer.parseInt(prev.split(":")[0])*60 + Integer.parseInt(prev.split(":")[1]);
+            int curMins = Integer.parseInt(s.split(":")[0])*60 + Integer.parseInt(s.split(":")[1]);
+            int diff = curMins - prevMins;
+            if (diff < 0) diff += 1440;
+            minDiff = Math.min(minDiff, Math.min(diff, 1440 - diff));
+            prev = s;
+        }
+        return minDiff;
+    }
+}
+
+128. Longest Consecutive Sequence
+public class Solution {
+    public int longestConsecutive(int[] nums) {
+        //Key:O(n)，所以应该必须用map吧.....
+        //Key:这道题需要处理duplicates test case，但是只统计不同数字的连续序列：  [100,4,2,200,1,3,2]  excepted ans:4    [1,2,0,1]  excepted:3
+        if(nums.length == 0) return 0;
+        Map<Integer,Integer> map = new HashMap<>();
+        int max = Integer.MIN_VALUE;
+        int tmp = 0;
+        for(int i:nums){
+            if(!map.containsKey(i)){
+                //left和right分别是左右两部分的长度
+                int left = map.getOrDefault(i-1,0),right = map.getOrDefault(i+1,0);
+                tmp = 1+left+right;
+                map.put(i,tmp);
+                //Key:原先我写的是错误的，不应该只考虑i-1和i+1重置，而应该是考虑的是这个范围的start和end重置
+                //https://discuss.leetcode.com/topic/6148/my-really-simple-java-o-n-solution-accepted
+                /***
+                if(map.getOrDefault(i-1,0) != 0){
+                    map.put(i-1,tmp);
+                }
+                if(map.getOrDefault(i+1,0) != 0){
+                    map.put(i+1,tmp);
+                }
+                **/
+                map.put(i - left, tmp);
+                map.put(i + right, tmp);
+                max = Math.max(max,tmp);
+            }
+            
+        }
+        return max;
+    }
+}
+
+329. Longest Increasing Path in a Matrix
+public class Solution {
+    //Key:这道题又TMD写乱了.......
+    /**
+    public int longestIncreasingPath(int[][] matrix) {
+        //key:brute force  DFS or BFS
+        List<Integer> item = new ArrayList<>();
+        boolean[][] used = new boolean[matrix.length][matrix[0].length];
+        helper(matrix,used,item);
+    }
+    public void helper(int[][] matrix,used,List<Integer> item,int prevR,int prevC){
+        for(int i = 0;i<=matrix.length-1;i++){
+            for(int j = 0;j<=matrix[0].length-1;j++){
+                if(used[i][j] || matrix[i][j] <=item.get(item.size()-1) || matrix[]) continue;
+                item.add(matrix[i][j]);
+                used[i][j] = true;
+                max = Math.max(max,item.size());
+                helper(matrix,used,item);
+                used[i][j]
+            }
+        }
+    }
+    **/
+    //Key:这道题写起来很麻烦，所以我just cp的
+    //https://discuss.leetcode.com/topic/34835/15ms-concise-java-solution/2
+    public static final int[][] dirs = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    public int longestIncreasingPath(int[][] matrix) {
+        if(matrix.length == 0) return 0;
+        int m = matrix.length, n = matrix[0].length;
+        int[][] cache = new int[m][n];
+        int max = 1;
+        for(int i = 0; i < m; i++) {
+            for(int j = 0; j < n; j++) {
+                int len = dfs(matrix, i, j, m, n, cache);
+                max = Math.max(max, len);
+            }
+        }   
+        return max;
+    }
+    
+    public int dfs(int[][] matrix, int i, int j, int m, int n, int[][] cache) {
+        if(cache[i][j] != 0) return cache[i][j];
+        int max = 1;
+        for(int[] dir: dirs) {
+            int x = i + dir[0], y = j + dir[1];
+            if(x < 0 || x >= m || y < 0 || y >= n || matrix[x][y] <= matrix[i][j]) continue;
+            int len = 1 + dfs(matrix, x, y, m, n, cache);
+            max = Math.max(max, len);
+        }
+        cache[i][j] = max;
+        return max;
+    }
+}
+
+395. Longest Substring with At Least K Repeating Characters
+public class Solution {
+    
+    //Key:写了半天还是错的.....
+    /**
+    public int longestSubstring(String s, int k) {
+       
+       
+        Map<Character,Integer> map = new HashMap<>();
+        Set<Character> set = new HashSet<>();
+        for(char c:s.toCharArray()){
+            map.put(c,map.getOrDefault(c,0)+1);
+        }
+        for(Map.Entry<Character,Integer> entry:map.entrySet()){
+            if(entry.getValue() < k) set.add(entry.getKey());
+        }
+        //Test case:"weitong" 2
+        if(set.size() == map.size()) return 0;
+        int max = Integer.MIN_VALUE;
+        int start = 0,end = s.length()-1;
+        int length = s.length();
+        for(int i = 0;i<=s.length()-1;i++){
+            if(set.contains(s.charAt(i))){
+                //Key:这道题怎么说呢....蒙着做出来的....
+                //Key:遇到不满足k的元素时，取得之前满足substring的最大长度
+                //Key:因为s = s.substring(i+1,end+1); 所以i的范围要length-2  对于这种case "weitong" 2 处理时要注意i+1的范围。注意，此时s的length一直在变....
+                //Key:下面这行substirng没意义....
+                //if(i+1 <= length-1) s = s.substring(i+1,length);
+                max = Math.max(max,i-start);
+                start = i+1;
+            }
+        }
+        return max == Integer.MIN_VALUE?s.length():max;
+       
+       
+    }
+    **/
+    //Just cp
+    //https://discuss.leetcode.com/topic/57372/java-divide-and-conquer-recursion-solution/2
+    public int longestSubstring(String s, int k) {
+        char[] str = s.toCharArray();
+        return helper(str,0,s.length(),k);
+    }
+    private int helper(char[] str, int start, int end,  int k){
+        if(end-start<k) return 0;//substring length shorter than k.
+        int[] count = new int[26];
+        for(int i = start;i<end;i++){
+            int idx = str[i]-'a';
+            count[idx]++;
+        }
+        for(int i = 0;i<26;i++){
+            if(count[i]<k&&count[i]>0){ //count[i]=0 => i+'a' does not exist in the string, skip it.
+                for(int j = start;j<end;j++){
+                    if(str[j]==i+'a'){
+                        int left = helper(str,start,j,k);
+                        int right = helper(str,j+1,end,k);
+                        return Math.max(left,right);
+                    }
+                }
+            }
+        }
+        return end-start;
+    }
+}
+
+172. Factorial Trailing Zeroes
+public class Solution {
+    public int trailingZeroes(int n) {
+        //Key:背 Just cp
+        //https://discuss.leetcode.com/topic/6848/my-explanation-of-the-log-n-solution/4
+        int cnt = 0;
+        while(n>0){
+            cnt += n/5;
+            n/=5;
+        }
+        return cnt;
+    }
+}
+
+315. Count of Smaller Numbers After Self
+public class Solution {
+    //Key:很难，背吧。Just cp
+    //https://discuss.leetcode.com/topic/31554/11ms-java-solution-using-merge-sort-with-explanation
+    int[] count;
+    public List<Integer> countSmaller(int[] nums) {
+        List<Integer> res = new ArrayList<Integer>();     
+    
+        count = new int[nums.length];
+        int[] indexes = new int[nums.length];
+        for(int i = 0; i < nums.length; i++){
+        	indexes[i] = i;
+        }
+        mergesort(nums, indexes, 0, nums.length - 1);
+        for(int i = 0; i < count.length; i++){
+        	res.add(count[i]);
+        }
+        return res;
+    }
+    private void mergesort(int[] nums, int[] indexes, int start, int end){
+    	if(end <= start){
+    		return;
+    	}
+    	int mid = (start + end) / 2;
+    	mergesort(nums, indexes, start, mid);
+    	mergesort(nums, indexes, mid + 1, end);
+    	
+    	merge(nums, indexes, start, end);
+    }
+    private void merge(int[] nums, int[] indexes, int start, int end){
+    	int mid = (start + end) / 2;
+    	int left_index = start;
+    	int right_index = mid+1;
+    	int rightcount = 0;    	
+    	int[] new_indexes = new int[end - start + 1];
+    
+    	int sort_index = 0;
+    	while(left_index <= mid && right_index <= end){
+    		if(nums[indexes[right_index]] < nums[indexes[left_index]]){
+    			new_indexes[sort_index] = indexes[right_index];
+    			rightcount++;
+    			right_index++;
+    		}else{
+    			new_indexes[sort_index] = indexes[left_index];
+    			count[indexes[left_index]] += rightcount;
+    			left_index++;
+    		}
+    		sort_index++;
+    	}
+    	while(left_index <= mid){
+    		new_indexes[sort_index] = indexes[left_index];
+    		count[indexes[left_index]] += rightcount;
+    		left_index++;
+    		sort_index++;
+    	}
+    	while(right_index <= end){
+    		new_indexes[sort_index++] = indexes[right_index++];
+    	}
+    	for(int i = start; i <= end; i++){
+    		indexes[i] = new_indexes[i - start];
+    	}
+    }
+}
+
+17. Letter Combinations of a Phone Number
+public class Solution {
+    //Key:想起来不麻烦，但是写起来可能会有些乱...
+    public List<String> letterCombinations(String digits) {
+        String[] strs = {"abc","def","ghi","jkl","mno","pqrs","tuv","wxyz"};
+        List<String> res = new ArrayList<>();
+        if(digits == null || digits.length() == 0) return res;
+        int depth = 0;
+        helper(res,strs,digits,depth,"");
+        return res;
+    }
+    public void helper(List<String> list,String[] strs,String digits,int depth,String tmp){
+        if(depth == digits.length()){
+            list.add(tmp);
+        } else {
+            int index = digits.charAt(depth)-'2';
+            //Key:排除0,1这种无效按键的干扰
+            if(index >= 0){
+                for(int i = 0;i<=strs[index].length()-1;i++){
+                    tmp = tmp+String.valueOf(strs[index].charAt(i));
+                    helper(list,strs,digits,depth+1,tmp);
+                    tmp = tmp.substring(0,tmp.length()-1);
+                }
+            }
+        }
+    }
+}
+
+20. Valid Parentheses
+public class Solution {
+    //Key:不难写，主要是corner case的判断
+    //Corner case:"(("  需要单独判断一下最后是否为空
+    public boolean isValid(String s) {
+        if(s == null || s.length() == 0 || s.length()%2 == 1) return false;
+        Stack<Character> stack = new Stack<>();
+        for(int i = 0;i<=s.length()-1;i++){
+            if(s.charAt(i) == '}' || s.charAt(i) == ')' || s.charAt(i) == ']'){
+                if(stack.empty()){
+                    return false;
+                } else {
+                    if(s.charAt(i) == '}' && stack.peek() != '{' ||s.charAt(i) == ')' && stack.peek() != '(' || s.charAt(i) == ']' && stack.peek() != '['){
+                        return false;
+                    } 
+                    stack.pop();
+                }
+            } else {
+                stack.push(s.charAt(i));
+            }
+            
+        }
+        //Corner case:"(("  需要单独判断一下最后是否为空
+        return stack.empty()?true:false;
+    }
+}
