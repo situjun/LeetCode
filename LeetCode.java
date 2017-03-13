@@ -2638,3 +2638,30 @@ public class Solution {
         return stack.empty()?true:false;
     }
 }
+
+49. Group Anagrams
+public class Solution {
+    public List<List<String>> groupAnagrams(String[] strs) {
+        //Key:思路一开始不容易想，但解法较容易理解
+        //Key:Just cp
+        //https://discuss.leetcode.com/topic/24494/share-my-short-java-solution/5
+        if(strs==null || strs.length == 0){
+    		return new ArrayList<List<String>>();
+    	}
+    	HashMap<String, List<String>> map = new HashMap<String, List<String>>();
+    	//Arrays.sort(strs);
+    	for (String s:strs) {
+    		char[] ca = s.toCharArray();
+    		Arrays.sort(ca);
+    		String keyStr = String.valueOf(ca);
+    		if(!map.containsKey(keyStr))
+    			map.put(keyStr, new ArrayList<String>());
+    		map.get(keyStr).add(s);
+    	}
+    	
+    	for(String key: map.keySet()) {
+    		Collections.sort(map.get(key));
+    	}
+    	return new ArrayList<List<String>>(map.values());
+    }
+}
