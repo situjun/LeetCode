@@ -2665,3 +2665,144 @@ public class Solution {
     	return new ArrayList<List<String>>(map.values());
     }
 }
+
+33. Search in Rotated Sorted Array
+public class Solution {
+    public int search(int[] nums, int target) {
+        //Key:Loop version
+        /**
+        //Key:有一半肯定是依然有序的，判断target在unsorted or sorted中，然后recursion处理之
+        //Key:https://discuss.leetcode.com/topic/16580/java-ac-solution-using-once-binary-search
+        if(nums.length == 0) return -1;
+        int low = 0,high = nums.length-1,mid = 0;
+        while(low<=high){
+            mid = (low+high)/2;
+            if(nums[mid] == target) return mid;
+            //determine which part is sorted  Key:no duplicates
+            //前半部分有序,后半部分无序
+            //Key:Corner case: 单数组处理 [1] 0 因为nums[mid]一样nums[low]，如果不加=，会导致low,high无变化，导致无限循环
+            //if(nums[mid] > nums[low]){
+            if(nums[mid] >= nums[low]){
+                //target belong to sorted part
+                if(target < nums[mid] && target >= nums[low]) high = mid-1;
+                //target belong to unsorted part
+                else low = mid + 1;
+            }
+            //后半部分有序,前半部分无序
+            if(nums[mid] <= nums[high]){
+                //target belong to sorted part
+                if(target > nums[mid] && target <= nums[high]) low = mid+1;
+                //target belong to unsorted part
+                else high = mid-1;
+            }
+        }
+        return -1;
+        **/
+        //Key:Recursion version
+        if(nums.length == 0) return -1;
+        return helper(0,nums.length-1,nums,target);
+    }
+    public int helper(int low,int high,int[] nums,int target){
+        int mid = (low+high)/2;
+        if(nums[mid] == target) return mid;
+        if(low <= high){
+            //Key:注意，下面的是binary search code,其中nums[mid]和target没有等于判断
+            /**
+            public int helper(int target,int[] nums,int start,int end){
+        		int mid = (start+end)/2;
+        		while(start<=end){
+        			//System.out.println(nums[mid]+"");
+        			if(nums[mid] == target) return mid;
+        			else if(nums[mid]<target) return helper(target,nums,mid+1,end);
+        			else return helper(target,nums,start,mid-1);
+        		}
+        		return -1;
+        	}
+            **/
+            //Key:而这里nums[mid] <= nums[high] 必须加=判断，注意为什么!!!!
+            //Corner case:[3,1] 1
+            if(nums[mid] <= nums[high]){
+                if(target > nums[mid] && target <= nums[high]) return helper(mid+1,high,nums,target);
+                else return helper(low,mid-1,nums,target);
+            }
+            if(nums[mid] >= nums[low]){
+                if(target >= nums[low] && target < nums[mid]) return helper(low,mid-1,nums,target);
+                else return helper(mid+1,high,nums,target);
+            }
+        }
+        return -1;
+    }
+}
+
+81. Search in Rotated Sorted Array II
+public class Solution {
+    public boolean search(int[] nums, int target) {
+        //Key:contains duplicates 
+        //Test case {2,2,1,2,2,2,2,2,2}  --->这时候无法仅通过nums[mid]>nums[low] 来判断了....
+        //Key:比较喜欢coder_gal25's sol, https://discuss.leetcode.com/topic/310/when-there-are-duplicates-the-worst-case-is-o-n-could-we-do-better/28   ---> 干扰项归根到底其实就是mid,high,low同时相等，只要把这种情况排除就好了!!!  Worst case：O(N)
+        if(nums.length == 0) return false;
+        return helper(0,nums.length-1,nums,target) == -1?false:true;
+    }
+    public int helper(int low,int high,int[] nums,int target){
+        int mid = (low+high)/2;
+        if(low<=high){
+            if(nums[mid] == target) return mid;
+            //Key:关键点，其他地方应该和Search in Rotated Sorted Array I 一样
+            if(nums[mid] == nums[low] && nums[mid] == nums[high]){
+                //low++;
+                //high--;
+                return helper(++low,--high,nums,target);
+            } else if(nums[mid]>=nums[low]){
+                if(target >= nums[low] && target < nums[mid]) return helper(low,mid-1,nums,target);
+                else return helper(mid+1,high,nums,target);
+            } else if(nums[mid] <= nums[high]){
+                if(target > nums[mid] && target <= nums[high]) return helper(mid+1,high,nums,target);
+                else return helper(low,mid-1,nums,target);
+            }
+        }
+        return -1;
+    }
+}
+
+154. Find Minimum in Rotated Sorted Array II
+public class Solution {
+    public int findMin(int[] nums) {
+        //Key:I 的Explanation，不过思路类似https://discuss.leetcode.com/topic/6112/a-concise-solution-with-proof-in-the-comment
+        //https://discuss.leetcode.com/topic/25248/super-simple-and-clean-java-binary-search
+        //Just cp
+        int l = 0, r = nums.length-1;
+        while (l < r) {
+             int mid = (l + r) / 2;
+             if (nums[mid] < nums[r]) {
+            	 r = mid;
+             } else if (nums[mid] > nums[r]){
+            	 l = mid + 1;
+             } else {  
+            	 r--;  //nums[mid]=nums[r] no idea, but we can eliminate nums[r];
+             }
+        }
+        return nums[l];
+    }
+}
+
+153. Find Minimum in Rotated Sorted Array
+public class Solution {
+    public int findMin(int[] nums) {
+        //Key:直接粘的 154 Find Minimum in Rotated Sorted Array II 的解法
+        //Key:I 的Explanation，不过思路类似https://discuss.leetcode.com/topic/6112/a-concise-solution-with-proof-in-the-comment
+        //https://discuss.leetcode.com/topic/25248/super-simple-and-clean-java-binary-search
+        //Just cp
+        int l = 0, r = nums.length-1;
+        while (l < r) {
+             int mid = (l + r) / 2;
+             if (nums[mid] < nums[r]) {
+            	 r = mid;
+             } else if (nums[mid] > nums[r]){
+            	 l = mid + 1;
+             } else {  
+            	 r--;  //nums[mid]=nums[r] no idea, but we can eliminate nums[r];
+             }
+        }
+        return nums[l];
+    }
+}
