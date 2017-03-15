@@ -2791,7 +2791,7 @@ public class Solution {
         //Key:直接粘的 154 Find Minimum in Rotated Sorted Array II 的解法
         //Key:I 的Explanation，不过思路类似https://discuss.leetcode.com/topic/6112/a-concise-solution-with-proof-in-the-comment
         //https://discuss.leetcode.com/topic/25248/super-simple-and-clean-java-binary-search
-        //Just cp
+        //Just cp 背
         int l = 0, r = nums.length-1;
         while (l < r) {
              int mid = (l + r) / 2;
