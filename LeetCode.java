@@ -2806,3 +2806,100 @@ public class Solution {
         return nums[l];
     }
 }
+
+343. Integer Break
+public class Solution {
+    public int integerBreak(int n) {
+        //Key:DP or Math
+        //Just cp:https://discuss.leetcode.com/topic/42978/java-dp-solution DP
+       int[] dp = new int[n + 1];
+       dp[1] = 1;
+       for(int i = 2; i <= n; i ++) {
+           for(int j = 1; j < i; j ++) {
+               dp[i] = Math.max(dp[i], (Math.max(j,dp[j])) * (Math.max(i - j, dp[i - j])));
+           }
+       }
+       return dp[n];
+    }
+}
+
+401. Binary Watch
+public class Solution {
+    //Key:回溯，背，这道题挺麻烦的，估计不太可能问...
+    //Key:有一个bitCount的方法，不过貌似更不好记
+    //https://discuss.leetcode.com/topic/59374/simple-python-java
+    //Key:Just cp https://discuss.leetcode.com/topic/59494/3ms-java-solution-using-backtracking-and-idea-of-permutation-and-combination/2
+    
+    public List<String> readBinaryWatch(int num) {
+        List<String> res = new ArrayList<>();
+        int[] nums1 = new int[]{8, 4, 2, 1}, nums2 = new int[]{32, 16, 8, 4, 2, 1};
+        for(int i = 0; i <= num; i++) {
+            List<Integer> list1 = generateDigit(nums1, i);
+            List<Integer> list2 = generateDigit(nums2, num - i);
+            for(int num1: list1) {
+                if(num1 >= 12) continue;
+                for(int num2: list2) {
+                    if(num2 >= 60) continue;
+                    res.add(num1 + ":" + (num2 < 10 ? "0" + num2 : num2));
+                }
+            }
+        }
+        return res;
+    }
+
+    private List<Integer> generateDigit(int[] nums, int count) {
+        List<Integer> res = new ArrayList<>();
+        generateDigitHelper(nums, count, 0, 0, res);
+        return res;
+    }
+
+    private void generateDigitHelper(int[] nums, int count, int pos, int sum, List<Integer> res) {
+        if(count == 0) {
+            res.add(sum);
+            return;
+        }
+        
+        for(int i = pos; i < nums.length; i++) {
+            generateDigitHelper(nums, count - 1, i + 1, sum + nums[i], res);    
+        }
+    }
+}
+
+383. Ransom Note
+public class Solution {
+    public boolean canConstruct(String ransomNote, String magazine) {
+        //这道题目表述有点问题
+        //"abb","bba"我觉得不符题意，但是它可以通过。貌似只要magazine中的字符任意截取能组成ransomNote就可以....但还是没理解 
+    //     char[] rArr = ransomNote.toCharArray();
+    //     char[] mArr = magazine.toCharArray();
+    //     int lengthR = rArr.length();
+    //     int lengthM = mArr.length();
+    //     int tmp = 0;
+    //     int index1 = 0,index2 = 0;
+    //     for(int i=0;i<=lengthR-1;i++){
+    //         tmp ^= (int)rArr[i];
+    //     }
+    //     for(int i=0;i<=lengthM-1;i++){
+    //         tmp ^= (int)mArr[i];
+    //     }
+    //     for(int i=0;i<=lengthR-1;i++){
+    //         tmp ^= (int)rArr[i];
+    //     }
+    // }
+    
+        //Key:应该是ransomNote中的字符均属于magazine中的就可以
+        //Key:Coner case:"" "b" 空字符串自然也符合题意
+        //Key:数量也得对上....Corner case:"aa", "aab" -->true    "aa""ab" --> false
+        if(ransomNote == null || ransomNote.length() == 0) return true;
+        if(magazine == null || magazine.length() == 0) return false;
+        Map<Character,Integer> map = new HashMap<>();
+        for(char c:magazine.toCharArray()){
+            map.put(c,map.getOrDefault(c,0)+1);
+        }
+        for(char c:ransomNote.toCharArray()){
+            map.put(c,map.getOrDefault(c,0)-1);
+            if(map.get(c) == -1) return false;
+        }
+        return true;
+    }
+}
