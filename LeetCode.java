@@ -2983,3 +2983,42 @@ public class Solution {
     }
 }
 
+538. Convert BST to Greater Tree
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //Just cp
+    int sum = 0;
+    
+    public TreeNode convertBST(TreeNode root) {
+        convert(root);
+        return root;
+    }
+    
+    public void convert(TreeNode cur) {
+        if (cur == null) return;
+        convert(cur.right);
+        cur.val += sum;
+        sum = cur.val;
+        convert(cur.left);
+    }
+}
+
+537. Complex Number Multiplication
+public class Solution {
+    public String complexNumberMultiply(String a, String b) {
+        //Hard,Key:Just cp
+        //https://discuss.leetcode.com/topic/84261/java-3-liner/2
+        int[] coefs1 = Stream.of(a.split("\\+|i")).mapToInt(Integer::parseInt).toArray(), 
+        coefs2 = Stream.of(b.split("\\+|i")).mapToInt(Integer::parseInt).toArray();
+        return (coefs1[0]*coefs2[0] - coefs1[1]*coefs2[1]) + "+" + (coefs1[0]*coefs2[1] + coefs1[1]*coefs2[0]) + "i";
+        
+    }
+}
