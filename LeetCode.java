@@ -2955,3 +2955,31 @@ public class Solution {
     }
 }
 
+543. Diameter of Binary Tree
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //1st version
+    int max = Integer.MIN_VALUE;
+    public int diameterOfBinaryTree(TreeNode root) {
+        if(root == null) return 0;
+        helper(root); 
+        return max;
+    }
+    public int helper(TreeNode node){
+        if(node != null){
+            int left = helper(node.left),right = helper(node.right);
+            max = Math.max(left+right,max);
+            return Math.max(left+1,right+1);
+        }
+        return 0;
+    }
+}
+
