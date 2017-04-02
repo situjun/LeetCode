@@ -3048,3 +3048,114 @@ public class Solution {
         }
     }
 }
+
+98. Validate Binary Search Tree
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+
+
+public class Solution {
+    //Key:my wrong version
+    
+    /**
+    boolean tag = true;
+    public boolean isValidBST(TreeNode root) {
+        //Key:Corner case:[] 返回true
+        if(root == null) return true;
+        helper(root.left,root.val,true);
+        helper(root.right,root.val,false);
+        return tag;
+    }
+    //Key:很容易忽略的一点!!!!!
+    //Key:Corner case:[10,5,15,null,null,6,20]  
+    //还要顾虑到中间的left和right的上限和下限范围
+    public void helper(TreeNode node,int parent,boolean left){
+        if(node != null){
+            if(left){
+                if(node.val >= parent) tag = false;
+            } else {
+                if(node.val <= parent) tag = false;
+            }
+            helper(node.left,node.val,true);
+            helper(node.right,node.val,false);
+        }
+    }
+    **/
+    //Just cp
+    //https://discuss.leetcode.com/topic/46016/learn-one-iterative-inorder-traversal-apply-it-to-multiple-tree-questions-java-solution
+    public boolean isValidBST(TreeNode root) {
+       if (root == null) return true;
+       Stack<TreeNode> stack = new Stack<>();
+       TreeNode pre = null;
+       while (root != null || !stack.isEmpty()) {
+          while (root != null) {
+             stack.push(root);
+             root = root.left;
+          }
+          root = stack.pop();
+          if(pre != null && root.val <= pre.val) return false;
+          pre = root;
+          root = root.right;
+       }
+       return true;
+    }
+}
+
+4. Median of Two Sorted Arrays
+public class Solution {
+    //My wrong version
+    /**
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        int start1=0,start2=0,end1=nums1.length-1,end2=nums2.length-1;
+        return findMedian(start1,end1,nums1,start2,end2,nums2);
+    }
+    public double findMedian(int start1,int end1,int[] nums1,int start2,int end2,int[] nums2){
+        int mid1 = (start1+end1)/2,mid2 = (start2+end2)/2;
+        if(end1==start1 && end2==start2) return (double)(nums1[start1]+nums2[start2])/2;
+        
+        if(nums1[mid1] < nums2[mid2]){
+            start1 = (mid1+end1)/2;
+            end2 = (start2+mid2)/2;
+
+        } else if(nums1[mid1] > nums2[mid2]){
+            start2 = (mid2+end2)/2;
+            end1 = (start1+mid1)/2;
+            
+        } else if(nums1[mid1] == nums2[mid2]){
+           end1 = end1+1;
+           end2 = end2-1;
+        }
+        return findMedian(start1,end1,nums1,start2,end2,nums2);
+    }
+    **/
+    //Just cp
+    //https://discuss.leetcode.com/topic/28602/concise-java-solution-based-on-binary-search/2
+    public double findMedianSortedArrays(int[] A, int[] B) {
+    	    int m = A.length, n = B.length;
+    	    int l = (m + n + 1) / 2;
+    	    int r = (m + n + 2) / 2;
+    	    return (getkth(A, 0, B, 0, l) + getkth(A, 0, B, 0, r)) / 2.0;
+    	}
+    
+    public double getkth(int[] A, int aStart, int[] B, int bStart, int k) {
+    	if (aStart > A.length - 1) return B[bStart + k - 1];            
+    	if (bStart > B.length - 1) return A[aStart + k - 1];                
+    	if (k == 1) return Math.min(A[aStart], B[bStart]);
+    	
+    	int aMid = Integer.MAX_VALUE, bMid = Integer.MAX_VALUE;
+    	if (aStart + k/2 - 1 < A.length) aMid = A[aStart + k/2 - 1]; 
+    	if (bStart + k/2 - 1 < B.length) bMid = B[bStart + k/2 - 1];        
+    	
+    	if (aMid < bMid) 
+    	    return getkth(A, aStart + k/2, B, bStart,k - k/2);// Check: aRight + bLeft 
+    	else 
+    	    return getkth(A, aStart,B,bStart + k/2, k - k/2);// Check: bRight + aLeft
+    }
+}
