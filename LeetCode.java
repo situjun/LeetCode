@@ -3296,3 +3296,76 @@ public class Solution {
         return res.toString().trim();
     }
 }
+
+18. 4Sum
+public class Solution {
+    public List<List<Integer>> fourSum(int[] num, int target) {
+        //Key:BackTracking 会TLE
+        /**
+        Set<List<Integer>> list = new HashSet<>();
+        
+        List<Integer> item = new ArrayList<>();
+        Arrays.sort(nums);
+        //Key:还是不能有重复的
+        //不行，这道题用这个方法怎么着都TLE.....
+        
+        //[-493,-482,-482,-456,-427,-405,-392,-385,-351,-269,-259,-251,-235,-235,-202,-201,-194,-189,-187,-186,-180,-177,-175,-156,-150,-147,-140,-122,-112,-112,-105,-98,-49,-38,-35,-34,-18,20,52,53,57,76,124,126,128,132,142,147,157,180,207,227,274,296,311,334,336,337,339,349,354,363,372,378,383,413,431,471,474,481,492]  6189
+
+        helper(list,item,nums,target,0,0);
+        return new ArrayList(list);
+    }
+    public void helper(Set<List<Integer>> list,List<Integer> item,int[] nums,int target,int start,int sum){
+        if(item.size() <=4){
+            if(item.size() == 4){
+                int tmp = 0;
+                for(int i:item) tmp += i;
+                //System.out.println(item+"----");
+                if(tmp == target) list.add(new ArrayList<>(item));
+            } else {
+                for(int i = start;i<=nums.length-1;i++){
+                    //System.out.println(sum+nums[i]+"----");
+                    //Corcer case:[1,-2,-5,-4,-3,3,3,5]  -11 因为一开始-5>-11，所以就直接return 了///
+                    if(target <0 && item.size() == 3 && sum+nums[i] > target || target >0 && sum > target) return;
+                    
+                    //if(sum+nums[i] > target) return;
+                    //if(sum> target) return;
+                    item.add(nums[i]);
+                    //Corcer case:[-1,0,1,2,-1,-4]  -1 因为target 是负数，而我一开始传的sum是0，所以必须判断sum+nums[i] > target
+                    //而不是sum> target。否则因为一开始0就大于target，会导致错误
+                    
+                    //System.out.println(nums[start]+"----");
+                    helper(list,item,nums,target,i+1,sum+nums[i]);
+                    item.remove(item.size()-1);
+                }
+            }
+        }
+        **/
+        //Key:Just cp:很漂亮的一个算法
+        //https://discuss.leetcode.com/topic/12368/clean-accepted-java-o-n-3-solution-based-on-3sum
+        //和这个3sum有很大的相似度https://discuss.leetcode.com/topic/28857/easiest-java-solution
+        ArrayList<List<Integer>> ans = new ArrayList<>();
+        if(num.length<4)return ans;
+        Arrays.sort(num);
+        for(int i=0; i<num.length-3; i++){
+            if(i>0&&num[i]==num[i-1])continue;
+            for(int j=i+1; j<num.length-2; j++){
+                if(j>i+1&&num[j]==num[j-1])continue;
+                int low=j+1, high=num.length-1;
+                while(low<high){
+                    int sum=num[i]+num[j]+num[low]+num[high];
+                    if(sum==target){
+                        ans.add(Arrays.asList(num[i], num[j], num[low], num[high]));
+                        while(low<high&&num[low]==num[low+1])low++;
+                        while(low<high&&num[high]==num[high-1])high--;
+                        low++;
+                        high--;
+                    }
+                    else if(sum<target)low++;
+                    else high--;
+                }
+            }
+        }
+        return ans;
+        
+    }
+}
