@@ -3159,3 +3159,109 @@ public class Solution {
     	    return getkth(A, aStart,B,bStart + k/2, k - k/2);// Check: bRight + aLeft
     }
 }
+
+468. Validate IP Address
+public class Solution {
+    public String validIPAddress(String IP) {
+        //Key:hard 自己写匹配很麻烦，直接用regression比较简单
+        //Key:just cp
+        //https://discuss.leetcode.com/topic/75015/java-clear-regex-solution
+        //Key:正则的用法
+        String singleIPv4 = "([0-9]|[1-9][0-9]|[1][0-9]{2}|[2][0-5]{2})";
+        String IPv4 = String.format("(%s\\.){3}%s", singleIPv4,singleIPv4);
+    	if (IP.matches(IPv4)) return "IPv4";
+    	String singleLetter = "[A-Fa-f0-9]";
+    	String singleIPv6 = String.format("(%s{1,4}|[0]%s{0,3})", singleLetter,singleLetter);
+    	String IPv6 = String.format("(%s:){7}%s", singleIPv6,singleIPv6);
+        if (IP.matches(IPv6)) return "IPv6";
+        return "Neither";
+    }
+}
+
+420. Strong Password Checker
+//Key:Hard而且写起来很麻烦...
+//Key:Just cp
+//https://discuss.leetcode.com/topic/63185/java-easy-solution-with-explanation/2
+public class Solution {
+    public int strongPasswordChecker(String s) {
+        
+        if(s.length()<2) return 6-s.length();
+        
+        //Initialize the states, including current ending character(end), existence of lowercase letter(lower), uppercase letter(upper), digit(digit) and number of replicates for ending character(end_rep)
+        char end = s.charAt(0);
+        boolean upper = end>='A'&&end<='Z', lower = end>='a'&&end<='z', digit = end>='0'&&end<='9';
+        
+        //Also initialize the number of modification for repeated characters, total number needed for eliminate all consequnce 3 same character by replacement(change), and potential maximun operation of deleting characters(delete). Note delete[0] means maximum number of reduce 1 replacement operation by 1 deletion operation, delete[1] means maximun number of reduce 1 replacement by 2 deletion operation, delete[2] is no use here. 
+        int end_rep = 1, change = 0;
+        int[] delete = new int[3];
+        
+        for(int i = 1;i<s.length();++i){
+            if(s.charAt(i)==end) ++end_rep;
+            else{
+                change+=end_rep/3;
+                if(end_rep/3>0) ++delete[end_rep%3];
+                //updating the states
+                end = s.charAt(i);
+                upper = upper||end>='A'&&end<='Z';
+                lower = lower||end>='a'&&end<='z';
+                digit = digit||end>='0'&&end<='9';
+                end_rep = 1;
+            }
+        }
+        change+=end_rep/3;
+        if(end_rep/3>0) ++delete[end_rep%3];
+        
+        //The number of replcement needed for missing of specific character(lower/upper/digit)
+        int check_req = (upper?0:1)+(lower?0:1)+(digit?0:1);
+        
+        if(s.length()>20){
+            int del = s.length()-20;
+            
+            //Reduce the number of replacement operation by deletion
+            if(del<=delete[0]) change-=del;
+            else if(del-delete[0]<=2*delete[1]) change-=delete[0]+(del-delete[0])/2;
+            else change-=delete[0]+delete[1]+(del-delete[0]-2*delete[1])/3;
+            
+            return del+Math.max(check_req,change);
+        }
+        else return Math.max(6-s.length(), Math.max(check_req, change));
+    }
+}
+
+179. Largest Number
+public class Solution {
+    public String largestNumber(int[] nums) {
+        //Key:Hard
+        //Key:这个方法特别巧妙
+        //https://discuss.leetcode.com/topic/8018/my-java-solution-to-share/2
+        //https://discuss.leetcode.com/topic/32442/share-my-fast-java-solution-beat-98-64/2
+        //Key:Key point:
+        /**
+        String s1 = "9";
+        String s2 = "31";
+        
+        String case1 =  s1 + s2; // 931
+        String case2 = s2 + s1; // 319
+        **/
+        if (nums == null || nums.length == 0) return "";
+        String[] strs = new String[nums.length];
+        for (int i = 0; i < nums.length; i++) {
+            strs[i] = nums[i]+"";
+        }
+        Arrays.sort(strs, new Comparator<String>() {
+            @Override
+            public int compare(String i, String j) {
+                String s1 = i+j;
+                String s2 = j+i;
+                return s1.compareTo(s2);
+            }
+        });
+        if (strs[strs.length-1].charAt(0) == '0') return "0";
+        String res = new String();
+        for (int i = 0; i < strs.length; i++) {
+            res = strs[i]+res;
+        }
+        return res;
+    
+    }
+}
