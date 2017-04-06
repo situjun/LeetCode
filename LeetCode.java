@@ -3369,3 +3369,43 @@ public class Solution {
         
     }
 }
+
+135. Candy
+public class Solution {
+    public int candy(int[] ratings) {
+        //Key：Hard,Just cp
+        //Key:Greedy题，背!!!!
+        //https://discuss.leetcode.com/topic/37924/very-simple-java-solution-with-detail-explanation
+        //https://discuss.leetcode.com/topic/25985/simple-o-n-java-solution-with-comments
+        //两个思路相同，但是如何不知证明candies是最小的？？？
+        int sum=0;
+        int[] a=new int[ratings.length];
+        for(int i=0;i<a.length;i++)
+        {
+            a[i]=1;
+        }
+        for(int i=0;i<ratings.length-1;i++)
+        {
+            if(ratings[i+1]>ratings[i])
+            {
+                a[i+1]=a[i]+1;
+            }
+        }
+        for(int i=ratings.length-1;i>0;i--)
+        {
+            if(ratings[i-1]>ratings[i])
+            {
+                //Key:关键点，从右往左扫时，如果左边大于右边，要保证至少不小于右边+1
+                if(a[i-1]<(a[i]+1))
+                {
+                    a[i-1]=a[i]+1;
+                }
+            }
+        }
+        for(int i=0;i<a.length;i++)
+        {
+            sum+=a[i];
+        }
+        return sum;
+    }
+}
