@@ -3409,3 +3409,155 @@ public class Solution {
         return sum;
     }
 }
+
+188. Best Time to Buy and Sell Stock IV
+public class Solution {
+    //Key:Hard,just cp
+    //这两个解法比较容易理解
+    //https://discuss.leetcode.com/topic/24079/easy-understanding-and-can-be-easily-modified-to-different-situations-java-solution/2
+    //https://discuss.leetcode.com/topic/29489/clean-java-dp-o-nk-solution-with-o-k-space
+    //hold[i][k]  ith day k transaction have stock and maximum profit
+    //unhold[i][k] ith day k transaction do not have stock at hand and maximum profit
+    public int maxProfit(int k, int[] prices) {
+        if(k>prices.length/2) return maxP(prices);
+        int[][] hold = new int[prices.length][k+1];
+        int[][] unhold = new int[prices.length][k+1];
+        hold[0][0] = -prices[0];
+        for(int i=1;i<prices.length;i++) hold[i][0] = Math.max(hold[i-1][0],-prices[i]);
+        for(int j=1;j<=k;j++) hold[0][j] = -prices[0];
+        for(int i=1;i<prices.length;i++){
+            for(int j=1;j<=k;j++){
+                hold[i][j] = Math.max(unhold[i-1][j]-prices[i],hold[i-1][j]);
+                unhold[i][j] = Math.max(hold[i-1][j-1]+prices[i],unhold[i-1][j]);
+            }
+        }
+        return Math.max(hold[prices.length-1][k],unhold[prices.length-1][k]);
+    }
+    public int maxP(int[] prices){
+        int res =0;
+        for(int i=0;i<prices.length;i++){
+            if(i>0 && prices[i] > prices[i-1]){
+                res += prices[i]-prices[i-1];
+            }
+        }
+        return res;
+    }
+}
+
+103. Binary Tree Zigzag Level Order Traversal
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //Key:Just cp
+    //Traversal method
+    //https://discuss.leetcode.com/topic/3413/my-accepted-java-solution/2
+    
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) 
+    {
+        List<List<Integer>> sol = new ArrayList<>();
+        travel(root, sol, 0);
+        return sol;
+    }
+    
+    public void travel(TreeNode curr, List<List<Integer>> sol, int level)
+    {
+        if(curr == null) return;
+        
+        if(sol.size() <= level)
+        {
+            List<Integer> newLevel = new LinkedList<>();
+            sol.add(newLevel);
+        }
+        
+        List<Integer> collection  = sol.get(level);
+        if(level % 2 == 0) collection.add(curr.val);
+        else collection.add(0, curr.val);
+        
+        travel(curr.left, sol, level + 1);
+        travel(curr.right, sol, level + 1);
+    }
+}
+
+97. Interleaving String
+public class Solution {
+    //Key:Hard just cp,改写了一下CPP的解法
+    //https://discuss.leetcode.com/topic/3532/my-dp-solution-in-c/2
+    public boolean isInterleave(String s1, String s2, String s3) {
+        if(s3.length() != s1.length() + s2.length()) return false;
+        boolean[][] table = new boolean[s1.length()+1][s2.length()+1];
+        for(int i=0; i<s1.length()+1; i++)
+            for(int j=0; j< s2.length()+1; j++){
+                if(i==0 && j==0)
+                    table[i][j] = true;
+                else if(i == 0)
+                    table[i][j] = ( table[i][j-1] && s2.charAt(j-1) == s3.charAt(i+j-1));
+                else if(j == 0)
+                    table[i][j] = ( table[i-1][j] && s1.charAt(i-1) == s3.charAt(i+j-1));
+                else
+                    table[i][j] = (table[i-1][j] && s1.charAt(i-1) == s3.charAt(i+j-1) ) || (table[i][j-1] && s2.charAt(j-1) == s3.charAt(i+j-1) );
+            }
+            
+        return table[s1.length()][s2.length()];
+    }
+}
+
+61. Rotate List
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //Key:2 pointers  
+    //Keu:难点在于k有可能大于链表总长度，所以处理起来会很麻烦
+    //My 1st wrong version
+    /**
+    public ListNode rotateRight(ListNode head, int k) {
+        
+        if(head == null) return null;
+        ListNode node1 = head,node2 = head;
+        ListNode res = null;
+        for(int i = 0;i<=k-1;i++){
+            node2 = node2.next;
+        }
+        while(node2.next != null){
+            node1 = node1.next;
+            node2 = node2.next;
+        }
+        res = node1.next;
+        node1 = null;
+        node2.next = head;
+        return head;
+    }
+    ***/
+    //Key:just cp
+    public ListNode rotateRight(ListNode head, int n) {
+        if (head==null||head.next==null) return head;
+        ListNode dummy=new ListNode(0);
+        dummy.next=head;
+        ListNode fast=dummy,slow=dummy;
+    
+        int i;
+        for (i=0;fast.next!=null;i++)//Get the total length 
+        	fast=fast.next;
+        
+        for (int j=i-n%i;j>0;j--) //Get the i-n%i th node
+        	slow=slow.next;
+        
+        fast.next=dummy.next; //Do the rotation
+        dummy.next=slow.next;
+        slow.next=null;
+        
+        return dummy.next;
+    }
+}
