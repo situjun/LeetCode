@@ -3561,3 +3561,82 @@ public class Solution {
         return dummy.next;
     }
 }
+
+239. Sliding Window Maximum
+public class Solution {
+    public int[] maxSlidingWindow(int[] a, int k) {
+        //Key:Deque用法  just cp
+        //https://discuss.leetcode.com/topic/19055/java-o-n-solution-using-deque-with-explanation/2
+        if (a == null || k <= 0) {
+			return new int[0];
+		}
+		int n = a.length;
+		int[] r = new int[n-k+1];
+		int ri = 0;
+		// store index
+		Deque<Integer> q = new ArrayDeque<>();
+		for (int i = 0; i < a.length; i++) {
+			// remove numbers out of range k
+			while (!q.isEmpty() && q.peek() < i - k + 1) {
+				q.poll();
+			}
+			// remove smaller numbers in k range as they are useless
+			while (!q.isEmpty() && a[q.peekLast()] < a[i]) {
+				q.pollLast();
+			}
+			// q contains index... r contains content
+			q.offer(i);
+			if (i >= k - 1) {
+				r[ri++] = a[q.peek()];
+			}
+		}
+		return r;
+    }
+}
+
+297. Serialize and Deserialize Binary Tree
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Codec {
+    //Key:Hard,背,cp
+    //找的一个最短的解法  https://discuss.leetcode.com/topic/34836/short-and-clear-recursive-java-solution
+    
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) 
+    {
+        if(root == null) return "#";
+        
+        return "" + root.val + " " + serialize(root.left) + " " + serialize(root.right);
+    }
+    
+    
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) 
+    {
+        return build(new Scanner(data));
+    }
+    
+    private TreeNode build(Scanner sc)
+    {
+        if(!sc.hasNext()) return null;
+        String tk = sc.next();
+        if(tk.equals("#")) return null;
+        
+        TreeNode root = new TreeNode(Integer.parseInt(tk));
+        root.left = build(sc);
+        root.right = build(sc);
+        
+        return root;
+    }
+}
+
+// Your Codec object will be instantiated and called as such:
+// Codec codec = new Codec();
+// codec.deserialize(codec.serialize(root));
