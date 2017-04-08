@@ -3607,7 +3607,7 @@ public class Solution {
 public class Codec {
     //Key:Hard,背,cp
     //找的一个最短的解法  https://discuss.leetcode.com/topic/34836/short-and-clear-recursive-java-solution
-    
+    //这个解法有点投机取巧了，直接调用的Scanner类...
     // Encodes a tree to a single string.
     public String serialize(TreeNode root) 
     {
@@ -3640,3 +3640,54 @@ public class Codec {
 // Your Codec object will be instantiated and called as such:
 // Codec codec = new Codec();
 // codec.deserialize(codec.serialize(root));
+
+131. Palindrome Partitioning
+public class Solution {
+    //Key:Hard,DFS,cp
+    //https://discuss.leetcode.com/topic/33461/easiest-4ms-java-solution-95-99/2
+    public List<List<String>> partition(String s) {
+        List<List<String>> res = new ArrayList<>();
+        dfs(res, new ArrayList<String>(), s.toCharArray(), 0);
+        return res;
+    }
+    
+    void dfs(List<List<String>> res, ArrayList<String> list, char[] c, int pos) {
+        if (pos == c.length) res.add(new ArrayList<>(list));
+        for (int i = pos; i < c.length; i++) {
+            if (isPal(c, pos, i)){
+                list.add(new String(c, pos, i - pos + 1)); 
+                dfs(res, list, c, i + 1);
+                list.remove(list.size() - 1);
+            }
+        }
+    }
+    
+    boolean isPal(char[] c, int lo, int hi) {
+        while (lo < hi) if (c[lo++] != c[hi--]) return false;
+        return true;
+    }
+}
+
+132. Palindrome Partitioning II
+public class Solution {
+    public int minCut(String s) {
+        //Key:Hard,DP,cp
+        //https://discuss.leetcode.com/topic/32575/easiest-java-dp-solution-97-36/2
+        char[] c = s.toCharArray();
+        int n = c.length;
+        int[] cut = new int[n];
+        boolean[][] pal = new boolean[n][n];
+        
+        for(int i = 0; i < n; i++) {
+            int min = i;
+            for(int j = 0; j <= i; j++) {
+                if(c[j] == c[i] && (j + 1 > i - 1 || pal[j + 1][i - 1])) {
+                    pal[j][i] = true;  
+                    min = j == 0 ? 0 : Math.min(min, cut[j - 1] + 1);
+                }
+            }
+            cut[i] = min;
+        }
+        return cut[n - 1];
+    }
+}
