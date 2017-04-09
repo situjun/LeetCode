@@ -3691,3 +3691,201 @@ public class Solution {
         return cut[n - 1];
     }
 }
+
+557. Reverse Words in a String III
+public class Solution {
+    public String reverseWords(String s) {
+        //return new StringBuilder(s.substring(0,s.length())).reverse().toString();
+		if(s == null || s.length() == 0) return "";
+        String[] arr = new StringBuilder(s.substring(0,s.length())).reverse().toString().split(" ");
+		String res = "";
+		for(int i = arr.length-1;i>=0;i--){
+			res = res + arr[i] + " ";
+		}
+		return res.trim();
+    }
+}
+
+556. Next Greater Element III
+//Key:My 1st version
+public class Solution {
+    long min = Integer.MAX_VALUE;
+    public  void helper(List<Integer> list,int[] arr,boolean[] used,int item,int n){
+		if(list.size() == arr.length){
+			long num = 0;
+			for(int i =0;i<=list.size()-1;i++){
+				num = num*10+list.get(i);
+			}
+			if(num>(long)n){
+				if(num<min) min = num;
+			}
+		} else {
+			for(int i =0;i<=arr.length-1;i++){
+				if(used[i]) continue;
+				list.add(arr[i]);
+				//item = item*10+arr[i];
+				used[i] = true;
+				helper(list,arr,used,item,n);
+				used[i] = false;
+				//item = item/10;
+				list.remove(list.size()-1);
+			}
+		}
+	}
+	public  int nextGreaterElement(int n) {
+        long max = Integer.MAX_VALUE;
+        long res = 0;
+        int[] arr = new int[(n+"").length()];
+		boolean[] used = new boolean[arr.length];
+		int tmp = n,index = 0;
+		while(tmp != 0){
+			arr[index++] = tmp%10;
+			tmp /= 10;
+		}
+        Arrays.sort(arr);
+		helper(new ArrayList<Integer>(),arr,used,0,n);
+		res = min;
+        if(min == Integer.MAX_VALUE) return -1;
+        if(res<=max){
+            if(res <= n){
+				//System.out.println(res+"");
+                return -1;
+            } else {
+                return (int)res;
+            }
+        } else {
+            if((long)n+1<=max) return n+1;
+            else return -1;
+        }
+        
+    }
+}
+
+554. Brick Wall
+public class Solution {
+    public int leastBricks(List<List<Integer>> wall) {
+        //Key:底下写的很多case通不过，改写一下
+        /***
+        if(wall == null || wall.size() == 0 ||wall.get(0).size() == 0) return 0;
+        Map<Integer,Integer> map = new HashMap<>();
+        int res = 0,max = Integer.MIN_VALUE,sum = 0;
+        for(List<Integer> i:wall){
+            sum = 0;
+            for(int j:i){
+                sum += j;
+                map.put(sum,map.getOrDefault(sum,0)+1);
+            }
+        }
+        for(Map.Entry<Integer,Integer> entry:map.entrySet()){
+            //Key:下面的不对，因为总长度相同，下面的最终会一直导致max == 砖长
+            //max = Math.max(entry.getValue(),max);
+            //The wall is rectangular  ----> 矩形砖
+            //Key:Corner case:You cannot draw a line just along one of the two vertical edges of the wall
+            //所以[[1],[1],[1]]不能从尾端切，只能从中间切
+            if(entry.getKey() != wall.size()) max = Math.max(entry.getValue(),max);
+        }
+        //Key:tackle Corner case:[[1],[1],[1]]
+        //比较疑惑的是，对于上面的case，为什么必须要切一下，不切不成吗....
+        if(map.size() == 1) return wall.size();
+        return wall.size()-max;
+        
+        ***/
+        
+        //Key:切割最少砖块的点就是位于最多共同砖块末端的点
+        //Key point: the position for vertical line to cross the least bricks = the position for the most bricks end
+        //https://discuss.leetcode.com/topic/85746/neat-java-solution-o-n-using-hashmap
+        if(wall == null || wall.size() == 0 ||wall.get(0).size() == 0) return 0;
+        Map<Integer,Integer> map = new HashMap<>();
+        int res = wall.size(),sum = 0;
+        for(List<Integer> i:wall){
+            sum = 0;
+            //Key:最后一块砖块不加，否则会干扰这道题的test case判断
+            //同时也把[[1],[1],[1]]这个case的麻烦排除了
+            for(int j = 0;j<=i.size()-2;j++){
+                sum += i.get(j);
+                map.put(sum,map.getOrDefault(sum,0)+1);
+            }
+        }
+        for(Map.Entry<Integer,Integer> entry:map.entrySet()){
+            //Key:下面的不对，因为总长度相同，下面的最终会一直导致max == 砖长
+            //max = Math.max(entry.getValue(),max);
+            //The wall is rectangular  ----> 矩形砖
+            //Key:Corner case:You cannot draw a line just along one of the two vertical edges of the wall
+            //所以[[1],[1],[1]]不能从尾端切，只能从中间切
+            //if(entry.getKey() != wall.size()) max = Math.max(entry.getValue(),max);
+            //Key:按照题意正向思维求最小，不求最大值，否则corner case会导致一些错误,思维也比较容易乱
+            res = Math.min(res,wall.size()-entry.getValue());
+        }
+        //Key:tackle Corner case:[[1],[1],[1]]
+        //比较疑惑的是，对于上面的case，为什么必须要切一下，不切不成吗...
+        return res;
+    }
+}
+
+549. Binary Tree Longest Consecutive Sequence II
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    
+    /***
+    int max = Integer.MIN_VALUE;
+    public int longestConsecutive(TreeNode root) {
+        if(root == null) return 0;
+        helper(root);
+        return max;
+    }
+    //Key：下边写错了，自己写的这个只能针对binary search tree,而无法处理binary tree
+    public int helper(TreeNode node){
+        if(node != null){
+            int tmp = 1,left = helper(node.left),right = helper(node.right);
+            int sum = 1;
+            if(node.left != null && node.left.val < node.val) {
+                tmp = Math.max(left+1,tmp);
+                sum += left;
+            }
+            if(node.right != null && node.right.val > node.val) {
+                 tmp = Math.max(right+1,tmp);
+                 sum += right;
+            }
+            max = Math.max(max,sum);
+            return tmp;
+        }
+        return 0;
+    }
+    ****/
+    //Key:My ans is wrong,just cp
+    //https://discuss.leetcode.com/topic/85764/neat-java-solution-single-pass-o-n/2
+    int maxval = 0;
+    public int longestConsecutive(TreeNode root) {
+        longestPath(root);
+        return maxval;
+    }
+    public int[] longestPath(TreeNode root) {
+        if (root == null)
+            return new int[] {0,0};
+        int inr = 1, dcr = 1;
+        if (root.left != null) {
+            int[] l = longestPath(root.left);
+            if (root.val == root.left.val + 1)
+                dcr = l[1] + 1;
+            else if (root.val == root.left.val - 1)
+                inr = l[0] + 1;
+        }
+        if (root.right != null) {
+            int[] r = longestPath(root.right);
+            if (root.val == root.right.val + 1)
+                dcr = Math.max(dcr, r[1] + 1);
+            else if (root.val == root.right.val - 1)
+                inr = Math.max(inr, r[0] + 1);
+        }
+        maxval = Math.max(maxval, dcr + inr - 1);
+        return new int[] {inr, dcr};
+    }
+}
