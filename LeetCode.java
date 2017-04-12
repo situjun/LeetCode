@@ -3889,3 +3889,201 @@ public class Solution {
         return new int[] {inr, dcr};
     }
 }
+
+207. Course Schedule
+public class Solution {
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        //Key:Hard  
+        //拓扑排序思路就是，入度为0的点持续排出。如果课程有效的话，则必然有个入度为0的课程，否则肯定全部都为环了....
+        //https://discuss.leetcode.com/topic/13854/easy-bfs-topological-sort-java
+        //Key:配合着这篇文章来看topological sort  http://www.cnblogs.com/easonliu/p/4483437.html
+        //Key:改写了点变量名称，以方便理解
+        //i->j是否存在边
+        int[][] edges = new int[numCourses][numCourses]; // i -> j
+        //每个点的入度
+        int[] indegree = new int[numCourses];
+        
+        for (int i=0; i<prerequisites.length; i++) {
+            int ready = prerequisites[i][0];
+            int pre = prerequisites[i][1];
+            //Key:先统计每个点的入度情况，实际上就是prerequisites中的后续课程情况
+            //下面的两句合起来看，如果存在edges[pre][ready]，则入度++，赋值为1只是为了与0区分，避免重复计算，其实赋值为任何数字都可以
+            if (edges[pre][ready] == 0)  indegree[ready]++; 
+            edges[pre][ready] = 1;
+        }
+        
+        int count = 0;
+        Queue<Integer> queue = new LinkedList();
+        for (int i=0; i<indegree.length; i++) {
+            //先把入度为0的加入队列
+            if (indegree[i] == 0) queue.offer(i);
+        }
+        while (!queue.isEmpty()) {
+            int course = queue.poll();
+            count++;
+            for (int i=0; i<numCourses; i++) {
+                if (edges[course][i] != 0) {
+                    if (--indegree[i] == 0)
+                        queue.offer(i);
+                }
+            }
+        }
+        return count == numCourses;
+    }
+}
+
+210. Course Schedule II
+public class Solution {
+    public int[] findOrder(int numCourses, int[][] prerequisites) {
+        //Key:Just cp
+        //Schedule II 解法可以直接用在Schedule I中
+        //https://discuss.leetcode.com/topic/27940/concise-java-solution-based-on-bfs-with-comments
+        if (numCourses == 0) return null;
+        // Convert graph presentation from edges to indegree of adjacent list.
+        int indegree[] = new int[numCourses], order[] = new int[numCourses], index = 0;
+        for (int i = 0; i < prerequisites.length; i++) // Indegree - how many prerequisites are needed.
+            indegree[prerequisites[i][0]]++;    
+    
+        Queue<Integer> queue = new LinkedList<Integer>();
+        for (int i = 0; i < numCourses; i++) 
+            if (indegree[i] == 0) {
+                // Add the course to the order because it has no prerequisites.
+                order[index++] = i;
+                queue.offer(i);
+            }
+    
+        // How many courses don't need prerequisites. 
+        while (!queue.isEmpty()) {
+            int prerequisite = queue.poll(); // Already finished this prerequisite course.
+            for (int i = 0; i < prerequisites.length; i++)  {
+                if (prerequisites[i][1] == prerequisite) {
+                    indegree[prerequisites[i][0]]--; 
+                    if (indegree[prerequisites[i][0]] == 0) {
+                        // If indegree is zero, then add the course to the order.
+                        order[index++] = prerequisites[i][0];
+                        queue.offer(prerequisites[i][0]);
+                    }
+                } 
+            }
+        }
+    
+        return (index == numCourses) ? order : new int[0];
+    }
+}
+
+105. Construct Binary Tree from Preorder and Inorder Traversal
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //Key:构造binary tree--->背!!!!
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        return helper(0, 0, inorder.length - 1, preorder, inorder);
+    }
+    public TreeNode helper(int preStart, int inStart, int inEnd, int[] preorder, int[] inorder) {
+        if (preStart > preorder.length - 1 || inStart > inEnd) {
+            return null;
+        }
+        TreeNode root = new TreeNode(preorder[preStart]);
+        int inIndex = 0; // Index of current root in inorder
+        for (int i = inStart; i <= inEnd; i++) {
+            if (inorder[i] == root.val) {
+                inIndex = i;
+            }
+        }
+        root.left = helper(preStart + 1, inStart, inIndex - 1, preorder, inorder);
+        root.right = helper(preStart + inIndex - inStart + 1, inIndex + 1, inEnd, preorder, inorder);
+        return root;
+    }
+}
+
+34. Search for a Range
+public class Solution {
+    //Key:背 ---> 我觉得就是二叉搜索找找第一个和最后一个target的变种...
+    
+    //Version 1 https://discuss.leetcode.com/topic/44031/easy-to-understand-java-ac-solution
+    //这个解法同时可以解决first和last 问题
+    public int[] searchRange(int[] A, int target) {
+    	int start = findPosition(A, target, false);
+    	int end = findPosition(A, target, true);
+    	return new int[]{start, end};
+    }
+    
+    private int findPosition(int[] A, int target, boolean isLast) {
+    	int low = 0, high = A.length-1, index = -1;
+    	while (low <= high) {
+    		int mid = low + ((high - low) >> 1);
+    		if(isLast){
+    			if (A[mid] <= target) low = mid + 1;
+    			else high = mid-1;
+    		} else{
+    			if (A[mid] < target) low = mid + 1;
+    			else high = mid-1;
+    		}
+    		if(A[mid] == target) index = mid; /** update index */
+    	}
+    	return index;
+    }
+    
+
+    //Version 2 https://discuss.leetcode.com/topic/6327/a-very-simple-java-solution-with-only-one-binary-search-algorithm
+    /**
+    
+    public int[] searchRange(int[] A, int target) {
+		int start = Solution.firstGreaterEqual(A, target);
+		if (start == A.length || A[start] != target) {
+			return new int[]{-1, -1};
+		}
+		return new int[]{start, Solution.firstGreaterEqual(A, target + 1) - 1};
+	}
+	//find the first number that is greater than or equal to target.
+	//could return A.length if target is greater than A[A.length-1].
+	//actually this is the same as lower_bound in C++ STL.
+	private static int firstGreaterEqual(int[] A, int target) {
+		int low = 0, high = A.length;
+		while (low < high) {
+			int mid = low + ((high - low) >> 1);
+			//low <= mid < high
+			if (A[mid] < target) {
+				low = mid + 1;
+			} else {
+				//should not be mid-1 when A[mid]==target.
+				//could be mid even if A[mid]>target because mid<high.
+				high = mid;
+			}
+		}
+		return low;
+	}
+    
+    **/
+}
+
+190. Reverse Bits
+public class Solution {
+    // you need treat n as an unsigned value
+    public int reverseBits(int n) {
+        //Brute Force 用Stack存储n%2,再逆序相乘
+        //主要还是Bit 操作，看不懂答案
+        
+        //Key：直接调用function的解法
+        //return Integer.reverse(n);
+        
+        //https://discuss.leetcode.com/topic/42572/sharing-my-2ms-java-solution-with-explanation
+        if (n == 0) return 0;
+        int result = 0;
+        for (int i = 0; i < 32; i++) {
+            result <<= 1;
+            if ((n & 1) == 1) result++;
+            n >>= 1;
+        }
+        return result;
+        
+        
+    }
+}
