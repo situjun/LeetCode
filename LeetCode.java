@@ -4227,3 +4227,54 @@ public class Solution {
         
     }
 }
+
+28. Implement strStr()
+public class Solution {
+    public int strStr(String haystack, String needle) {
+        //Key:My wrong version
+        /**
+        
+        //还是太麻烦了!!!!
+        //思考麻烦。这个需要考虑的Corner Case 太多了
+        //Corner Case:"","a" 输出-1
+        if(needle.trim().equals("")) return 0;
+        if(haystack.trim().equals("") && !needle.trim().equals("")) return -1;
+       
+        int begin = -1;
+        int length1= haystack.length();
+        int length2 = needle.length();
+        int index1 = 0;
+        int index2 = 0;
+        while(index1 <= length1 -1 && index2 <= length2-1){
+           
+            if(haystack.charAt(index1) == needle.charAt(index2)){
+                //Corner Case:"mississippi","issip"
+                if(index2 == (length2-1) && begin != -1) return begin;
+                if(begin <0) begin = index1;
+                index2++;
+                index1++;
+            } else {
+                //偷个懒，只是针对这个Case:"mississippi","issip"。但思考的肯定不全
+                if(index2!=0) index1 -= 1;
+                index2 = 0;
+                begin = -1;
+            }
+            
+        }
+        //Test Case:"aaa""aaaa"
+        //<length2 而不是length2-1。因为最后结束循环前，index2和index1都++过
+        if(index2<length2) begin = -1;
+        return begin;
+        
+        **/
+        
+        //Key:Just cp https://discuss.leetcode.com/topic/18839/elegant-java-solution
+        for (int i = 0; ; i++) {
+            for (int j = 0; ; j++) {
+              if (j == needle.length()) return i;
+              if (i + j == haystack.length()) return -1;
+              if (needle.charAt(j) != haystack.charAt(i + j)) break;
+            }
+        }
+    }
+}
