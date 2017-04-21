@@ -4278,3 +4278,14 @@ public class Solution {
         }
     }
 }
+
+69. Sqrt(x)
+public class Solution {
+    public int mySqrt(int x) {
+        //Key:±³£¬just cp  https://discuss.leetcode.com/topic/24532/3-4-short-lines-integer-newton-every-language
+        long r = x;
+        while (r*r > x)
+            r = (r + x/r) / 2;
+        return (int) r;
+    }
+}
