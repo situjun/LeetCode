@@ -4346,3 +4346,5 @@ public class Solution {
     		return minNumber[amount];
     }
 }
+
+test
