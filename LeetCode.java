@@ -4293,3 +4293,35 @@ public class Solution {
 ////////////////////////////////////////////////////////////////////////////////
 Ubuntu Test
 ////////////////////////////////////////////////////////////////////////////////
+
+150. Evaluate Reverse Polish Notation
+
+public class Solution {
+    public int evalRPN(String[] tokens) {
+        //Key:Just cp,±³ https://discuss.leetcode.com/topic/18179/accepted-clean-java-solution        
+        Stack<Integer> stack = new Stack<Integer>();
+        for (int i = 0; i < a.length; i++) {
+            switch (a[i]) {
+              case "+":
+                stack.push(stack.pop() + stack.pop());
+                break;
+              case "-":
+                stack.push(-stack.pop() + stack.pop());
+                break;
+              case "*":
+                stack.push(stack.pop() * stack.pop());
+                break;
+            
+              case "/":
+                int n1 = stack.pop(), n2 = stack.pop();
+                stack.push(n2 / n1);
+                break;
+                  
+              default:
+                stack.push(Integer.parseInt(a[i]));
+            }
+        }
+        
+        return stack.pop();
+    }
+}
