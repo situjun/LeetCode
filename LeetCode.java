@@ -4297,7 +4297,7 @@ Ubuntu Test
 150. Evaluate Reverse Polish Notation
 
 public class Solution {
-    public int evalRPN(String[] tokens) {
+    public int evalRPN(String[] a) {
         //Key:Just cp,背 https://discuss.leetcode.com/topic/18179/accepted-clean-java-solution        
         Stack<Integer> stack = new Stack<Integer>();
         for (int i = 0; i < a.length; i++) {
@@ -4326,6 +4326,41 @@ public class Solution {
     }
 }
 
+138. Copy List with Random Pointer
+/**
+ * Definition for singly-linked list with a random pointer.
+ * class RandomListNode {
+ *     int label;
+ *     RandomListNode next, random;
+ *     RandomListNode(int x) { this.label = x; }
+ * };
+ */
+public class Solution {
+    public RandomListNode copyRandomList(RandomListNode head) {
+        //Key:Just cp,背 https://discuss.leetcode.com/topic/18086/java-o-n-solution
+        if (head == null) return null;
+        
+        Map<RandomListNode, RandomListNode> map = new HashMap<RandomListNode, RandomListNode>();
+        
+        // loop 1. copy all the nodes
+        RandomListNode node = head;
+        while (node != null) {
+            map.put(node, new RandomListNode(node.label));
+            node = node.next;
+        }
+        
+        // loop 2. assign next and random pointers
+        node = head;
+        while (node != null) {
+            map.get(node).next = map.get(node.next);
+            map.get(node).random = map.get(node.random);
+            node = node.next;
+        }
+        
+        return map.get(head);
+    }
+}
+
 322. Coin Change
 public class Solution {
     public int coinChange(int[] coins, int amount) {
@@ -4347,4 +4382,41 @@ public class Solution {
     }
 }
 
-test
+23. Merge k Sorted Lists
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    public ListNode mergeKLists(ListNode[] lists) {
+        //Brute force： Time Limit Exceeded
+
+        //Key:Just cp,背  这道题一开始理解错了
+        //[[],[1],[1,2,2,2]],期望的是 [1,1,2,2,2] ，而不是[2,2,2,2]-->也就是说要重新排序
+        if(lists.length == 0) return null;
+        //Key:corner case:[[]],[[],[1]]
+        if(lists.length == 1 && lists[0] == null) return null;
+        List<Integer> list = new ArrayList<>();
+        ListNode item = new ListNode(0);
+        ListNode head = item;
+        for(int i = 0;i<=lists.length-1;i++){
+            while(lists[i] != null){
+                list.add(lists[i].val);
+                lists[i] = lists[i].next;
+                
+            }
+        }
+        Integer[] nums = new Integer[list.size()];
+        nums = list.toArray(nums);
+        Arrays.sort(nums);
+        for(int i:nums){
+            item.next = new ListNode(i);
+            item = item.next;
+        }
+        return head.next;
+    }
+}
