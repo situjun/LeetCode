@@ -4420,3 +4420,92 @@ public class Solution {
         return head.next;
     }
 }
+
+218. The Skyline Problem
+public class Solution {
+    public List<int[]> getSkyline(int[][] buildings) {
+        //Key:Just cp,hard,±³
+        //https://discuss.leetcode.com/topic/22482/short-java-solution
+        List<int[]> result = new ArrayList<>();
+        List<int[]> height = new ArrayList<>();
+        for(int[] b:buildings) {
+            height.add(new int[]{b[0], -b[2]});
+            height.add(new int[]{b[1], b[2]});
+        }
+        Collections.sort(height, (a, b) -> {
+                if(a[0] != b[0]) 
+                    return a[0] - b[0];
+                return a[1] - b[1];
+        });
+        Queue<Integer> pq = new PriorityQueue<>((a, b) -> (b - a));
+        pq.offer(0);
+        int prev = 0;
+        for(int[] h:height) {
+            if(h[1] < 0) {
+                pq.offer(-h[1]);
+            } else {
+                pq.remove(h[1]);
+            }
+            int cur = pq.peek();
+            if(prev != cur) {
+                result.add(new int[]{h[0], cur});
+                prev = cur;
+            }
+        }
+        return result;
+    }
+}
+
+79. Word Search
+
+public class Solution {
+    //Key:my wrong version 
+    /**
+    public boolean exist(char[][] board, String word) {
+        int row = board.length,col = board[0].length;
+        boolean[][] used = new boolean[row][col];
+        return helper(board,used,word,"");
+    }
+    public boolean helper(char[][] board,boolean[][] used,String word,String tmp,int rowIn,int colIn){
+        if(tmp.equals(word)){
+            return true;
+        } else if(tmp.length() >= word.length()){
+            return false;
+        } else {
+            if(rowIn < row || colIn > col || used[rowIn][colIn]){
+                return false;
+            } else {
+                tmp = tmp + String.valueOf(board[row][col]);
+                return helper(board,used,word,tmp,rowIn+)
+            }
+        }
+        return false;
+    }
+    **/
+    //Key:cp,±³£¬
+    //https://discuss.leetcode.com/topic/7907/accepted-very-short-java-solution-no-additional-space/4
+    //https://discuss.leetcode.com/topic/45252/java-dfs-solution-beats-97-64
+    
+    public boolean exist(char[][] board, String word) {
+        char[] w = word.toCharArray();
+        for (int y=0; y<board.length; y++) {
+        	for (int x=0; x<board[y].length; x++) {
+        		if (exist(board, y, x, w, 0)) return true;
+        	}
+        }
+        return false;
+    }
+    private boolean exist(char[][] board, int y, int x, char[] word, int i) {
+    	if (i == word.length) return true;
+    	if (y<0 || x<0 || y == board.length || x == board[y].length) return false;
+    	if (board[y][x] != word[i]) return false;
+    	board[y][x] ^= 256;
+    	boolean exist = exist(board, y, x+1, word, i+1)
+    		|| exist(board, y, x-1, word, i+1)
+    		|| exist(board, y+1, x, word, i+1)
+    		|| exist(board, y-1, x, word, i+1);
+    	board[y][x] ^= 256;
+    	return exist;
+    }
+    
+}
