@@ -4509,3 +4509,512 @@ public class Solution {
     }
     
 }
+
+324. Wiggle Sort II
+
+public class Solution {
+    public void wiggleSort(int[] nums) {
+        
+        //Key:背，Just cp,不是最佳优化，但比较容易背   https://discuss.leetcode.com/topic/33084/ac-java-solution-7ms/3
+        Arrays.sort(nums);
+        int n = nums.length, mid = n%2==0?n/2-1:n/2;
+        int[] temp = Arrays.copyOf(nums, n);
+        int index = 0;
+        for(int i=0;i<=mid;i++){
+            nums[index] = temp[mid-i];
+            if(index+1<n)
+                nums[index+1] = temp[n-i-1];
+            index += 2;
+        }
+    }
+}
+
+152. Maximum Product Subarray
+public class Solution {
+    public int maxProduct(int[] a) {
+        //Key:My wrong version
+        /**
+        if(nums.length == 0) return 0;
+        if(nums.length == 1) return nums[0];
+        int[] F = new int[nums.length];
+        int[] K = new int[nums.length];
+        int res = nums[0];
+        F[0] = nums[0];
+        K[0] = nums[0];
+        for(int i = 1;i<=nums.length-1;i++){
+            F[i] = Math.max(nums[i],F[i-1]*nums[i]);
+            res = Math.max(F[i],res);
+        }
+        for(int i = 1;i<=nums.length-1;i++){
+            res = Math.max(res,K[i-1]*nums[i]);
+            K[i] = Math.min(nums[i],K[i-1]*nums[i]);
+            
+        }
+        return res;
+        **/
+        
+        //Key:Just cp,背  -->典型DP
+        //和那道Maximum Contiguous Subarray比较像
+        //https://discuss.leetcode.com/topic/18203/accepted-java-solution
+        if (a == null || a.length == 0) return 0;
+        int ans = a[0], min = ans, max = ans;
+        for (int i = 1; i < a.length; i++) {
+            if (a[i] >= 0) {
+              max = Math.max(a[i], max * a[i]);
+              min = Math.min(a[i], min * a[i]);
+            } else {
+              int tmp = max;
+              max = Math.max(a[i], min * a[i]);
+              min = Math.min(a[i], tmp * a[i]);
+            }
+            ans = Math.max(ans, max);
+        }
+          
+        return ans;
+    }
+}
+
+564. Find the Closest Palindrome -hard
+public class Solution {
+    //Key:Just cp,掌握思路就成了....
+    //https://discuss.leetcode.com/topic/87200/java-solution
+    public String nearestPalindromic(String n) {
+        if (n.length() >= 2 && allNine(n)) {
+            String s = "1";
+            for (int i = 0; i < n.length() - 1; i++) {
+                s += "0";
+            }
+            s += "1";
+            return s;
+        }
+        boolean isOdd = (n.length() % 2 != 0);
+        String left = n.substring(0, (n.length() + 1) / 2);
+        long[] increment = {-1, 0, +1};
+        String ret = n;
+        long minDiff = Long.MAX_VALUE;
+        for (long i : increment) {
+            String s = getPalindrom(Long.toString(Long.parseLong(left) + i), isOdd);
+            if (n.length() >= 2 && (s.length() != n.length() || Long.parseLong(s) == 0)) {
+                s = "";
+                for (int j = 0; j < n.length() - 1; j++) {
+                    s += "9";
+                }
+            }
+            long diff = s.equals(n) ? Long.MAX_VALUE : Math.abs(Long.parseLong(s) - Long.parseLong(n));
+            if (diff < minDiff) {
+                minDiff = diff;
+                ret = s;
+            }
+        }
+        return ret;
+    }
+    private String getPalindrom(String s, boolean isOdd) {
+        String right = new StringBuilder(s).reverse().toString();
+        return isOdd ? s.substring(0, s.length() - 1) + right : s + right;
+    }
+    private boolean allNine(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) != '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+214. Shortest Palindrome
+public class Solution {
+    public String shortestPalindrome(String s) {
+        //Key:Just cp,背,  https://discuss.leetcode.com/topic/25860/my-9-lines-three-pointers-java-solution-with-explanation
+        
+        int i = 0, end = s.length() - 1, j = end; char chs[] = s.toCharArray();
+        while(i < j) {
+             if (chs[i] == chs[j]) {
+                 i++; j--;
+             } else { 
+                 i = 0; end--; j = end;
+             }
+        }
+        return new StringBuilder(s.substring(end+1)).reverse().toString() + s;
+    }
+}
+
+5. Longest Palindromic Substring
+public class Solution {
+    //Key:Just cp,背，复用isPalindrome  https://discuss.leetcode.com/topic/21848/ac-relatively-short-and-very-clear-java-solution
+    
+    public String longestPalindrome(String s) {
+        String res = "";
+        int currLength = 0;
+        for(int i=0;i<s.length();i++){
+            if(isPalindrome(s,i-currLength-1,i)){
+                res = s.substring(i-currLength-1,i+1);
+                currLength = currLength+2;
+            }
+            else if(isPalindrome(s,i-currLength,i)){
+                res = s.substring(i-currLength,i+1);
+                currLength = currLength+1;
+            }
+        }
+        return res;
+    }
+    
+    public boolean isPalindrome(String s, int begin, int end){
+        if(begin<0) return false;
+        while(begin<end){
+        	if(s.charAt(begin++)!=s.charAt(end--)) return false;
+        }
+        return true;
+    }
+    
+}
+
+209. Minimum Size Subarray Sum
+public class Solution {
+    public int minSubArrayLen(int s, int[] nums) {
+        //Key:最简单是Brute Force --> O(n^2)
+        //Key:2 pointers --> O(n),Just cp  https://discuss.leetcode.com/topic/18583/accepted-clean-java-o-n-solution-two-pointers
+        
+        if (nums == null || nums.length == 0) return 0;
+        int i = 0, j = 0, sum = 0, min = Integer.MAX_VALUE;
+        while (j < nums.length) {
+            sum += nums[j++];
+            while (sum >= s) {
+                min = Math.min(min, j - i);
+                sum -= nums[i++];
+            }
+        }
+        return min == Integer.MAX_VALUE ? 0 : min;
+        
+        
+        //Key:O(NlogN)   https://discuss.leetcode.com/topic/13749/two-ac-solutions-in-java-with-time-complexity-of-n-and-nlogn-with-explanation
+        
+        /**
+        
+        private int solveNLogN(int s, int[] nums) {
+            int[] sums = new int[nums.length + 1];
+            for (int i = 1; i < sums.length; i++) sums[i] = sums[i - 1] + nums[i - 1];
+            int minLen = Integer.MAX_VALUE;
+            for (int i = 0; i < sums.length; i++) {
+                int end = binarySearch(i + 1, sums.length - 1, sums[i] + s, sums);
+                if (end == sums.length) break;
+                if (end - i < minLen) minLen = end - i;
+            }
+            return minLen == Integer.MAX_VALUE ? 0 : minLen;
+        }
+        
+        private int binarySearch(int lo, int hi, int key, int[] sums) {
+            while (lo <= hi) {
+               int mid = (lo + hi) / 2;
+               if (sums[mid] >= key){
+                   hi = mid - 1;
+               } else {
+                   lo = mid + 1;
+               }
+            }
+            return lo;
+        }
+        
+        **/
+    }
+}
+
+560. Subarray Sum Equals K
+public class Solution {
+    public int subarraySum(int[] nums, int k) {
+        //Key:错误思路
+        /**
+        
+        int sum1 = 0;
+        for(int i:nums){
+            sum1 += i;
+        }
+        if(sum1 == 0 && k == 0) return 55;
+        int res = 0;
+        if(nums.length == 0) return 0;
+        int sum = 0,index = 0;
+		if(nums.length == 1 && nums[0] == k) return 1;
+        for(int i = 1;i<=nums.length-1;i++){
+            index = i;
+            sum = nums[index-1];
+			if(nums[index-1] == k) res++;
+            while(index<=nums.length-1){
+				
+                if(k == 0 && nums[index] == 0 && nums[index-1] == 0) res++;
+                sum+= nums[index++];
+                //Corner case:[23,2,6,4,7] 0  不能除以0！！！
+                if(sum == k) res++;
+            }
+        }
+		if(index >= nums.length && nums[index-1] == k) res++;
+        return res;
+        
+        **/
+        
+        
+        //Key:WOC!!!!!!一开始真是想多了，其实直接做个嵌套循环就可以了....
+        /**
+        int res = 0;
+        if(nums == null || nums.length == 0) return 0;
+        
+        for(int i = 0;i<=nums.length-1;i++){
+            int sum = 0;
+            for(int j = i;j<=nums.length-1;j++){
+                sum += nums[j];
+                if(sum == k) res++;
+            }
+        }
+        return res;
+        **/
+        
+        //O(n)  https://discuss.leetcode.com/topic/87850/java-solution-presum-hashmap
+        int sum = 0, result = 0;
+        Map<Integer, Integer> preSum = new HashMap<>();
+        preSum.put(0, 1);
+        
+        for (int i = 0; i < nums.length; i++) {
+            sum += nums[i];
+            if (preSum.containsKey(sum - k)) {
+                result += preSum.get(sum - k);
+            }
+            preSum.put(sum, preSum.getOrDefault(sum, 0) + 1);
+        }
+        
+        return result;
+    }
+}
+
+91. Decode Ways
+public class Solution {
+    public int numDecodings(String s) {
+        //Key:Just cp,DP   https://discuss.leetcode.com/topic/2562/dp-solution-java-for-reference
+        
+        int n = s.length();
+        if (n == 0) return 0;
+        
+        int[] memo = new int[n+1];
+        memo[n]  = 1;
+        memo[n-1] = s.charAt(n-1) != '0' ? 1 : 0;
+        
+        for (int i = n - 2; i >= 0; i--){
+            if (s.charAt(i) == '0') continue;
+            else memo[i] = (Integer.parseInt(s.substring(i,i+2))<=26) ? memo[i+1]+memo[i+2] : memo[i+1];
+        }
+            
+        return memo[0];
+    }
+}
+
+130. Surrounded Regions
+public class Solution {
+    
+    //Key:题意表达不明,Just cp,  https://discuss.leetcode.com/topic/6496/my-java-o-n-2-accepted-solution/2
+    //Key:背 O(n^2)
+    
+    public void solve(char[][] board) {
+        if(board==null||board.length==0||board[0].length==0) return;
+        for(int i=0;i<board.length;i++) if(board[i][0]=='O') linkedUnit(board,i,0);
+        for(int i=1;i<board[0].length;i++) if(board[0][i]=='O') linkedUnit(board,0,i);
+        for(int i=1;i<board[0].length;i++) if(board[board.length-1][i]=='O') linkedUnit(board,board.length-1,i);
+        for(int i=1;i<board.length-1;i++) if(board[i][board[0].length-1]=='O') linkedUnit(board,i,board[0].length-1);
+        for(int i=0;i<board.length;i++){
+            for(int j=0;j<board[0].length;j++){
+                if(board[i][j]=='1') board[i][j] = 'O';
+                else if(board[i][j]=='O') board[i][j] = 'X';
+                else continue;
+            }
+        }
+    }
+    private void linkedUnit(char[][] board, int x, int y){
+        board[x][y] = '1';
+        if(x-1>0&&board[x-1][y]=='O') linkedUnit(board, x-1, y);
+        if(x+1<board.length&&board[x+1][y]=='O') linkedUnit(board, x+1, y);
+        if(y-1>0&&board[x][y-1]=='O') linkedUnit(board, x, y-1);
+        if(y+1<board[x].length&&board[x][y+1]=='O') linkedUnit(board, x, y+1);
+    }
+}
+
+166. Fraction to Recurring Decimal
+public class Solution {
+    public String fractionToDecimal(int numerator, int denominator) {
+        //Key:Hard,just cp,背 https://discuss.leetcode.com/topic/7876/my-clean-java-solution
+        
+        if (numerator == 0) {
+            return "0";
+        }
+        StringBuilder res = new StringBuilder();
+        // "+" or "-"
+        res.append(((numerator > 0) ^ (denominator > 0)) ? "-" : "");
+        long num = Math.abs((long)numerator);
+        long den = Math.abs((long)denominator);
+        
+        // integral part
+        res.append(num / den);
+        num %= den;
+        if (num == 0) {
+            return res.toString();
+        }
+        
+        // fractional part
+        res.append(".");
+        HashMap<Long, Integer> map = new HashMap<Long, Integer>();
+        map.put(num, res.length());
+        while (num != 0) {
+            num *= 10;
+            res.append(num / den);
+            num %= den;
+            if (map.containsKey(num)) {
+                int index = map.get(num);
+                res.insert(index, "(");
+                res.append(")");
+                break;
+            }
+            else {
+                map.put(num, res.length());
+            }
+        }
+        return res.toString();
+    }
+}
+
+29. Divide Two Integers
+public class Solution {
+    public int divide(int dividend, int divisor) {
+        //Key:背  https://discuss.leetcode.com/topic/45980/very-detailed-step-by-step-explanation-java-solution/2
+        boolean isNegative = (dividend < 0 && divisor > 0) || (dividend > 0 && divisor < 0) ? true : false;
+        long absDividend = Math.abs((long) dividend);
+        long absDivisor = Math.abs((long) divisor);
+        long result = 0;
+        while(absDividend >= absDivisor){
+            long tmp = absDivisor, count = 1;
+            while(tmp <= absDividend){
+                tmp <<= 1;
+                count <<= 1;
+            }
+            result += count >> 1;
+            absDividend -= tmp >> 1;
+        }
+        return  isNegative ? (int) ~result + 1 : result > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) result;
+        
+    }
+       
+}
+
+8. String to Integer (atoi)
+public class Solution {
+    public int myAtoi(String str) {
+        //Key:背   https://discuss.leetcode.com/topic/12473/java-solution-with-4-steps-explanations/6
+        
+        int i = 0;
+        str = str.trim();        
+        char[] c = str.toCharArray();
+        
+        int sign = 1;
+        if (i < c.length && (c[i] == '-' || c[i] == '+')) {
+            if (c[i] == '-') {
+                sign = -1;
+            }
+            i++;
+        }      
+        
+        int num = 0;
+        int bound = Integer.MAX_VALUE / 10;
+        while (i < c.length && c[i] >= '0' && c[i] <= '9') {
+            int digit = c[i] - '0';
+            if (num > bound || (num == bound && digit > 7)) {
+                return sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            }
+            num = num * 10 + digit;
+            i++;
+        }
+        return sign * num;
+    }
+}
+
+10. Regular Expression Matching
+public class Solution {
+    public boolean isMatch(String s, String p) {
+        //Key:背
+        //Dp version  https://discuss.leetcode.com/topic/40371/easy-dp-java-solution-with-detailed-explanation
+        
+        if (s == null || p == null) {
+            return false;
+        }
+        boolean[][] dp = new boolean[s.length()+1][p.length()+1];
+        dp[0][0] = true;
+        for (int i = 0; i < p.length(); i++) {
+            if (p.charAt(i) == '*' && dp[0][i-1]) {
+                dp[0][i+1] = true;
+            }
+        }
+        for (int i = 0 ; i < s.length(); i++) {
+            for (int j = 0; j < p.length(); j++) {
+                if (p.charAt(j) == '.') {
+                    dp[i+1][j+1] = dp[i][j];
+                }
+                if (p.charAt(j) == s.charAt(i)) {
+                    dp[i+1][j+1] = dp[i][j];
+                }
+                if (p.charAt(j) == '*') {
+                    if (p.charAt(j-1) != s.charAt(i) && p.charAt(j-1) != '.') {
+                        dp[i+1][j+1] = dp[i+1][j-1];
+                    } else {
+                        dp[i+1][j+1] = (dp[i+1][j] || dp[i][j+1] || dp[i+1][j-1]);
+                    }
+                }
+            }
+        }
+        return dp[s.length()][p.length()];
+        
+        //Key:Recursion version 
+        //https://discuss.leetcode.com/topic/12289/clean-java-solution
+        //https://discuss.leetcode.com/topic/7437/share-a-short-java-solution
+        
+        
+    }
+}
+
+561. Array Partition I
+public class Solution {
+    public int arrayPairSum(int[] nums) {
+        //Key:写起来不难，难点应该是在如何证明结论的正确上
+        //不过可以以{1,2,3,4}来做个例子,1+3( [1,2] [3,4] )明显大于1+2([1,4],[2,3]),来猜测...
+        if(nums == null || nums.length == 0) return 0;
+        Arrays.sort(nums);
+        int sum = 0;
+        for(int i = 0;i<=nums.length-1;i=i+2) sum += nums[i];
+        return sum;
+    }
+}
+
+481. Magical String
+public class Solution {
+    public int magicalString(int n) {
+        //Key:不行，这道题一直读不懂什么意思.....
+        //Key:只统计出现的次数，前面不加入1,2元素本身
+        //and the occurrences of '1's or '2's in each group are:
+        //1 2	2 1 1 2 1 2 2 1 2 2 ......
+        //Key:读不懂题，just cp,背   https://discuss.leetcode.com/topic/74917/simple-java-solution-using-one-array-and-two-pointers/2
+        
+       
+        if (n <= 0) return 0;
+        if (n <= 3) return 1;
+        
+        int[] a = new int[n + 1];
+        a[0] = 1; a[1] = 2; a[2] = 2;
+        int head = 2, tail = 3, num = 1, result = 1;
+        
+        while (tail < n) {
+            for (int i = 0; i < a[head]; i++) {
+                a[tail] = num;
+                if (num == 1 && tail < n) result++;
+                tail++;
+            }
+            num = num ^ 3;
+            head++;
+        }
+        
+        return result;
+   
+    }
+}
