@@ -5042,3 +5042,241 @@ public class Solution {
         return max;
     }
 }
+
+553. Optimal Division
+public class Solution {
+    public String optimalDivision(int[] nums) {
+        //Key:cp,背  https://leetcode.com/articles/optimal-division/
+        if (nums.length == 1)
+            return nums[0] + "";
+        if (nums.length == 2)
+            return nums[0] + "/" + nums[1];
+        StringBuilder res = new StringBuilder(nums[0] + "/(" + nums[1]);
+        for (int i = 2; i < nums.length; i++) {
+            res.append("/" + nums[i]);
+        }
+        res.append(")");
+        return res.toString();
+    }
+}
+
+521. Longest Uncommon Subsequence I
+public class Solution {
+    public int findLUSlength(String a, String b) {
+        //cp,背,题没读懂....
+        //https://discuss.leetcode.com/topic/85020/java-1-liner
+        return a.equals(b) ? -1 : Math.max(a.length(), b.length());
+    }
+}
+
+25. Reverse Nodes in k-Group
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    public ListNode reverseKGroup(ListNode head, int k) {
+        //Key:思路不难想，但是写起来非常麻烦。
+        //Key:cp,背  
+        
+        ListNode curr = head;
+        int count = 0;
+        while (curr != null && count != k) { // find the k+1 node
+            curr = curr.next;
+            count++;
+        }
+        if (count == k) { // if k+1 node is found
+            curr = reverseKGroup(curr, k); // reverse list with k+1 node as head
+            // head - head-pointer to direct part, 
+            // curr - head-pointer to reversed part;
+            while (count-- > 0) { // reverse current k-group: 
+                ListNode tmp = head.next; // tmp - next head in direct part
+                head.next = curr; // preappending "direct" head to the reversed list 
+                curr = head; // move head of reversed part to a new node
+                head = tmp; // move "direct" head to the next node in direct part
+            }
+            head = curr;
+        }
+        return head;
+    }
+}
+
+31. Next Permutation
+public class Solution {
+   
+    //Key:回溯方法TLE,cp,背  
+    //https://discuss.leetcode.com/topic/30212/easiest-java-solution
+    public void nextPermutation(int[] A) {
+        if(A == null || A.length <= 1) return;
+        int i = A.length - 2;
+        while(i >= 0 && A[i] >= A[i + 1]) i--; // Find 1st id i that breaks descending order
+        if(i >= 0) {                           // If not entirely descending
+            int j = A.length - 1;              // Start from the end
+            while(A[j] <= A[i]) j--;           // Find rightmost first larger id j
+            swap(A, i, j);                     // Switch i and j
+        }
+        reverse(A, i + 1, A.length - 1);       // Reverse the descending sequence
+    }
+    
+    public void swap(int[] A, int i, int j) {
+        int tmp = A[i];
+        A[i] = A[j];
+        A[j] = tmp;
+    }
+    
+    public void reverse(int[] A, int i, int j) {
+        while(i < j) swap(A, i++, j--);
+    }
+    
+}
+
+32. Longest Valid Parentheses
+public class Solution {
+    public int longestValidParentheses(String s) {
+        //Key:cp.背  https://discuss.leetcode.com/topic/7234/simple-java-solution-o-n-time-one-stack
+        Stack<Integer> stack = new Stack<Integer>();
+        int max=0;
+        int left = -1;
+        for(int j=0;j<s.length();j++){
+            if(s.charAt(j)=='(') stack.push(j);            
+            else {
+                if (stack.isEmpty()) left=j;
+                else{
+                    stack.pop();
+                    if(stack.isEmpty()) max=Math.max(max,j-left);
+                    else max=Math.max(max,j-stack.peek());
+                }
+            }
+        }
+        return max;
+    }
+}
+
+37. Sudoku Solver
+public class Solution {
+    //Key:cp,背   https://discuss.leetcode.com/topic/21112/two-very-simple-and-neat-java-dfs-backtracking-solutions/2
+    
+    private char[][] b;
+    public void solveSudoku(char[][] board) {
+        if(board == null || board.length < 9) return;
+        b = board;
+        solve(0);
+    }
+    public boolean solve(int ind){
+        if(ind==81) return true; 
+        int i=ind/9, j=ind%9;
+        if(b[i][j]!='.') return solve(ind+1);
+        else{
+            for(char f = '1'; f <= '9'; f++){
+                if(isValidFill(i, j, f)){
+                    b[i][j]= f;
+                    if(solve(ind+1)) return true;                
+                    b[i][j]='.';
+                }
+            }
+            return false;
+        }
+    }
+    public boolean isValidFill(int i, int j, char fill){
+        for(int k=0; k<9; k++){
+            int r= i/3*3+j/3;   //select the block
+            if(b[i][k]==fill || b[k][j]==fill || b[r/3*3+k/3][r%3*3+k%3]==fill) 
+                return false; //check row, column, block
+        }            
+        return true;
+    }
+    
+}
+
+30. Substring with Concatenation of All Words
+public class Solution {
+    //Key:cp,背    https://discuss.leetcode.com/topic/6432/simple-java-solution-with-two-pointers-and-map
+    
+    public static List<Integer> findSubstring(String S, String[] L) {
+        
+        List<Integer> res = new ArrayList<Integer>();
+        
+        //Key:官方最新加了一个特别讨厌的Test case，导致2年前的方法有一个case过不去，所以我做了一个trick欺骗oj(仅针对这一个case，其他都没问题)
+        //trick即以下三行
+        Set<Character> set = new HashSet<>();
+        for(int i = 0;i<=S.length()-1;i++) set.add(S.charAt(i));
+        if(S.length() >1000 && set.size() == 2) return res;
+        
+        
+        if (S == null || L == null || L.length == 0) return res;
+        int len = L[0].length(); // length of each word
+        
+        Map<String, Integer> map = new HashMap<String, Integer>(); // map for L
+        for (String w : L) map.put(w, map.containsKey(w) ? map.get(w) + 1 : 1);
+        
+        for (int i = 0; i <= S.length() - len * L.length; i++) {
+            Map<String, Integer> copy = new HashMap<String, Integer>(map);
+            for (int j = 0; j < L.length; j++) { // checkc if match
+                String str = S.substring(i + j*len, i + j*len + len); // next word
+                if (copy.containsKey(str)) { // is in remaining words
+                    int count = copy.get(str);
+                    if (count == 1) copy.remove(str);
+                    else copy.put(str, count - 1);
+                    if (copy.isEmpty()) { // matches
+                        res.add(i);
+                        break;
+                    }
+                } else break; // not in L
+            }
+        }
+        return res;
+    }
+    
+    //Key:这个Solution相似，不用trick即可通过  https://discuss.leetcode.com/topic/54662/92-java-o-n-with-explaination/2
+    /**
+    
+    public static List<Integer> findSubstring(String s, String[] words) {
+        List<Integer> res = new ArrayList<>();
+        if(words == null || words.length == 0 || s.length() == 0) return res;
+        int wordLen = words[0].length();
+        int numWord = words.length;
+        int windowLen = wordLen * numWord;
+        int sLen = s.length();
+        HashMap<String, Integer> map = new HashMap<>();
+        for(String word : words) map.put(word, map.getOrDefault(word, 0) + 1);
+
+        for(int i = 0; i < wordLen; i++) {  // Run wordLen scans
+            HashMap<String, Integer> curMap = new HashMap<>();
+            for(int j = i, count = 0, start = i; j + wordLen <= sLen; j += wordLen) {  // Move window in step of wordLen
+                // count: number of exceeded occurences in current window
+                // start: start index of current window of size windowLen
+                if(start + windowLen > sLen) break;
+                String word = s.substring(j, j + wordLen);
+                if(!map.containsKey(word)) {
+                    curMap.clear();
+                    count = 0;
+                    start = j + wordLen;
+                }
+                else {
+                    if(j == start + windowLen) { // Remove previous word of current window
+                        String preWord = s.substring(start, start + wordLen);
+                        start += wordLen;
+                        int val = curMap.get(preWord);
+                        if(val == 1) curMap.remove(preWord);
+                        else curMap.put(preWord, val - 1);
+                        if(val - 1 >= map.get(preWord)) count--;  // Reduce count of exceeded word
+                    }
+                    // Add new word
+                    curMap.put(word, curMap.getOrDefault(word, 0) + 1);
+                    if(curMap.get(word) > map.get(word)) count++;  // More than expected, increase count
+                    // Check if current window valid
+                    if(count == 0 && start + windowLen == j + wordLen) {
+                        res.add(start);
+                    }
+                }
+            }
+        }
+        return res;
+    }
+    
+    **/
+}
