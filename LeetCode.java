@@ -5373,3 +5373,141 @@ public class Solution {
         return i;
     }
 }
+
+60. Permutation Sequence
+public class Solution {
+    //My brute force  正确,但是果然TLE.....
+    /**
+    
+    int count = 0;
+    String res = "";
+    public String getPermutation(int n, int k) {
+        //Key:参考  Next Permutation  https://leetcode.com/problems/next-permutation/#/description
+        if(n == 0 || k == 0) return "";
+        helper(new ArrayList<Integer>(),n,k);
+        return res;
+    }
+    public void helper(List<Integer> item,int n,int k){
+        if(item.size() == n){
+            count++;
+            if(count == k){
+                String tmp = "";
+                for(int i:item) tmp = tmp+i;
+                res = tmp;
+            }
+        } else {
+            for(int i = 1;i<=n;i++){
+                if(item.contains(i)) continue;
+                if(count >= k) return;
+                item.add(i);
+                helper(item,n,k);
+                item.remove(item.size()-1);
+            }
+        }
+    }
+    
+    **/
+    //Key:cp,背  https://discuss.leetcode.com/topic/5081/an-iterative-solution-for-reference/2
+    public String getPermutation(int n, int k) {
+        List<Integer> num = new LinkedList<Integer>();
+        for (int i = 1; i <= n; i++) num.add(i);
+        int[] fact = new int[n];  // factorial
+        fact[0] = 1;
+        for (int i = 1; i < n; i++) fact[i] = i*fact[i-1];
+        k = k-1;
+        StringBuilder sb = new StringBuilder();
+        for (int i = n; i > 0; i--){
+            int ind = k/fact[i-1];
+            k = k%fact[i-1];
+            sb.append(num.get(ind));
+            num.remove(ind);
+        }
+        return sb.toString();
+    }
+    
+}
+
+71. Simplify Path
+public class Solution {
+    public String simplifyPath(String path) {
+        //Key:cp,背  https://discuss.leetcode.com/topic/41587/java-easy-to-understand-stack-solution
+        //Key:同时可参考:https://discuss.leetcode.com/topic/7675/java-10-lines-solution-with-stack
+        Stack<String> stack = new Stack<>();
+        String[] p = path.split("/");
+        for (int i = 0; i < p.length; i++) {
+            if (!stack.empty() && p[i].equals(".."))
+                stack.pop();
+            else if (!p[i].equals(".") && !p[i].equals("") && !p[i].equals(".."))
+                stack.push(p[i]);
+        }
+        List<String> list = new ArrayList(stack);
+        return "/"+String.join("/", list);
+    }
+}
+
+63. Unique Paths II
+public class Solution {
+    public int uniquePathsWithObstacles(int[][] obstacleGrid) {
+        //Key:DP,cp,背,同时可解 Unique Paths     https://discuss.leetcode.com/topic/10974/short-java-solution/2
+        int width = obstacleGrid[0].length;
+        int[] dp = new int[width];
+        dp[0] = 1;
+        for (int[] row : obstacleGrid) {
+            for (int j = 0; j < width; j++) {
+                if (row[j] == 1)
+                    dp[j] = 0;
+                else if (j > 0)
+                    dp[j] += dp[j - 1];
+            }
+        }
+        return dp[width - 1];
+    }
+}
+
+74. Search a 2D Matrix
+public class Solution {
+    public boolean searchMatrix(int[][] matrix, int target) {
+        //Key:Binary Search,cp,背  https://discuss.leetcode.com/topic/29159/java-clear-solution
+        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
+            return false;
+        }
+        int i = 0, j = matrix[0].length - 1;
+        while (i < matrix.length && j >= 0) {
+                if (matrix[i][j] == target) {
+                    return true;
+                } else if (matrix[i][j] > target) {
+                    j--;
+                } else {
+                    i++;
+                }
+            }
+        
+        return false;
+    }
+}
+
+72. Edit Distance
+public class Solution {
+    public int minDistance(String word1, String word2) {
+        //Key:cp,背 https://discuss.leetcode.com/topic/27929/concise-java-dp-solution-with-comments
+        //Key:参考-->https://discuss.leetcode.com/topic/5809/my-accepted-java-solution
+        // dp[i][j] : minimum steps to convert i long word1 and j long word2
+    	int dp[][] = new int[word1.length() + 1][word2.length() + 1];
+    
+    	for (int i = 0; i <= word1.length(); i++) dp[i][0] = i;    	
+    	for (int j = 0; j <= word2.length(); j++) dp[0][j] = j; 
+    	 
+    	for (int i = 1;i <= word1.length(); i++) {
+    		for (int j = 1; j<= word2.length(); j++) {
+    			if (word1.charAt(i-1) == word2.charAt(j-1))// <--
+    				dp[i][j] = dp[i-1][j-1];
+    			else 
+                    // dp[i-1][j-1] : replace word1(i) with word2(j), because word1(0, i-1) == word2(0, j-1);
+                    // dp[i  ][j-1] : delete word(j)
+                    // dp[i-1][j  ] : delete word(i), because word1(0, i-1) == word2(0, j)
+    				dp[i][j] = Math.min(dp[i-1][j-1], Math.min(dp[i][j-1], dp[i-1][j])) + 1; 
+    		}
+    	}
+    	return dp[word1.length()][word2.length()];
+    }
+}
