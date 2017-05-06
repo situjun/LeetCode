@@ -5511,3 +5511,61 @@ public class Solution {
     	return dp[word1.length()][word2.length()];
     }
 }
+
+86. Partition List
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    public ListNode partition(ListNode head, int x) {
+        //Key:Given a linked list and a value x, partition it such that all nodes less than x come before nodes greater than or equal to x.
+        //题意应该是比x小的数全部挪到那些大于等于x的数字的左边
+        //Key:最简单的方法，是new 两个新的ListNode list,同时重构下一个小于x的链表，一个大于等于的链表，再一合并
+        //Key:My version -- > 2 pointers
+        //Key:事实上，还是写麻烦了，不用新new ListNode
+        /**
+        
+        if(head == null) return null;
+            ListNode res = new ListNode(-1);
+            ListNode index = head;
+            ListNode join = new ListNode(-1);
+            ListNode res1 = res,join1 = join;
+            while(index != null){
+                if(index.val < x){
+                    res.next = new ListNode(index.val);
+                    res = res.next;
+                } else {
+                    join.next = new ListNode(index.val);
+                    join = join.next;
+                }
+                index = index.next;
+            }
+            res.next = join1.next;
+            return res1.next;
+        }
+        
+        **/
+    
+    
+        ListNode dummy1 = new ListNode(0), dummy2 = new ListNode(0);  //dummy heads of the 1st and 2nd queues
+        ListNode curr1 = dummy1, curr2 = dummy2;      //current tails of the two queues;
+        while (head!=null){
+            if (head.val<x) {
+                curr1.next = head;
+                curr1 = head;
+            }else {
+                curr2.next = head;
+                curr2 = head;
+            }
+            head = head.next;
+        }
+        curr2.next = null;          //important! avoid cycle in linked list. otherwise u will get TLE.
+        curr1.next = dummy2.next;
+        return dummy1.next;
+    }
+}
