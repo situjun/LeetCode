@@ -5569,3 +5569,158 @@ public class Solution {
         return dummy1.next;
     }
 }
+
+93. Restore IP Addresses
+public class Solution {
+    
+     //Key:cp,교  https://discuss.leetcode.com/topic/20009/easy-java-code-of-backtracking-within-16-lines/2
+     //Key:Backtracking
+    public List<String> restoreIpAddresses(String s) {
+        List<String> res = new ArrayList<>();
+        helper(s,"",res,0);
+        return res;
+    }
+    public void helper(String s, String tmp, List<String> res,int n){
+        if(n==4){
+            if(s.length()==0) res.add(tmp.substring(0,tmp.length()-1));
+            //substring here to get rid of last '.'
+            return;
+        }
+        for(int k=1;k<=3;k++){
+            if(s.length()<k) continue;
+            int val = Integer.parseInt(s.substring(0,k));
+            if(val>255 || k!=String.valueOf(val).length()) continue;
+            /*in the case 010 the parseInt will return len=2 where val=10, but k=3, skip this.*/
+            helper(s.substring(k),tmp+s.substring(0,k)+".",res,n+1);
+        }
+    }
+}
+
+92. Reverse Linked List II
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    public ListNode reverseBetween(ListNode head, int m, int n) {
+        //Key:cp,교  https://discuss.leetcode.com/topic/24873/easy-understanding-java-solution/2
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+        //first part
+        ListNode cur1 = dummy;
+        ListNode pre1 = null;
+        for(int i=0;i<m;i++){
+            pre1 = cur1;
+            cur1 = cur1.next;
+        }
+        
+        //reverse
+        ListNode cur2 = cur1;
+        ListNode pre2 = pre1;
+        ListNode q2;
+        for(int i=m;i<=n;i++){
+            q2 = cur2.next;
+            cur2.next = pre2;
+            pre2 = cur2;
+            cur2 = q2;
+        }
+        
+        //connect 
+        pre1.next = pre2;
+        cur1.next = cur2;
+        
+        return dummy.next;
+    }
+}
+
+87. Scramble String
+public class Solution {
+    public boolean isScramble(String s1, String s2) {
+        //Key:Iteration,cp,교  https://discuss.leetcode.com/topic/1195/any-better-solution/3
+        if(s1==null || s2==null || s1.length()!=s2.length()) return false;
+        if(s1.equals(s2)) return true;
+        char[] c1 = s1.toCharArray();
+        char[] c2 = s2.toCharArray();
+        Arrays.sort(c1);
+        Arrays.sort(c2);
+        if(!Arrays.equals(c1, c2)) return false;
+        for(int i=1; i<s1.length(); i++)
+        {
+            if(isScramble(s1.substring(0,i), s2.substring(0,i)) && isScramble(s1.substring(i), s2.substring(i))) return true;
+            if(isScramble(s1.substring(0,i), s2.substring(s2.length()-i)) && isScramble(s1.substring(i), s2.substring(0, s2.length()-i))) return true;
+        }
+        return false;
+        
+        //Key:DP  https://discuss.leetcode.com/topic/36715/simple-iterative-dp-java-solution-with-explanation/2
+        
+        /**
+		 * Let F(i, j, k) = whether the substring S1[i..i + k - 1] is a scramble of S2[j..j + k - 1] or not
+		 * Since each of these substrings is a potential node in the tree, we need to check for all possible cuts.
+		 * Let q be the length of a cut (hence, q < k), then we are in the following situation:
+		 * 
+		 * S1 [   x1    |         x2         ]
+		 *    i         i + q                i + k - 1
+		 * 
+		 * here we have two possibilities:
+		 *      
+		 * S2 [   y1    |         y2         ]
+		 *    j         j + q                j + k - 1
+		 *    
+		 * or 
+		 * 
+		 * S2 [       y1        |     y2     ]
+		 *    j                 j + k - q    j + k - 1
+		 * 
+		 * which in terms of F means:
+		 * 
+		 * F(i, j, k) = for some 1 <= q < k we have:
+		 *  (F(i, j, q) AND F(i + q, j + q, k - q)) OR (F(i, j + k - q, q) AND F(i + q, j, k - q))
+		 *  
+		 * Base case is k = 1, where we simply need to check for S1[i] and S2[j] to be equal 
+		 * */
+        /**
+        if (s1.length() != s2.length()) return false;
+		int len = s1.length();
+		
+		boolean [][][] F = new boolean[len][len][len + 1];
+		for (int k = 1; k <= len; ++k)
+			for (int i = 0; i + k <= len; ++i)
+				for (int j = 0; j + k <= len; ++j)
+					if (k == 1)
+						F[i][j][k] = s1.charAt(i) == s2.charAt(j);
+					else for (int q = 1; q < k && !F[i][j][k]; ++q) {
+						F[i][j][k] = (F[i][j][q] && F[i + q][j + q][k - q]) || (F[i][j + k - q][q] && F[i + q][j][k - q]);
+					}
+		return F[0][0][len];
+        
+        **/
+        
+        
+        
+    }
+}
+
+84. Largest Rectangle in Histogram
+public class Solution {
+    public int largestRectangleArea(int[] height) {
+        //Key:cp,교  https://discuss.leetcode.com/topic/7599/o-n-stack-based-java-solution/2
+        int len = height.length;
+        Stack<Integer> s = new Stack<Integer>();
+        int maxArea = 0;
+        for(int i = 0; i <= len; i++){
+            int h = (i == len ? 0 : height[i]);
+            if(s.isEmpty() || h >= height[s.peek()]){
+                s.push(i);
+            }else{
+                int tp = s.pop();
+                maxArea = Math.max(maxArea, height[tp] * (s.isEmpty() ? i : i - 1 - s.peek()));
+                i--;
+            }
+        }
+        return maxArea;
+    }
+}
