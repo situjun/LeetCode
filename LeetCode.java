@@ -5876,6 +5876,54 @@ public class Solution {
         if (root == null) return 0;
         return Math.max(depth(root.left), depth (root.right)) + 1;
     }
+}
 
-    
+82. Remove Duplicates from Sorted List II
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    public ListNode deleteDuplicates(ListNode head) {
+        //Key:2 pointers
+        //Key:My wrong version:题就读错了...
+        /**
+        
+        if(head == null) return null;
+        ListNode prev = head,cur = head.next;
+        Set<Integer> set = new HashSet<>();
+        set.add(prev.val);
+        while(cur != null){
+            if(!set.contains(cur.val)) {
+                set.add(cur.val);
+                prev.next = cur;
+                prev = prev.next;
+            } 
+            cur = cur.next;
+        }
+        return head;
+        
+        **/
+        
+        //Key:cp,背  https://discuss.leetcode.com/topic/11234/a-short-and-simple-java-solution
+        //Key:dummy可以认为是对一个是在没有意义的变量的命名....写成tmp,foo,bar也无所谓...
+        ListNode dummy = new ListNode(0);
+        ListNode d = dummy;
+        while (head != null) {
+            if (head.next != null && head.val == head.next.val) {
+                while (head.next != null && head.val == head.next.val)
+                    head = head.next;
+            } else {
+                d.next = head;
+                d = d.next;
+            }
+            head = head.next;
+        }
+        d.next = null;
+        return dummy.next;
+    }
 }
