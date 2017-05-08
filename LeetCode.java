@@ -5724,3 +5724,158 @@ public class Solution {
         return maxArea;
     }
 }
+
+117. Populating Next Right Pointers in Each Node II
+/**
+ * Definition for binary tree with next pointer.
+ * public class TreeLinkNode {
+ *     int val;
+ *     TreeLinkNode left, right, next;
+ *     TreeLinkNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    public void connect(TreeLinkNode root) {
+        //Key:与 Populating Next Right Pointers in Each Node 比较，这道题中的binary tree非perfect。（即左右孩子有可能不存在）
+        //Key:cp,背 https://discuss.leetcode.com/topic/28580/java-solution-with-constant-space/2
+        TreeLinkNode dummyHead = new TreeLinkNode(0);
+        TreeLinkNode pre = dummyHead;
+        while (root != null) {
+    	    if (root.left != null) {
+    		    pre.next = root.left;
+    		    pre = pre.next;
+    	    }
+    	    if (root.right != null) {
+    		    pre.next = root.right;
+    		    pre = pre.next;
+    	    }
+    	    root = root.next;
+    	    if (root == null) {
+    		    pre = dummyHead;
+    		    root = dummyHead.next;
+    		    dummyHead.next = null;
+    	    }
+        }
+        
+    }
+}
+
+106. Construct Binary Tree from Inorder and Postorder Traversal
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    
+    //Key:cp,背   https://discuss.leetcode.com/topic/24633/simple-and-clean-java-solution-with-comments-recursive
+    public TreeNode buildTree(int[] inorder, int[] postorder) {
+        return buildTree(inorder, inorder.length-1, 0, postorder, postorder.length-1);
+    }
+    
+    private TreeNode buildTree(int[] inorder, int inStart, int inEnd, int[] postorder,
+    		int postStart) {
+    	if (postStart < 0 || inStart < inEnd)
+    		return null;
+    	
+    	//The last element in postorder is the root.
+    	TreeNode root = new TreeNode(postorder[postStart]);
+    	
+    	//find the index of the root from inorder. Iterating from the end.
+    	int rIndex = inStart;
+    	for (int i = inStart; i >= inEnd; i--) {
+    		if (inorder[i] == postorder[postStart]) {
+    			rIndex = i;
+    			break;
+    		}
+    	}
+    	//build right and left subtrees. Again, scanning from the end to find the sections.
+    	root.right = buildTree(inorder, inStart, rIndex + 1, postorder, postStart-1);
+    	root.left = buildTree(inorder, rIndex - 1, inEnd, postorder, postStart - (inStart - rIndex) -1);
+    	return root;
+    }
+}
+
+115. Distinct Subsequences
+public class Solution {
+    public int numDistinct(String S, String T) {
+        //Key:cp,背  https://discuss.leetcode.com/topic/9488/easy-to-understand-dp-in-java/2
+        // array creation
+        int[][] mem = new int[T.length()+1][S.length()+1];
+    
+        // filling the first row: with 1s
+        for(int j=0; j<=S.length(); j++) {
+            mem[0][j] = 1;
+        }
+        
+        // the first column is 0 by default in every other rows but the first, which we need.
+        
+        for(int i=0; i<T.length(); i++) {
+            for(int j=0; j<S.length(); j++) {
+                if(T.charAt(i) == S.charAt(j)) {
+                    mem[i+1][j+1] = mem[i][j] + mem[i+1][j];
+                } else {
+                    mem[i+1][j+1] = mem[i+1][j];
+                }
+            }
+        }
+        
+        return mem[T.length()][S.length()];
+    }
+}
+
+114. Flatten Binary Tree to Linked List
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //Key:cp,背，这解法太牛了...  https://discuss.leetcode.com/topic/11444/my-short-post-order-traversal-java-solution-for-share
+    private TreeNode prev = null;
+
+    public void flatten(TreeNode root) {
+        if (root == null)
+            return;
+        flatten(root.right);
+        flatten(root.left);
+        root.right = prev;
+        root.left = null;
+        prev = root;
+    }
+}
+
+110. Balanced Binary Tree
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //Key:cp,背  https://discuss.leetcode.com/topic/7798/the-bottom-up-o-n-solution-would-be-better
+    //Key:另一个我觉得也挺不错的方法  https://discuss.leetcode.com/topic/10192/java-o-n-solution-based-on-maximum-depth-of-binary-tree
+    public boolean isBalanced(TreeNode root) {
+        if (root == null) return true;
+        int left=depth(root.left);
+        int right=depth(root.right);
+        return Math.abs(left - right) <= 1 && isBalanced(root.left) && isBalanced(root.right);
+    }
+    public int depth (TreeNode root) {
+        if (root == null) return 0;
+        return Math.max(depth(root.left), depth (root.right)) + 1;
+    }
+
+    
+}
