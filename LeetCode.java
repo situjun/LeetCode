@@ -6130,3 +6130,98 @@ public class Solution {
         return G[n];
     }
 }
+
+109. Convert Sorted List to Binary Search Tree
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //Key:可以把这道题转为array再用array的方法处理...   Convert Sorted Array to Binary Search Tree
+    //Key:cp,背  https://discuss.leetcode.com/topic/35997/share-my-java-solution-1ms-very-short-and-concise
+    public TreeNode sortedListToBST(ListNode head) {
+        if(head==null) return null;
+        return toBST(head,null);
+    }
+    public TreeNode toBST(ListNode head, ListNode tail){
+        ListNode slow = head;
+        ListNode fast = head;
+        if(head==tail) return null;
+        
+        while(fast!=tail&&fast.next!=tail){
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        TreeNode thead = new TreeNode(slow.val);
+        thead.left = toBST(head,slow);
+        thead.right = toBST(slow.next,tail);
+        return thead;
+    }
+}
+
+99. Recover Binary Search Tree
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    
+    //Key:cp,背 https://discuss.leetcode.com/topic/3988/no-fancy-algorithm-just-simple-and-powerful-in-order-traversal
+    //Key:里面对order tree 的写法挺不错的
+    TreeNode firstElement = null;
+    TreeNode secondElement = null;
+    // The reason for this initialization is to avoid null pointer exception in the first comparison when prevElement has not been initialized
+    TreeNode prevElement = new TreeNode(Integer.MIN_VALUE);
+    
+    public void recoverTree(TreeNode root) {
+        
+        // In order traversal to find the two elements
+        traverse(root);
+        
+        // Swap the values of the two nodes
+        int temp = firstElement.val;
+        firstElement.val = secondElement.val;
+        secondElement.val = temp;
+    }
+    
+    private void traverse(TreeNode root) {
+        
+        if (root == null)
+            return;
+            
+        traverse(root.left);
+        
+        // Start of "do some business", 
+        // If first element has not been found, assign it to prevElement (refer to 6 in the example above)
+        if (firstElement == null && prevElement.val >= root.val) {
+            firstElement = prevElement;
+        }
+    
+        // If first element is found, assign the second element to the root (refer to 2 in the example above)
+        if (firstElement != null && prevElement.val >= root.val) {
+            secondElement = root;
+        }        
+        prevElement = root;
+        // End of "do some business"
+
+        traverse(root.right);
+    }
+}
