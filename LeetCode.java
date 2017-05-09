@@ -6389,3 +6389,32 @@ public class BSTIterator {
  * BSTIterator i = new BSTIterator(root);
  * while (i.hasNext()) v[f()] = i.next();
  */
+ 
+ 205. Isomorphic Strings
+ public class Solution {
+    public boolean isIsomorphic(String s1, String s2) {
+        //Key:My wrong version
+        /***
+        //Test case:"ab" "aa"
+        if(s.length() != t.length()) return false;
+        Map<Character,Character> map = new HashMap<>();
+        for(int i = 0;i<=s.length()-1;i++){
+            if(map.containsKey(s.charAt(i))){
+                if(map.get(s.charAt(i)) != t.charAt(i)) return false;
+            } else {
+                map.put(s.charAt(i),t.charAt(i));
+            }
+        }
+        return true;
+        ****/
+
+        //Key:cp,±³ https://discuss.leetcode.com/topic/13001/short-java-solution-without-maps/2
+        int[] m = new int[512];
+        for (int i = 0; i < s1.length(); i++) {
+            if (m[s1.charAt(i)] != m[s2.charAt(i)+256]) return false;
+            m[s1.charAt(i)] = m[s2.charAt(i)+256] = i+1;
+        }
+        return true;
+        
+    }
+}
