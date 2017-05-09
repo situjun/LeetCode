@@ -5927,3 +5927,206 @@ public class Solution {
         return dummy.next;
     }
 }
+
+147. Insertion Sort List
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    public ListNode insertionSortList(ListNode head) {
+        //Key:cp,背 https://discuss.leetcode.com/topic/18097/clean-java-solution-using-a-fake-head
+        
+        ListNode curr = head, next = null;
+        // l is a fake head
+        ListNode l = new ListNode(0);
+        
+        while (curr != null) {
+            next = curr.next;
+            ListNode p = l;
+            while (p.next != null && p.next.val < curr.val) p = p.next;
+            // insert curr between p and p.next
+            curr.next = p.next;
+            p.next = curr;
+            curr = next;
+        }
+        
+        return l.next;
+    }
+}
+
+145. Binary Tree Postorder Traversal
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //Key:my wrong ans
+    /**
+    
+    public List<Integer> postorderTraversal(TreeNode root) {
+        //它既然要求用iteratively的方法，咱们就可以参照Binary Tree Right Side View，用个depth来标记
+        int depth = 0;
+        List<Integer> list = new ArrayList<Integer>();
+        postorder(root,depth);
+    }
+    public void postorder(TreeNode root,int depth){
+        if(root != null){
+            
+        }
+    }
+    
+    **/
+    
+    //Key:cp,背 https://discuss.leetcode.com/topic/44231/preorder-inorder-and-postorder-traversal-iterative-java-solution
+    
+    public List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> list = new ArrayList<>();
+        if(root == null) return list;
+        Stack<TreeNode> stack = new Stack<>();
+        stack.push(root);
+        while(!stack.empty()){
+            root = stack.pop();
+            list.add(0, root.val);
+            if(root.left != null) stack.push(root.left);
+            if(root.right != null) stack.push(root.right);
+        }
+        return list;
+    }
+}
+
+143. Reorder List
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    public void reorderList(ListNode head) {
+        //Key:cp,背  https://discuss.leetcode.com/topic/13869/java-solution-with-3-steps
+        if(head==null||head.next==null) return;
+        
+        //Find the middle of the list
+        ListNode p1=head;
+        ListNode p2=head;
+        while(p2.next!=null&&p2.next.next!=null){ 
+            p1=p1.next;
+            p2=p2.next.next;
+        }
+        
+        //Reverse the half after middle  1->2->3->4->5->6 to 1->2->3->6->5->4
+        ListNode preMiddle=p1;
+        ListNode preCurrent=p1.next;
+        while(preCurrent.next!=null){
+            ListNode current=preCurrent.next;
+            preCurrent.next=current.next;
+            current.next=preMiddle.next;
+            preMiddle.next=current;
+        }
+        
+        //Start reorder one by one  1->2->3->6->5->4 to 1->6->2->5->3->4
+        p1=head;
+        p2=preMiddle.next;
+        while(p1!=preMiddle){
+            preMiddle.next=p2.next;
+            p2.next=p1.next;
+            p1.next=p2;
+            p1=p2.next;
+            p2=preMiddle.next;
+        }
+    }
+}
+
+95. Unique Binary Search Trees II
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //Key:another version --> divide and conquer cp,背 https://discuss.leetcode.com/topic/8410/divide-and-conquer-f-i-g-i-1-g-n-i
+    /**
+     public List<TreeNode> generateTrees(int n) {
+        if(n<1) return new ArrayList<TreeNode>();
+    	return generateSubtrees(1, n);
+    }
+    private List<TreeNode> generateSubtrees(int s, int e) {
+    	List<TreeNode> res = new LinkedList<TreeNode>();
+    	if (s > e) {
+    		res.add(null); // empty tree
+    		return res;
+    	}
+    	for (int i = s; i <= e; ++i) {
+    		List<TreeNode> leftSubtrees = generateSubtrees(s, i - 1);
+    		List<TreeNode> rightSubtrees = generateSubtrees(i + 1, e);
+    		for (TreeNode left : leftSubtrees) {
+    			for (TreeNode right : rightSubtrees) {
+    				TreeNode root = new TreeNode(i);
+    				root.left = left;
+    				root.right = right;
+    				res.add(root);
+    			}
+    		}
+    	}
+    	return res;
+    }
+    **/
+    //Key:https://discuss.leetcode.com/topic/3079/a-simple-recursive-solution/14
+    public List<TreeNode> generateTrees(int n) {
+        if(n<1) return new ArrayList<TreeNode>();
+        return genTreeList(1,n);
+    }
+    private List<TreeNode> genTreeList (int start, int end) {
+        List<TreeNode> list = new ArrayList<TreeNode>(); 
+        if (start > end) {
+            list.add(null);
+        }
+        for(int idx = start; idx <= end; idx++) {
+            List<TreeNode> leftList = genTreeList(start, idx - 1);
+            List<TreeNode> rightList = genTreeList(idx + 1, end);
+            for (TreeNode left : leftList) {
+                for(TreeNode right: rightList) {
+                    TreeNode root = new TreeNode(idx);
+                    root.left = left;
+                    root.right = right;
+                    list.add(root);
+                }
+            }
+        }
+        return list;
+    }
+}
+
+96. Unique Binary Search Trees
+public class Solution {
+    public int numTrees(int n) {
+        //Key:cp,背  https://discuss.leetcode.com/topic/8398/dp-solution-in-6-lines-with-explanation-f-i-n-g-i-1-g-n-i/2
+        
+        int [] G = new int[n+1];
+        G[0] = G[1] = 1;
+        
+        for(int i=2; i<=n; ++i) {
+        	for(int j=1; j<=i; ++j) {
+        		G[i] += G[j-1] * G[i-j];
+        	}
+        }
+    
+        return G[n];
+    }
+}
