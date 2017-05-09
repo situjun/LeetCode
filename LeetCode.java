@@ -6225,3 +6225,167 @@ public class Solution {
         traverse(root.right);
     }
 }
+
+155. Min Stack
+public class MinStack {
+
+    //Key:cp.背   https://discuss.leetcode.com/topic/7020/java-accepted-solution-using-one-stack
+    /** initialize your data structure here. */
+    int min = Integer.MAX_VALUE;
+    Stack<Integer> stack = new Stack<Integer>();
+    public void push(int x) {
+        // only push the old minimum value when the current 
+        // minimum value changes after pushing the new value x
+        if(x <= min){          
+            stack.push(min);
+            min=x;
+        }
+        stack.push(x);
+    }
+
+    public void pop() {
+        // if pop operation could result in the changing of the current minimum value, 
+        // pop twice and change the current minimum value to the last minimum value.
+        if(stack.pop() == min) min=stack.pop();
+    }
+
+    public int top() {
+        return stack.peek();
+    }
+
+    public int getMin() {
+        return min;
+    }
+}
+
+/**
+ * Your MinStack object will be instantiated and called as such:
+ * MinStack obj = new MinStack();
+ * obj.push(x);
+ * obj.pop();
+ * int param_3 = obj.top();
+ * int param_4 = obj.getMin();
+ */
+ 
+ 164. Maximum Gap
+ public class Solution {
+    public int maximumGap(int[] nums) {
+        //Key:cp.背  https://discuss.leetcode.com/topic/22221/radix-sort-solution-in-java-with-explanation/2
+        
+        if (nums == null || nums.length < 2) {
+            return 0;
+        }
+        
+        // m is the maximal number in nums
+        int m = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            m = Math.max(m, nums[i]);
+        }
+        
+        int exp = 1; // 1, 10, 100, 1000 ...
+        int R = 10; // 10 digits
+    
+        int[] aux = new int[nums.length];
+        
+        while (m / exp > 0) { // Go through all digits from LSB to MSB
+            int[] count = new int[R];
+            
+            for (int i = 0; i < nums.length; i++) {
+                count[(nums[i] / exp) % 10]++;
+            }
+            
+            for (int i = 1; i < count.length; i++) {
+                count[i] += count[i - 1];
+            }
+            
+            for (int i = nums.length - 1; i >= 0; i--) {
+                aux[--count[(nums[i] / exp) % 10]] = nums[i];
+            }
+            
+            for (int i = 0; i < nums.length; i++) {
+                nums[i] = aux[i];
+            }
+            exp *= 10;
+        }
+        
+        int max = 0;
+        for (int i = 1; i < aux.length; i++) {
+            max = Math.max(max, aux[i] - aux[i - 1]);
+        }
+         
+        return max;
+        
+    }
+}
+
+201. Bitwise AND of Numbers Range
+public class Solution {
+    public int rangeBitwiseAnd(int m, int n) {
+        //Key:题没读懂
+        //Key:bit,cp,背  https://discuss.leetcode.com/topic/20176/2-line-solution-with-detailed-explanation
+        while(m<n) n = n & (n-1);
+        return n;
+    }
+}
+
+187. Repeated DNA Sequences
+public class Solution {
+    public List<String> findRepeatedDnaSequences(String s) {
+        //Key:cp,背   https://discuss.leetcode.com/topic/27517/7-lines-simple-java-o-n
+        //Key:补充解释 https://discuss.leetcode.com/topic/33745/easy-understand-and-straightforward-java-solution
+        Set seen = new HashSet(), repeated = new HashSet();
+        for (int i = 0; i + 9 < s.length(); i++) {
+            String ten = s.substring(i, i + 10);
+            if (!seen.add(ten))
+                repeated.add(ten);
+        }
+        return new ArrayList(repeated);
+    }
+}
+
+173. Binary Search Tree Iterator
+/**
+ * Definition for binary tree
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+
+public class BSTIterator {
+    //Key:cp,背   https://discuss.leetcode.com/topic/6575/my-solutions-in-3-languages-with-stack/19
+    private Stack<TreeNode> stack = new Stack<TreeNode>();
+    
+    public BSTIterator(TreeNode root) {
+        pushAll(root);
+    }
+
+    /** @return whether we have a next smallest number */
+    public boolean hasNext() {
+        return !stack.isEmpty();
+    }
+
+    /** @return the next smallest number */
+    public int next() {
+        TreeNode tmpNode = stack.pop();
+        pushAll(tmpNode.right);
+        return tmpNode.val;
+    }
+    
+    private void pushAll(TreeNode node) {
+        //下面这个for是原作者sol中的写法，也真是醉了....我改写成了while
+        //for (; node != null; stack.push(node), node = node.left);
+        while(node != null){
+            stack.push(node);
+            node = node.left;
+        }
+    }
+}
+
+/**
+ * Your BSTIterator will be called like this:
+ * BSTIterator i = new BSTIterator(root);
+ * while (i.hasNext()) v[f()] = i.next();
+ */
