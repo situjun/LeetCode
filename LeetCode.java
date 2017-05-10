@@ -6418,3 +6418,296 @@ public class BSTIterator {
         
     }
 }
+
+225. Implement Stack using Queues
+public class MyStack {
+    
+    //Key:cp,背  https://discuss.leetcode.com/topic/15945/concise-1-queue-java-c-python/2
+    /** Initialize your data structure here. */
+    private Queue<Integer> queue = new LinkedList<>();
+
+    public void push(int x) {
+        queue.add(x);
+        for (int i=1; i<queue.size(); i++)
+            queue.add(queue.remove());
+    }
+
+    public int pop() {
+        int tmp = queue.peek();
+        queue.remove();
+        return tmp;
+    }
+
+    public int top() {
+        return queue.peek();
+    }
+
+    public boolean empty() {
+        return queue.isEmpty();
+    }
+}
+
+/**
+ * Your MyStack object will be instantiated and called as such:
+ * MyStack obj = new MyStack();
+ * obj.push(x);
+ * int param_2 = obj.pop();
+ * int param_3 = obj.top();
+ * boolean param_4 = obj.empty();
+ */
+ 
+ 224. Basic Calculator
+ public class Solution {
+    public int calculate(String s) {
+        //Key:这道题不难，但写起来太麻烦了.....
+        //Key:typical Stack
+        //Stack 不加<>限制的话，貌似存的是抽象类Object，所以 stack.push(1); 接着stack.push("1");也可以。不会报错
+        //Stack stack = new Stack();
+        //但是如下面这句就不能push(1)了
+        //Stack<String> stack = new Stack<>();
+        //Key:my wrong version 2
+        /**
+        Stack<Character> stack = new Stack<>();
+        Stack<Integer> nums = new Stack<>();
+        int tmp = 0;
+        char c = '''
+        for(int i = 0;i<=s.length()-1;i++){
+            c = s.charAt(i);
+            if(c-'0' >=0 && c-'0' <=9){
+                 tmp = tmp*10+(c-'0');
+            } else {
+                nums.add(tmp);
+                tmp = 0;
+                if(c != '(' && c!= ')') stack.add(c);
+            }
+        }
+        int res = 0;
+        while(!stack.isEmpty()){
+            
+        }
+        **/
+        //Key:My wrong version
+        /***
+        for(int i = 0;i<=s.length()-1;i++){
+            if(s.charAt(i) == ')'){
+                String tmp = "";
+                while(stack.peek() != '('){
+                    if(String.valueOf(stack.pop()) == " ") continue;
+                    tmp = stack.pop()+tmp;
+                }
+                stack.pop();
+                
+                while(index<=tmp.length()-1){
+                    
+                }
+            }
+        }
+        return 1;
+        **/
+        
+        //Key:cp,背  https://discuss.leetcode.com/topic/15816/iterative-java-solution-with-stack/7
+        if(s == null) return 0;
+        
+        int result = 0;
+        int sign = 1;
+        int num = 0;
+                
+        Stack<Integer> stack = new Stack<Integer>();
+        stack.push(sign);
+                
+        for(int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+                    
+            if(c >= '0' && c <= '9') {
+                num = num * 10 + (c - '0');
+                        
+            } else if(c == '+' || c == '-') {
+                result += sign * num;
+                sign = stack.peek() * (c == '+' ? 1: -1); 
+                num = 0;
+                        
+            } else if(c == '(') {
+                stack.push(sign);
+                        
+            } else if(c == ')') {
+                stack.pop();
+            }
+        }
+                
+        result += sign * num;
+        return result;
+    }
+}
+
+222. Count Complete Tree Nodes
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //Key:注意 >> 用法，cp,背 https://discuss.leetcode.com/topic/15533/concise-java-solutions-o-log-n-2
+    public int height(TreeNode root) {
+        return root == null ? -1 : 1 + height(root.left);
+    }
+    public int countNodes(TreeNode root) {
+        int h = height(root);
+        return h < 0 ? 0 :
+               height(root.right) == h-1 ? (1 << h) + countNodes(root.right)
+                                         : (1 << h-1) + countNodes(root.left);
+    }
+    
+}
+
+232. Implement Queue using Stacks
+class MyQueue {
+    //这道题有问题
+    //Test Case:push(1),pop,empty
+    //结果它stdout:[1, 1, 1][1, 1]
+    //但是在自己机子完全没问题
+    //Key:Something wrong。。。
+    /**
+    public static Stack stack1 = new Stack();
+    public static Stack stack2 = new Stack();
+    public static void push(int x) {
+        while(!stack2.empty()){
+            stack1.push(stack2.peek());
+            stack2.pop();
+        }
+        stack2.push(x);
+        while(!stack1.empty()){
+            stack2.push(stack1.peek());
+            stack1.pop();
+        }
+        System.out.println(stack2);
+	
+    }
+
+    // Removes the element from in front of queue.
+    public static void pop() {
+        if(!stack2.empty()){
+            stack2.pop();
+        }
+        System.out.println(stack2);
+    }
+
+    // Get the front element.
+    public static int peek() {
+        int a = 0;
+        //Key Point Integer 转 int
+        if(!stack2.empty()){
+            a=(int)stack2.peek();
+        }
+        return a;
+    }
+
+    // Return whether the queue is empty.
+    public static boolean empty() {
+        boolean flag = false;
+        if(stack2.empty()) flag = true;
+        else flag = false;
+        return flag;
+    }
+    **/
+    
+    //Key:cp,背  https://discuss.leetcode.com/topic/17974/short-o-1-amortized-c-java-ruby/2
+    Stack<Integer> input = new Stack();
+    Stack<Integer> output = new Stack();
+    public void push(int x) {
+        input.push(x);
+    }
+
+    public int pop() {
+        int tmp = peek();
+        output.pop();
+        return tmp;
+    }
+
+    public int peek() {
+        if (output.empty())
+            while (!input.empty())
+                output.push(input.pop());
+        return output.peek();
+    }
+
+    public boolean empty() {
+        return input.empty() && output.empty();
+    }
+}
+
+208. Implement Trie (Prefix Tree)
+//Key:cp,背   https://discuss.leetcode.com/topic/19221/ac-java-solution-simple-using-single-array/2
+class TrieNode {
+    public boolean isWord; 
+    public TrieNode[] children = new TrieNode[26];
+    public TrieNode() {}
+}
+
+public class Trie {
+    private TrieNode root;
+    public Trie() {
+        root = new TrieNode();
+    }
+
+    public void insert(String word) {
+        TrieNode ws = root;
+        for(int i = 0; i < word.length(); i++){
+            char c = word.charAt(i);
+            if(ws.children[c - 'a'] == null){
+                ws.children[c - 'a'] = new TrieNode();
+            }
+            ws = ws.children[c - 'a'];
+        }
+        ws.isWord = true;
+    }
+
+    public boolean search(String word) {
+        TrieNode ws = root; 
+        for(int i = 0; i < word.length(); i++){
+            char c = word.charAt(i);
+            if(ws.children[c - 'a'] == null) return false;
+            ws = ws.children[c - 'a'];
+        }
+        return ws.isWord;
+    }
+
+    public boolean startsWith(String prefix) {
+        TrieNode ws = root; 
+        for(int i = 0; i < prefix.length(); i++){
+            char c = prefix.charAt(i);
+            if(ws.children[c - 'a'] == null) return false;
+            ws = ws.children[c - 'a'];
+        }
+        return true;
+    }
+}
+
+/**
+ * Your Trie object will be instantiated and called as such:
+ * Trie obj = new Trie();
+ * obj.insert(word);
+ * boolean param_2 = obj.search(word);
+ * boolean param_3 = obj.startsWith(prefix);
+ */
+ 
+213. House Robber II
+public class Solution {
+    //Key:cp,背  https://discuss.leetcode.com/topic/14375/simple-ac-solution-in-java-in-o-n-with-explanation/2
+    public int rob(int[] nums) {
+        if (nums.length == 1) return nums[0];
+        return Math.max(rob(nums, 0, nums.length - 2), rob(nums, 1, nums.length - 1));
+    }
+    private int rob(int[] num, int lo, int hi) {
+        int include = 0, exclude = 0;
+        for (int j = lo; j <= hi; j++) {
+            int i = include, e = exclude;
+            include = e + num[j];
+            exclude = Math.max(e, i);
+        }
+        return Math.max(include, exclude);
+    }
+} 
