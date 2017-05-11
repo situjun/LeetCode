@@ -6822,3 +6822,17 @@ public class Solution {
         return list;
     }
 }
+
+233. Number of Digit One
+public class Solution {
+    public int countDigitOne(int n) {
+        //Key:cp,背  
+        //https://discuss.leetcode.com/topic/18054/4-lines-o-log-n-c-java-python
+        //https://discuss.leetcode.com/topic/18972/ac-short-java-solution
+        //两个大神争奇斗艳...
+        int ones = 0;
+        for (long m = 1; m <= n; m *= 10)
+            ones += (n/m + 8) / 10 * m + (n/m % 10 == 1 ? n%m + 1 : 0);
+        return ones;
+    }
+}
