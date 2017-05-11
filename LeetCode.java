@@ -6711,3 +6711,114 @@ public class Solution {
         return Math.max(include, exclude);
     }
 } 
+
+220. Contains Duplicate III
+public class Solution {
+    public boolean containsNearbyAlmostDuplicate(int[] nums, int k, int t) {
+        //Key:cp,교 https://discuss.leetcode.com/topic/15199/ac-o-n-solution-in-java-using-buckets-with-explanation/2
+        //Key:another ref:https://discuss.leetcode.com/topic/27608/java-python-one-pass-solution-o-n-time-o-n-space-using-buckets/2
+        if (k < 1 || t < 0) return false;
+        Map<Long, Long> map = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            long remappedNum = (long) nums[i] - Integer.MIN_VALUE;
+            long bucket = remappedNum / ((long) t + 1);
+            if (map.containsKey(bucket)
+                    || (map.containsKey(bucket - 1) && remappedNum - map.get(bucket - 1) <= t)
+                        || (map.containsKey(bucket + 1) && map.get(bucket + 1) - remappedNum <= t))
+                            return true;
+            if (map.entrySet().size() >= k) {
+                long lastBucket = ((long) nums[i - k] - Integer.MIN_VALUE) / ((long) t + 1);
+                map.remove(lastBucket);
+            }
+            map.put(bucket, remappedNum);
+        }
+        return false;
+        
+    }
+}
+
+221. Maximal Square
+public class Solution {
+    public int maximalSquare(char[][] a) {
+        //Key:cp,교，DP  https://discuss.leetcode.com/topic/20801/extremely-simple-java-solution
+        //Key:another ref：https://discuss.leetcode.com/topic/18482/accepted-clean-java-dp-solution
+        if(a.length == 0) return 0;
+        int m = a.length, n = a[0].length, result = 0;
+        int[][] b = new int[m+1][n+1];
+        for (int i = 1 ; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if(a[i-1][j-1] == '1') {
+                    b[i][j] = Math.min(Math.min(b[i][j-1] , b[i-1][j-1]), b[i-1][j]) + 1;
+                    result = Math.max(b[i][j], result); // update result
+                }
+            }
+        }
+        return result*result;
+    }
+}
+
+229. Majority Element II
+public class Solution {
+    public List<Integer> majorityElement(int[] nums) {
+        //Key:cp,교  https://discuss.leetcode.com/topic/32510/java-easy-version-to-understand/2
+        //Key:another ref -> https://discuss.leetcode.com/topic/17564/boyer-moore-majority-vote-algorithm-and-my-elaboration
+        if (nums == null || nums.length == 0)
+    		return new ArrayList<Integer>();
+    	List<Integer> result = new ArrayList<Integer>();
+    	int number1 = nums[0], number2 = nums[0], count1 = 0, count2 = 0, len = nums.length;
+    	for (int i = 0; i < len; i++) {
+    		if (nums[i] == number1)
+    			count1++;
+    		else if (nums[i] == number2)
+    			count2++;
+    		else if (count1 == 0) {
+    			number1 = nums[i];
+    			count1 = 1;
+    		} else if (count2 == 0) {
+    			number2 = nums[i];
+    			count2 = 1;
+    		} else {
+    			count1--;
+    			count2--;
+    		}
+    	}
+    	count1 = 0;
+    	count2 = 0;
+    	for (int i = 0; i < len; i++) {
+    		if (nums[i] == number1)
+    			count1++;
+    		else if (nums[i] == number2)
+    			count2++;
+    	}
+    	if (count1 > len / 3)
+    		result.add(number1);
+    	if (count2 > len / 3)
+    		result.add(number2);
+    	return result;
+    }
+}
+
+228. Summary Ranges
+public class Solution {
+    public List<String> summaryRanges(int[] nums) {
+        //Key:cp,교   https://discuss.leetcode.com/topic/17151/accepted-java-solution-easy-to-understand
+        
+        List<String> list=new ArrayList();
+    	if(nums.length==1){
+    		list.add(nums[0]+"");
+    		return list;
+    	}
+        for(int i=0;i<nums.length;i++){
+        	int a=nums[i];
+        	while(i+1<nums.length&&(nums[i+1]-nums[i])==1){
+        		i++;
+        	}
+        	if(a!=nums[i]){
+        		list.add(a+"->"+nums[i]);
+        	}else{
+        		list.add(a+"");
+        	}
+        }
+        return list;
+    }
+}
