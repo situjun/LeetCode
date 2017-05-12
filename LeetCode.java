@@ -6836,3 +6836,52 @@ public class Solution {
         return ones;
     }
 }
+
+275. H-Index II
+public class Solution {
+    public int hIndex(int[] citations) {
+        //Key:cp,±³£¬binary search  https://discuss.leetcode.com/topic/23399/standard-binary-search/2
+        if(citations == null || citations.length == 0) return 0;
+        int l = 0, r = citations.length;
+        int n = citations.length;
+        while(l < r){
+            int mid = l + (r - l) / 2;
+            if(citations[mid] == n - mid) return n - mid;
+            if(citations[mid] < citations.length - mid) l = mid + 1;
+            else r = mid;
+        }
+        return n - l;
+    }
+}
+
+282. Expression Add Operators
+public class Solution {
+    //Key:cp.±³  https://discuss.leetcode.com/topic/24523/java-standard-backtrace-ac-solutoin-short-and-clear
+    public List<String> addOperators(String num, int target) {
+        List<String> rst = new ArrayList<String>();
+        if(num == null || num.length() == 0) return rst;
+        helper(rst, "", num, target, 0, 0, 0);
+        return rst;
+    }
+    public void helper(List<String> rst, String path, String num, int target, int pos, long eval, long multed){
+        if(pos == num.length()){
+            if(target == eval)
+                rst.add(path);
+            return;
+        }
+        for(int i = pos; i < num.length(); i++){
+            if(i != pos && num.charAt(pos) == '0') break;
+            long cur = Long.parseLong(num.substring(pos, i + 1));
+            if(pos == 0){
+                helper(rst, path + cur, num, target, i + 1, cur, cur);
+            }
+            else{
+                helper(rst, path + "+" + cur, num, target, i + 1, eval + cur , cur);
+                
+                helper(rst, path + "-" + cur, num, target, i + 1, eval -cur, -cur);
+                
+                helper(rst, path + "*" + cur, num, target, i + 1, eval - multed + multed * cur, multed * cur );
+            }
+        }
+    }
+}
