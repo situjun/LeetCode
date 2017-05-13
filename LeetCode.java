@@ -6885,3 +6885,285 @@ public class Solution {
         }
     }
 }
+
+310. Minimum Height Trees
+public class Solution {
+    public List<Integer> findMinHeightTrees(int n, int[][] edges) {
+        //Key:cp,背   https://discuss.leetcode.com/topic/30572/share-some-thoughts/2
+        
+        if (n == 1) return Collections.singletonList(0);
+        List<Set<Integer>> adj = new ArrayList<>(n);
+        for (int i = 0; i < n; ++i) adj.add(new HashSet<>());
+        for (int[] edge : edges) {
+            adj.get(edge[0]).add(edge[1]);
+            adj.get(edge[1]).add(edge[0]);
+        }
+    
+        List<Integer> leaves = new ArrayList<>();
+        for (int i = 0; i < n; ++i)
+            if (adj.get(i).size() == 1) leaves.add(i);
+    
+        while (n > 2) {
+            n -= leaves.size();
+            List<Integer> newLeaves = new ArrayList<>();
+            for (int i : leaves) {
+                int j = adj.get(i).iterator().next();
+                adj.get(j).remove(i);
+                if (adj.get(j).size() == 1) newLeaves.add(j);
+            }
+            leaves = newLeaves;
+        }
+        return leaves;
+    }
+}
+
+309. Best Time to Buy and Sell Stock with Cooldown
+public class Solution {
+    public int maxProfit(int[] prices) {
+        //Key:DP,cp,背  https://discuss.leetcode.com/topic/30421/share-my-thinking-process/2
+        int sell = 0, prev_sell = 0, buy = Integer.MIN_VALUE, prev_buy;
+        for (int price : prices) {
+            prev_buy = buy;
+            buy = Math.max(prev_sell - price, prev_buy);
+            prev_sell = sell;
+            sell = Math.max(prev_buy + price, prev_sell);
+        }
+        return sell;
+        
+    }
+}
+
+301. Remove Invalid Parentheses
+public class Solution {
+    
+    //Key:cp,背  https://discuss.leetcode.com/topic/34875/easy-short-concise-and-fast-java-dfs-3-ms-solution/3
+    public List<String> removeInvalidParentheses(String s) {
+        List<String> ans = new ArrayList<>();
+        remove(s, ans, 0, 0, new char[]{'(', ')'});
+        return ans;
+    }
+    
+    public void remove(String s, List<String> ans, int last_i, int last_j,  char[] par) {
+        for (int stack = 0, i = last_i; i < s.length(); ++i) {
+            if (s.charAt(i) == par[0]) stack++;
+            if (s.charAt(i) == par[1]) stack--;
+            if (stack >= 0) continue;
+            for (int j = last_j; j <= i; ++j)
+                if (s.charAt(j) == par[1] && (j == last_j || s.charAt(j - 1) != par[1]))
+                    remove(s.substring(0, j) + s.substring(j + 1, s.length()), ans, i, j, par);
+            return;
+        }
+        String reversed = new StringBuilder(s).reverse().toString();
+        if (par[0] == '(') // finished left to right
+            remove(reversed, ans, 0, 0, new char[]{')', '('});
+        else // finished right to left
+            ans.add(reversed);
+    }
+}
+
+299. Bulls and Cows
+public class Solution {
+    public String getHint(String secret, String guess) {
+        //Key:my wrong version
+        /**
+        
+        //很麻烦
+        //不知道怎么回事
+        int bulls = 0;
+        int cows = 0;
+        HashMap<Character,Integer> map = new HashMap<Character,Integer>();
+        for(int i=0;i<=secret.length()-1;i++){
+            if(map.containsKey(secret.charAt(i))){ 
+				Character c = new Character(secret.charAt(i));
+				//不知道怎么回事,map.get 老是提示下面的错误  
+				//Line 13: error: unexpected type required: variable found:    value
+                map.put((Character)secret.charAt(i),map.get((Character)secret.charAt(i))++);
+            } else {
+                map.put((Character)secret.charAt(i),1);   
+            }
+            if(guess.charAt(i) == secret.charAt(i)) bulls++;
+               
+        }
+        for(int i=0;i<=secret.length()-1;i++){
+            if(map.containsKey(guess.charAt(i))){
+                map.put((Character)guess.charAt(i),map.get((Character)guess.charAt(i))--);
+            }
+        }
+        for(int i:map.values()){
+            if(i>=0){
+                cows += i;
+            }
+            cows = secret.length()-cows-bulls;
+        }
+        return bulls+"A"+cows+"B";
+        
+        **/
+        int bulls = 0;
+        int cows = 0;
+        int[] numbers = new int[10];
+        for (int i = 0; i<secret.length(); i++) {
+            if (secret.charAt(i) == guess.charAt(i)) bulls++;
+            else {
+                if (numbers[secret.charAt(i)-'0']++ < 0) cows++;
+                if (numbers[guess.charAt(i)-'0']-- > 0) cows++;
+            }
+        }
+        return bulls + "A" + cows + "B";
+        
+    }
+}
+
+290. Word Pattern
+public class Solution {
+    public boolean wordPattern(String pattern, String str) {
+        //Key:my wrong version
+        /**
+        //这道题太麻烦了，就没写对过.....
+        String[] strArr = str.split(" ");
+        int index = 0;
+		int[] tmp = new int[strArr.length];
+        if(strArr.length != pattern.length()) return false;
+        boolean flag = true;
+        //Key Point
+        //遍历HashMap时，不按照输入是的顺序输出。比如这个Case "deadbeef" "d e a d b e e f" 就会乱序输出。
+        //要想顺序输出，用LinkedHashMap。它内部有个链表
+        LinkedHashMap<Integer,Integer> map = new LinkedHashMap<Integer,Integer>();
+        LinkedHashMap<String,Integer> map2 = new LinkedHashMap<String,Integer>();
+        for(int i=0;i<=pattern.length()-1;i++){
+            if(map.containsKey(pattern.charAt(i)-'0')){
+                map.put(i,map.get(pattern.charAt(i)-'0'));
+            } else {
+                map.put(pattern.charAt(i)-'0',i);
+            }
+        }
+		for(int i=0;i<=strArr.length-1;i++){
+			System.out.println(strArr[i]);
+			if(map2.containsKey(strArr[i])){
+				tmp[i] = map2.get(strArr[i]);
+			} else {
+				System.out.println("else"+strArr[i]+","+i);
+				map2.put(strArr[i],i);
+				tmp[i] = i;
+			}
+			
+		}
+        for(Integer i:map.values()){
+            //KEY POINT
+            //只比较String值是否一样，用equals,不要用==。如果用==，两个variable的类型有区别的话，==就会认为他们不等。所以只比较值时，用equals
+            //if(strArr[index] != strArr[i]) flag = false;  这是错的，即使值相同，但仍然会返回false;
+            // if(!strArr[index].equals(strArr[i])) flag = false;
+            // index++;
+			///System.out.println(tmp[index]+","+i);
+            if(tmp[index++] != i) flag = false;
+        }
+        return flag;
+        **/
+         
+        //Key:cp,背 https://discuss.leetcode.com/topic/26573/very-fast-3ms-java-solution-using-hashmap/2
+        String[] arr= str.split(" ");
+        HashMap<Character, String> map = new HashMap<Character, String>();
+        if(arr.length!= pattern.length())
+            return false;
+        for(int i=0; i<arr.length; i++){
+            char c = pattern.charAt(i);
+            if(map.containsKey(c)){
+                if(!map.get(c).equals(arr[i]))
+                    return false;
+            }else{
+                if(map.containsValue(arr[i]))
+                    return false;
+                map.put(c, arr[i]);
+            }    
+        }
+        return true;
+        
+    }
+}
+
+399. Evaluate Division
+public class Solution {
+    //Key:cp,背，弃  https://discuss.leetcode.com/topic/59146/java-ac-solution-using-graph/2
+    public double[] calcEquation(String[][] equations, double[] values, String[][] queries) {
+        HashMap<String, ArrayList<String>> pairs = new HashMap<String, ArrayList<String>>();
+        HashMap<String, ArrayList<Double>> valuesPair = new HashMap<String, ArrayList<Double>>();
+        for (int i = 0; i < equations.length; i++) {
+            String[] equation = equations[i];
+            if (!pairs.containsKey(equation[0])) {
+                pairs.put(equation[0], new ArrayList<String>());
+                valuesPair.put(equation[0], new ArrayList<Double>());
+            }
+            if (!pairs.containsKey(equation[1])) {
+                pairs.put(equation[1], new ArrayList<String>());
+                valuesPair.put(equation[1], new ArrayList<Double>());
+            }
+            pairs.get(equation[0]).add(equation[1]);
+            pairs.get(equation[1]).add(equation[0]);
+            valuesPair.get(equation[0]).add(values[i]);
+            valuesPair.get(equation[1]).add(1/values[i]);
+        }
+        
+        double[] result = new double[queries.length];
+        for (int i = 0; i < queries.length; i++) {
+            String[] query = queries[i];
+            result[i] = dfs(query[0], query[1], pairs, valuesPair, new HashSet<String>(), 1.0);
+            if (result[i] == 0.0) result[i] = -1.0;
+        }
+        return result;
+    }
+    
+    private double dfs(String start, String end, HashMap<String, ArrayList<String>> pairs, HashMap<String, ArrayList<Double>> values, HashSet<String> set, double value) {
+        if (set.contains(start)) return 0.0;
+        if (!pairs.containsKey(start)) return 0.0;
+        if (start.equals(end)) return value;
+        set.add(start);
+        
+        ArrayList<String> strList = pairs.get(start);
+        ArrayList<Double> valueList = values.get(start);
+        double tmp = 0.0;
+        for (int i = 0; i < strList.size(); i++) {
+            tmp = dfs(strList.get(i), end, pairs, values, set, value*valueList.get(i));
+            if (tmp != 0.0) {
+                break;
+            }
+        }
+        set.remove(start);
+        return tmp;
+    }
+}
+
+397. Integer Replacement
+public class Solution {
+    public int integerReplacement(int n) {
+        //Key:my wrong version-->TLE
+        /**
+        //DP,逆序=> 1-7 
+        //想起来挺麻烦的
+        if(n<1) return 0;
+        int[] F = new int[n+1];
+        F[0] = 0;
+        for(int i=1;i<=n;i++){
+            if((i+1)%2 == 0){
+                F[i] = F[(i-1)/2]+1;
+                F[i-1] = Math.min(F[i-1],F[i]+1);
+            }else {
+                F[i] = F[i-1]+1;
+            }
+        }
+        return F[n-1];
+        **/
+        //Key:cp,背   https://discuss.leetcode.com/topic/58334/a-couple-of-java-solutions-with-explanations/2
+        //Key:因为他给的case都挺大的，所以DP或者Recursion貌似都会TLE
+        int c = 0;
+        while (n != 1) {
+            if ((n & 1) == 0) {
+                n >>>= 1;
+            } else if (n == 3 || ((n >>> 1) & 1) == 0) {
+                --n;
+            } else {
+                ++n;
+            }
+            ++c;
+        }
+        return c;
+    }
+}
