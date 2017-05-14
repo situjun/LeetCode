@@ -7167,3 +7167,108 @@ public class Solution {
         return c;
     }
 }
+
+289. Game of Life
+public class Solution {
+    
+    //Key:这道题题意就不好读懂....
+    //Key:cp,背  https://discuss.leetcode.com/topic/29054/easiest-java-solution-with-explanation/2
+    public void gameOfLife(int[][] board) {
+        if (board == null || board.length == 0) return;
+        int m = board.length, n = board[0].length;
+    
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                int lives = liveNeighbors(board, m, n, i, j);
+    
+                // In the beginning, every 2nd bit is 0;
+                // So we only need to care about when will the 2nd bit become 1.
+                if (board[i][j] == 1 && lives >= 2 && lives <= 3) {  
+                    board[i][j] = 3; // Make the 2nd bit 1: 01 ---> 11
+                }
+                if (board[i][j] == 0 && lives == 3) {
+                    board[i][j] = 2; // Make the 2nd bit 1: 00 ---> 10
+                }
+            }
+        }
+    
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                board[i][j] >>= 1;  // Get the 2nd state.
+            }
+        }
+    }
+    
+    public int liveNeighbors(int[][] board, int m, int n, int i, int j) {
+        int lives = 0;
+        for (int x = Math.max(i - 1, 0); x <= Math.min(i + 1, m - 1); x++) {
+            for (int y = Math.max(j - 1, 0); y <= Math.min(j + 1, n - 1); y++) {
+                lives += board[x][y] & 1;
+            }
+        }
+        lives -= board[i][j] & 1;
+        return lives;
+    }
+}
+
+284. Peeking Iterator
+// Java Iterator interface reference:
+// https://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html
+//Key:cp,背 https://discuss.leetcode.com/topic/24883/concise-java-solution
+class PeekingIterator implements Iterator<Integer> {
+
+	private Integer next = null;
+    private Iterator<Integer> iter;
+
+    public PeekingIterator(Iterator<Integer> iterator) {
+        // initialize any member here.
+        iter = iterator;
+        if (iter.hasNext())
+            next = iter.next();
+    }
+    
+    // Returns the next element in the iteration without advancing the iterator. 
+    public Integer peek() {
+        return next; 
+    }
+
+    // hasNext() and next() should behave the same as in the Iterator interface.
+    // Override them if needed.
+    @Override
+    public Integer next() {
+        Integer res = next;
+        next = iter.hasNext() ? iter.next() : null;
+        return res; 
+    }
+
+    @Override
+    public boolean hasNext() {
+        return next != null;
+    }
+}
+
+306. Additive Number
+public class Solution {
+    //Key:cp,背 https://discuss.leetcode.com/topic/29856/java-recursive-and-iterative-solutions/2
+    public boolean isAdditiveNumber(String num) {
+        int n = num.length();
+        for (int i = 1; i <= n / 2; ++i)
+            for (int j = 1; Math.max(j, i) <= n - i - j; ++j)
+                if (isValid(i, j, num)) return true;
+        return false;
+    }
+    private boolean isValid(int i, int j, String num) {
+        if (num.charAt(0) == '0' && i > 1) return false;
+        if (num.charAt(i) == '0' && j > 1) return false;
+        String sum;
+        Long x1 = Long.parseLong(num.substring(0, i));
+        Long x2 = Long.parseLong(num.substring(i, i + j));
+        for (int start = i + j; start != num.length(); start += sum.length()) {
+            x2 = x2 + x1;
+            x1 = x2 - x1;
+            sum = x2.toString();
+            if (!num.startsWith(sum, start)) return false;
+        }
+        return true;
+    }
+}
