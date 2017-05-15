@@ -7272,3 +7272,18 @@ public class Solution {
         return true;
     }
 }
+
+316. Remove Duplicate Letters
+public class Solution {
+    public String removeDuplicateLetters(String s) {
+        //Key:cp,±³  https://discuss.leetcode.com/topic/31404/a-short-o-n-recursive-greedy-solution/2
+        int[] cnt = new int[26];
+        int pos = 0; // the position for the smallest s[i]
+        for (int i = 0; i < s.length(); i++) cnt[s.charAt(i) - 'a']++;
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) < s.charAt(pos)) pos = i;
+            if (--cnt[s.charAt(i) - 'a'] == 0) break;
+        }
+        return s.length() == 0 ? "" : s.charAt(pos) + removeDuplicateLetters(s.substring(pos + 1).replaceAll("" + s.charAt(pos), ""));
+    }
+}
