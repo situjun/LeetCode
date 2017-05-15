@@ -7287,3 +7287,66 @@ public class Solution {
         return s.length() == 0 ? "" : s.charAt(pos) + removeDuplicateLetters(s.substring(pos + 1).replaceAll("" + s.charAt(pos), ""));
     }
 }
+
+312. Burst Balloons
+public class Solution {
+    public int maxCoins(int[] iNums) {
+        //Key£ºcp,mem https://discuss.leetcode.com/topic/30746/share-some-analysis-and-explanations/2
+        int[] nums = new int[iNums.length + 2];
+        int n = 1;
+        for (int x : iNums) if (x > 0) nums[n++] = x;
+        nums[0] = nums[n++] = 1;
+    
+    
+        int[][] dp = new int[n][n];
+        for (int k = 2; k < n; ++k)
+            for (int left = 0; left < n - k; ++left) {
+                int right = left + k;
+                for (int i = left + 1; i < right; ++i)
+                    dp[left][right] = Math.max(dp[left][right], 
+                    nums[left] * nums[i] * nums[right] + dp[left][i] + dp[i][right]);
+            }
+    
+        return dp[0][n - 1];
+        
+    }
+}
+
+330. Patching Array
+public class Solution {
+    public int minPatches(int[] nums, int n) {
+        //Key:cp,mem  https://discuss.leetcode.com/topic/35494/solution-explanation/2
+         int count = 0, i = 0;
+        for (long miss=1; miss <= n; count++)
+            miss += (i < nums.length && nums[i] <= miss) ? nums[i++] : miss;
+        return count - i;
+    }
+}
+
+327. Count of Range Sum
+public class Solution {
+    public int countRangeSum(int[] nums, int lower, int upper) {
+        //Key:cp,mem  https://discuss.leetcode.com/topic/54668/share-my-java-solution-using-treemap
+        
+        if(nums==null || nums.length==0) return 0;
+        TreeMap<Long, Long> tr = new TreeMap<Long, Long>();
+        tr.put((long)0, (long)1);
+        long sum = 0;
+        long count = 0;
+        for(int i=0;i<nums.length;i++){
+            sum += nums[i];
+            long from = sum - upper;
+            long to = sum - lower;
+            Map<Long, Long> sub = tr.subMap(from, true, to, true);
+            for(Long value:sub.values()){
+                count+=value;
+            }
+            if(tr.containsKey(sum)){
+                tr.put(sum, tr.get(sum)+1);
+            } else {
+                tr.put(sum, (long)1);
+            }
+        }
+        return (int)count;
+    }
+}
