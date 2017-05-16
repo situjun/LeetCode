@@ -7666,3 +7666,58 @@ public class Solution {
         }
     }
 }
+
+514. Freedom Trail
+public class Solution {
+    public int findRotateSteps(String ring, String key) {
+        //Key:cp,mem  https://discuss.leetcode.com/topic/81684/concise-java-dp-solution
+        int n = ring.length();
+        int m = key.length();
+        int[][] dp = new int[m + 1][n];
+        
+        for (int i = m - 1; i >= 0; i--) {
+            for (int j = 0; j < n; j++) {
+                dp[i][j] = Integer.MAX_VALUE;
+                for (int k = 0; k < n; k++) {
+                    if (ring.charAt(k) == key.charAt(i)) {
+                        int diff = Math.abs(j - k);
+                        int step = Math.min(diff, n - diff);
+                        dp[i][j] = Math.min(dp[i][j], step + dp[i + 1][k]);
+                    }
+                }
+            }
+        }
+        
+        return dp[0][0] + m;
+        
+    }
+}
+
+376. Wiggle Subsequence
+public class Solution {
+    public int wiggleMaxLength(int[] nums) {
+        //Key:cp,mem  https://discuss.leetcode.com/topic/52076/easy-understanding-dp-solution-with-o-n-java-version/2
+        if( nums.length == 0 ) return 0;
+        
+        int[] up = new int[nums.length];
+        int[] down = new int[nums.length];
+        
+        up[0] = 1;
+        down[0] = 1;
+        
+        for(int i = 1 ; i < nums.length; i++){
+            if( nums[i] > nums[i-1] ){
+                up[i] = down[i-1]+1;
+                down[i] = down[i-1];
+            }else if( nums[i] < nums[i-1]){
+                down[i] = up[i-1]+1;
+                up[i] = up[i-1];
+            }else{
+                down[i] = down[i-1];
+                up[i] = up[i-1];
+            }
+        }
+        
+        return Math.max(down[nums.length-1],up[nums.length-1]);
+    }
+}
