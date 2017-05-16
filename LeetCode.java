@@ -7350,3 +7350,319 @@ public class Solution {
         return (int)count;
     }
 }
+
+394. Decode String
+public class Solution {
+    public String decodeString(String s) {
+        //这道题想起来很麻烦
+        //递归迭代都可以
+        
+        //Key:cp,背  https://discuss.leetcode.com/topic/57250/java-short-and-easy-understanding-solution-using-stack
+        
+        Stack<Integer> count = new Stack<>();
+        Stack<String> result = new Stack<>();
+        int i = 0;
+        result.push("");
+        while (i < s.length()) {
+            char ch = s.charAt(i);
+            if (ch >= '0' && ch <= '9') {
+                int start = i;
+                while (s.charAt(i + 1) >= '0' && s.charAt(i + 1) <= '9') i++;
+                count.push(Integer.parseInt(s.substring(start, i + 1)));
+            } else if (ch == '[') {
+                result.push("");
+            } else if (ch == ']') {
+                String str = result.pop();
+                StringBuilder sb = new StringBuilder();
+                int times = count.pop();
+                for (int j = 0; j < times; j += 1) {
+                    sb.append(str);
+                }
+                result.push(result.pop() + sb.toString());
+            } else {
+                result.push(result.pop() + ch);
+            }
+            i += 1;
+        }
+        return result.pop();
+    }
+}
+
+436. Find Right Interval
+/**
+ * Definition for an interval.
+ * public class Interval {
+ *     int start;
+ *     int end;
+ *     Interval() { start = 0; end = 0; }
+ *     Interval(int s, int e) { start = s; end = e; }
+ * }
+ */
+public class Solution {
+    public int[] findRightInterval(Interval[] intervals) {
+        //Key:my wrong version :
+        /**
+        //Simple solution:complexity On
+        //我估摸着9成得 Time Limit Exceeded
+        //Key point:
+        //题目说which means that the interval j has the minimum start point to build the "right" relationship for interval i. 所以要返回包含最小起点的那个interval
+        //Test case:[[1,2],[2,3],[3,4]] Expected answer返回[1,2,-1]，而非[2,2,-1]
+        //[[3,4],[2,3],[1,2]] Expected [-1,0,1],而非[-1,0,0]
+        //这道题只能用二分了，因为它最后一个Test Case给的太大....
+        //Time Limit Exceeded  More Details 
+        //Last executed input:
+        //[[-20000,-18835],[-19999,-17832],[-19998,-17887],[-19997,-19077],[-19996,-15996],[-19995,-15613],[-19994,-17900]
+        boolean flag = false;
+        if(intervals.length == 0) return null;
+        int len = intervals.length;
+        int[] result = new int[len];
+        for(int i=0;i<=len-1;i++){
+            result[i] = -1;
+            for(int j=0;j<=len-1;j++){
+                if(intervals[j].start>=intervals[i].end){
+                    if(result[i] != -1 ){
+                        if(intervals[result[i]].start>intervals[j].start){
+                            result[i] = j;
+                        }
+                    } else {
+                        result[i] = j;
+                    }
+                }
+                
+            }
+            
+        }
+        return result;
+        **/
+        TreeMap<Integer, Integer> map = new TreeMap<>();
+        int[] res = new int[intervals.length];
+        for(int i=0;i<intervals.length;i++) map.put(intervals[i].start, i);
+        for(int i=0;i<intervals.length;i++) {
+            Integer key = map.ceilingKey(intervals[i].end);
+            res[i] = key!=null ?map.get(key) : -1;
+        }
+        return res;
+    }
+}
+
+449. Serialize and Deserialize BST
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Codec {
+    //Key:cp,弃  https://discuss.leetcode.com/topic/66651/java-preorder-queue-solution
+    
+    private static final String SEP = ",";
+    private static final String NULL = "null";
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        StringBuilder sb = new StringBuilder();
+        if (root == null) return NULL;
+        //traverse it recursively if you want to, I am doing it iteratively here
+        Stack<TreeNode> st = new Stack<>();
+        st.push(root);
+        while (!st.empty()) {
+            root = st.pop();
+            sb.append(root.val).append(SEP);
+            if (root.right != null) st.push(root.right);
+            if (root.left != null) st.push(root.left);
+        }
+        return sb.toString();
+    }
+
+    // Decodes your encoded data to tree.
+    // pre-order traversal
+    public TreeNode deserialize(String data) {
+        if (data.equals(NULL)) return null;
+        String[] strs = data.split(SEP);
+        Queue<Integer> q = new LinkedList<>();
+        for (String e : strs) {
+            q.offer(Integer.parseInt(e));
+        }
+        return getNode(q);
+    }
+    
+    // some notes:
+    //   5
+    //  3 6
+    // 2   7
+    private TreeNode getNode(Queue<Integer> q) { //q: 5,3,2,6,7
+        if (q.isEmpty()) return null;
+        TreeNode root = new TreeNode(q.poll());//root (5)
+        Queue<Integer> samllerQueue = new LinkedList<>();
+        while (!q.isEmpty() && q.peek() < root.val) {
+            samllerQueue.offer(q.poll());
+        }
+        //smallerQueue : 3,2   storing elements smaller than 5 (root)
+        root.left = getNode(samllerQueue);
+        //q: 6,7   storing elements bigger than 5 (root)
+        root.right = getNode(q);
+        return root;
+    }
+}
+
+// Your Codec object will be instantiated and called as such:
+// Codec codec = new Codec();
+// codec.deserialize(codec.serialize(root));
+
+572. Subtree of Another Tree
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //Key:cp,背 https://discuss.leetcode.com/topic/88508/java-solution-tree-traversal
+    
+    public boolean isSubtree(TreeNode s, TreeNode t) {
+        if (s == null) return false;
+        if (isSame(s, t)) return true;
+        return isSubtree(s.left, t) || isSubtree(s.right, t);
+    }
+    
+    private boolean isSame(TreeNode s, TreeNode t) {
+        if (s == null && t == null) return true;
+        if (s == null || t == null) return false;
+        
+        if (s.val != t.val) return false;
+        
+        return isSame(s.left, t.left) && isSame(s.right, t.right);
+    }
+}
+
+583. Delete Operation for Two Strings
+public class Solution {
+    public int minDistance(String word1, String word2) {
+        //Key:cp,背 https://discuss.leetcode.com/topic/89285/java-dp-solution-longest-common-subsequence
+        //https://discuss.leetcode.com/topic/89421/longest-common-subsequence-dp-java-solution
+        
+        int dp[][] = new int[word1.length()+1][word2.length()+1];
+        for(int i = 0; i <= word1.length(); i++) {
+            for(int j = 0; j <= word2.length(); j++) {
+                if(i == 0 || j == 0) dp[i][j] = 0;
+                else dp[i][j] = (word1.charAt(i-1) == word2.charAt(j-1)) ? dp[i-1][j-1] + 1
+                        : Math.max(dp[i-1][j], dp[i][j-1]);
+            }
+        }
+        int val =  dp[word1.length()][word2.length()];
+        return word1.length() - val + word2.length() - val;
+    }
+}
+
+551. Student Attendance Record I
+public class Solution {
+    public boolean checkRecord(String s) {
+        //Key:cp,mem  https://discuss.leetcode.com/topic/86466/java-1-liner
+        
+        return !s.matches(".*LLL.*|.*A.*A.*");
+    }
+}
+
+582. Kill Process
+public class Solution {
+    //Key:cp,mem   https://discuss.leetcode.com/topic/89298/java-dfs-solution
+    //https://discuss.leetcode.com/topic/89287/java-dfs-o-n-time-o-n-space/2
+    public List<Integer> killProcess(List<Integer> pid, List<Integer> ppid, int kill) {
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        for(int i = 0; i < pid.size(); i++) {
+            List<Integer> children = map.getOrDefault(ppid.get(i), new ArrayList<>());
+            children.add(pid.get(i));
+            map.put(ppid.get(i), children);
+        }
+        List<Integer> result = new ArrayList<>();
+        dfs(map, kill, result);
+        return result;
+    }
+    private void dfs(Map<Integer, List<Integer>> map, int kill, List<Integer> result) {
+        result.add(kill);
+        if(!map.containsKey(kill)) return;
+        List<Integer> children = map.get(kill);
+        for(Integer child : children) {
+            dfs(map, child, result);
+        }
+    }
+}
+
+563. Binary Tree Tilt
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    //Key:cp,mem  https://discuss.leetcode.com/topic/87191/java-o-n-postorder-traversal
+    int tilt = 0;
+    
+    public int findTilt(TreeNode root) {
+        postorder(root);
+        return tilt;
+    }
+    
+    public int postorder(TreeNode root) {
+        if (root == null) return 0;
+        int leftSum = postorder(root.left);
+        int rightSum = postorder(root.right);
+        tilt += Math.abs(leftSum - rightSum);
+        return leftSum + rightSum + root.val;
+    }
+}
+
+390. Elimination Game
+public class Solution {
+    public int lastRemaining(int n) {
+        //Key:cp,mem   https://discuss.leetcode.com/topic/59293/java-easiest-solution-o-logn-with-explanation
+        boolean left = true;
+        int remaining = n;
+        int step = 1;
+        int head = 1;
+        while (remaining > 1) {
+            if (left || remaining % 2 ==1) {
+                head = head + step;
+            }
+            remaining = remaining / 2;
+            step = step * 2;
+            left = !left;
+        }
+        return head;
+        
+    }
+}
+
+386. Lexicographical Numbers
+public class Solution {
+    //Key:cp,mem  https://discuss.leetcode.com/topic/55377/simple-java-dfs-solution/2
+    public List<Integer> lexicalOrder(int n) {
+        List<Integer> res = new ArrayList<>();
+        for(int i=1;i<10;++i){
+          dfs(i, n, res); 
+        }
+        return res;
+    }
+    
+    public void dfs(int cur, int n, List<Integer> res){
+        if(cur>n)
+            return;
+        else{
+            res.add(cur);
+            for(int i=0;i<10;++i){
+                if(10*cur+i>n)
+                    return;
+                dfs(10*cur+i, n, res);
+            }
+        }
+    }
+}
