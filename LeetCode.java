@@ -7721,3 +7721,135 @@ public class Solution {
         return Math.max(down[nums.length-1],up[nums.length-1]);
     }
 }
+
+542. 01 Matrix
+public class Solution {
+    public int[][] updateMatrix(int[][] matrix) {
+        //Key:cp,mem https://discuss.leetcode.com/topic/83453/java-solution-bfs/2
+        //https://discuss.leetcode.com/topic/83574/short-solution-each-path-needs-at-most-one-turn
+        
+        int m = matrix.length;
+        int n = matrix[0].length;
+        
+        Queue<int[]> queue = new LinkedList<>();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == 0) {
+                    queue.offer(new int[] {i, j});
+                }
+                else {
+                    matrix[i][j] = Integer.MAX_VALUE;
+                }
+            }
+        }
+        
+        int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        
+        while (!queue.isEmpty()) {
+            int[] cell = queue.poll();
+            for (int[] d : dirs) {
+                int r = cell[0] + d[0];
+                int c = cell[1] + d[1];
+                if (r < 0 || r >= m || c < 0 || c >= n || 
+                    matrix[r][c] <= matrix[cell[0]][cell[1]] + 1) continue;
+                queue.add(new int[] {r, c});
+                matrix[r][c] = matrix[cell[0]][cell[1]] + 1;
+            }
+        }
+        
+        return matrix;
+    }
+}
+
+363. Max Sum of Rectangle No Larger Than K
+public class Solution {
+    public int maxSumSubmatrix(int[][] matrix, int target) {
+        //Key:cp,mem  https://discuss.leetcode.com/topic/48854/java-binary-search-solution-time-complexity-min-m-n-2-max-m-n-log-max-m-n/2
+        
+        int row = matrix.length;
+        if(row==0)return 0;
+        int col = matrix[0].length;
+        int m = Math.min(row,col);
+        int n = Math.max(row,col);
+        //indicating sum up in every row or every column
+        boolean colIsBig = col>row;
+        int res = Integer.MIN_VALUE;
+        for(int i = 0;i<m;i++){
+            int[] array = new int[n];
+            // sum from row j to row i
+            for(int j = i;j>=0;j--){
+                int val = 0;
+                TreeSet<Integer> set = new TreeSet<Integer>();
+                set.add(0);
+                //traverse every column/row and sum up
+                for(int k = 0;k<n;k++){
+                    array[k]=array[k]+(colIsBig?matrix[j][k]:matrix[k][j]);
+                    val = val + array[k];
+                    //use  TreeMap to binary search previous sum to get possible result 
+                    Integer subres = set.ceiling(val-target);
+                    if(null!=subres){
+                        res=Math.max(res,val-subres);
+                    }
+                    set.add(val);
+                }
+            }
+        }
+        return res;
+    }
+}
+
+219. Contains Duplicate II
+public class Solution {
+    public boolean containsNearbyDuplicate(int[] nums, int k) {
+        //Key:my wrong version
+        /**
+        //typical HashMap
+        if(nums == null || nums.length == 0) return false;
+        //Corner Case:k =0 时，直接返回true
+        if(k == 0) return true;
+        boolean flag = false;
+        HashMap<Integer,Integer> map = new HashMap<Integer,Integer>();
+        for(int i=0;i<=nums.length-1;i++){
+            if(!map.containsKey(nums[i]) && !flag){
+                map.put(nums[i],i);
+            } else {
+                if((i-map.get(nums[i]))<=k){
+                    flag = true;
+                } else {
+                    map.put(nums[i],i);
+                }
+            }
+        }
+        return flag;
+        **/
+        
+        
+        //Key:cp,mem  https://discuss.leetcode.com/topic/15305/simple-java-solution
+        Set<Integer> set = new HashSet<Integer>();
+        for(int i = 0; i < nums.length; i++){
+            if(i > k) set.remove(nums[i-k-1]);
+            if(!set.add(nums[i])) return true;
+        }
+        return false;
+    }
+}
+
+354. Russian Doll Envelopes
+public class Solution {
+    public int maxEnvelopes(int[][] envelopes) {
+        //Key:cp,mem   https://discuss.leetcode.com/topic/47594/short-and-simple-java-solution-15-lines
+        
+        Arrays.sort(envelopes, (a, b) -> a[0] - b[0]);
+        int max = 0;
+        int dp [] = new int [envelopes.length];
+        for(int i = 0; i < envelopes.length; i++){
+            dp[i] = 1;
+            for(int j = 0; j < i; j++){
+                if(envelopes[j][0] < envelopes[i][0] && envelopes[j][1] < envelopes[i][1])
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+            }
+            max = Math.max(dp[i], max);
+        }
+        return max;
+    }
+}
