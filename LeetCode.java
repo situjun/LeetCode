@@ -7853,3 +7853,169 @@ public class Solution {
         return max;
     }
 }
+
+368. Largest Divisible Subset
+public class Solution {
+    public List<Integer> largestDivisibleSubset(int[] nums) {
+        //Key:cp,mem  https://discuss.leetcode.com/topic/49652/classic-dp-solution-similar-to-lis-o-n-2/10
+        if (nums.length == 0) return new ArrayList<>();
+        Arrays.sort(nums);
+        Map <Integer, List<Integer>> map = new HashMap <>();
+        for (int num : nums) {
+        	Integer copyKey = null;
+            for (Integer key : map.keySet())
+                if (num % key == 0) 
+                    if (copyKey == null || map.get (copyKey).size() < map.get (key).size()) copyKey = key;
+                    
+            map.put (num, copyKey != null ? new ArrayList<> (map.get (copyKey)) : new ArrayList<>());
+			map.get (num).add (num);
+        }
+        
+        List<Integer> max = null;
+        for (Map.Entry<Integer, List<Integer>> entry : map.entrySet())
+            if (max == null || max.size() < entry.getValue().size()) max = entry.getValue();
+        return max;
+    }
+}
+
+576. Out of Boundary Paths
+public class Solution {
+    public int findPaths(int m, int n, int N, int i, int j) {
+        //Key:cp,mem https://discuss.leetcode.com/topic/88570/java-solution-dp-with-space-compression
+        
+        if (N <= 0) return 0;
+        
+        final int MOD = 1000000007;
+        int[][] count = new int[m][n];
+        count[i][j] = 1;
+        int result = 0;
+        
+        int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        
+        for (int step = 0; step < N; step++) {
+            int[][] temp = new int[m][n];
+            for (int r = 0; r < m; r++) {
+                for (int c = 0; c < n; c++) {
+                    for (int[] d : dirs) {
+                        int nr = r + d[0];
+                        int nc = c + d[1];
+                        if (nr < 0 || nr >= m || nc < 0 || nc >= n) {
+                            result = (result + count[r][c]) % MOD;
+                        }
+                        else {
+                            temp[nr][nc] = (temp[nr][nc] + count[r][c]) % MOD;
+                        }
+                    }
+                }
+            }
+            count = temp;
+        }
+        
+        return result;
+    }
+}
+
+417. Pacific Atlantic Water Flow
+public class Solution {
+    //Key:cp,弃  https://discuss.leetcode.com/topic/62379/java-bfs-dfs-from-ocean/2
+    
+    int[][]dir = new int[][]{{0,1},{0,-1},{1,0},{-1,0}};
+    public List<int[]> pacificAtlantic(int[][] matrix) {
+        List<int[]> res = new LinkedList<>();
+        if(matrix == null || matrix.length == 0 || matrix[0].length == 0){
+            return res;
+        }
+        int n = matrix.length, m = matrix[0].length;
+        boolean[][]pacific = new boolean[n][m];
+        boolean[][]atlantic = new boolean[n][m];
+        for(int i=0; i<n; i++){
+            dfs(matrix, pacific, Integer.MIN_VALUE, i, 0);
+            dfs(matrix, atlantic, Integer.MIN_VALUE, i, m-1);
+        }
+        for(int i=0; i<m; i++){
+            dfs(matrix, pacific, Integer.MIN_VALUE, 0, i);
+            dfs(matrix, atlantic, Integer.MIN_VALUE, n-1, i);
+        }
+        for (int i = 0; i < n; i++) 
+            for (int j = 0; j < m; j++) 
+                if (pacific[i][j] && atlantic[i][j]) 
+                    res.add(new int[] {i, j});
+        return res;
+    }
+    
+    
+    
+    public void dfs(int[][]matrix, boolean[][]visited, int height, int x, int y){
+        int n = matrix.length, m = matrix[0].length;
+        if(x<0 || x>=n || y<0 || y>=m || visited[x][y] || matrix[x][y] < height)
+            return;
+        visited[x][y] = true;
+        for(int[]d:dir){
+            dfs(matrix, visited, matrix[x][y], x+d[0], y+d[1]);
+        }
+    }
+}
+
+507. Perfect Number
+public class Solution {
+    public boolean checkPerfectNumber(int num) {
+        //Key:cp,mem https://discuss.leetcode.com/topic/84260/java-4-liner-o-sqrt-n-solution
+        //https://discuss.leetcode.com/topic/84259/simple-java-solution/2
+        //Key:这两个sol的思路一样，但是我复制的这个代码格写法的有点意思...
+        int sum = 1;
+        for (int i=2;i<Math.sqrt(num);i++) 
+            if (num % i == 0) sum += i + (num/i == i ? 0 : num/i);
+        return num != 1 && sum == num;
+    }
+}
+
+274. H-Index
+public class Solution {
+    public int hIndex(int[] citations) {
+        //Key:cp,mem  https://discuss.leetcode.com/topic/23310/my-easy-solution
+        //Another bucket sol:https://discuss.leetcode.com/topic/23307/my-o-n-time-solution-use-java  https://discuss.leetcode.com/topic/40765/java-bucket-sort-o-n-solution-with-detail-explanation/2
+        Arrays.sort(citations);
+        int len=citations.length;
+        for(int i=0;i<len;i++){
+            if(citations[i]>=len-i) return len-i;
+            
+        }
+        return 0;
+    }
+}
+
+403. Frog Jump
+public class Solution {
+    public boolean canCross(int[] stones) {
+        //Key:cp,mem https://discuss.leetcode.com/topic/59903/very-easy-to-understand-java-solution-with-explanations/2
+        
+        if (stones.length == 0) {
+        	return true;
+        }
+        
+        HashMap<Integer, HashSet<Integer>> map = new HashMap<Integer, HashSet<Integer>>(stones.length);
+        map.put(0, new HashSet<Integer>());
+        map.get(0).add(1);
+        for (int i = 1; i < stones.length; i++) {
+        	map.put(stones[i], new HashSet<Integer>() );
+        }
+        
+        for (int i = 0; i < stones.length - 1; i++) {
+        	int stone = stones[i];
+        	for (int step : map.get(stone)) {
+        		int reach = step + stone;
+        		if (reach == stones[stones.length - 1]) {
+        			return true;
+        		}
+        		HashSet<Integer> set = map.get(reach);
+        		if (set != null) {
+        		    set.add(step);
+        		    if (step - 1 > 0) set.add(step - 1);
+        		    set.add(step + 1);
+        		}
+        	}
+        }
+        
+        return false;
+    }
+}
