@@ -7837,7 +7837,7 @@ public class Solution {
 354. Russian Doll Envelopes
 public class Solution {
     public int maxEnvelopes(int[][] envelopes) {
-        //Key:just cp,mem   https://discuss.leetcode.com/topic/47594/short-and-simple-java-solution-15-lines
+        //Key:just cp,mem,解法很好   https://discuss.leetcode.com/topic/47594/short-and-simple-java-solution-15-lines
         
         Arrays.sort(envelopes, (a, b) -> a[0] - b[0]);
         int max = 0;
