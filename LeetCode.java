@@ -8019,3 +8019,128 @@ public class Solution {
         return false;
     }
 }
+
+375. Guess Number Higher or Lower II
+public class Solution {
+    public int getMoneyAmount(int n) {
+        //Key:cp,mem  https://discuss.leetcode.com/topic/51353/simple-dp-solution-with-explanation/2
+        
+        int[][] table = new int[n+1][n+1];
+        for(int j=2; j<=n; j++){
+            for(int i=j-1; i>0; i--){
+                int globalMin = Integer.MAX_VALUE;
+                for(int k=i+1; k<j; k++){
+                    int localMax = k + Math.max(table[i][k-1], table[k+1][j]);
+                    globalMin = Math.min(globalMin, localMax);
+                }
+                table[i][j] = i+1==j?i:globalMin;
+            }
+        }
+        return table[1][n];
+    }
+}
+
+410. Split Array Largest Sum
+public class Solution {
+    public int splitArray(int[] nums, int m) {
+        //Key:cp,mem  https://discuss.leetcode.com/topic/61405/dp-java
+        //https://discuss.leetcode.com/topic/61405/dp-java
+        
+        int L = nums.length;
+        int[] S = new int[L+1];
+        S[0]=0;
+        for(int i=0; i<L; i++)
+            S[i+1] = S[i]+nums[i];
+    
+        int[] dp = new int[L];
+        for(int i=0; i<L; i++)
+            dp[i] = S[L]-S[i];
+    
+        for(int s=1; s<m; s++)
+        {
+            for(int i=0; i<L-s; i++)
+            {
+                dp[i]=Integer.MAX_VALUE;
+                for(int j=i+1; j<=L-s; j++)
+                {
+                    int t = Math.max(dp[j], S[j]-S[i]);
+                    if(t<=dp[i])
+                        dp[i]=t;
+                    else
+                        break;
+                }
+            }
+        }
+    
+        return dp[0];
+    }
+}
+
+372. Super Pow
+public class Solution {
+    //Key:cp,mem   https://discuss.leetcode.com/topic/50586/math-solusion-based-on-euler-s-theorem-power-called-only-once-c-java-1-line-python/2
+    public int superPow(int a, int[] b) {
+        if (a % 1337 == 0) return 0;
+        int p = 0;
+        for (int i : b) p = (p * 10 + i) % 1140;
+        if (p == 0) p += 1440;
+        return power(a, p, 1337);
+    }
+    public int power(int a, int n, int mod) {
+        a %= mod;
+        int ret = 1;
+        while (n != 0) {
+            if ((n & 1) != 0) ret = ret * a % mod;
+            a = a * a % mod;
+            n >>= 1;
+        }
+        return ret;
+    }
+}
+
+393. UTF-8 Validation
+public class Solution {
+    public boolean validUtf8(int[] data) {
+        //Key:cp,弃  https://discuss.leetcode.com/topic/61818/simple-one-pass-concise-java-solution-beating-99
+        int varCharLeft = 0;
+		for (int b: data) {
+			if (varCharLeft == 0) {
+				if ((b & 0b010000000) == 0)  varCharLeft = 0;
+				else if ((b & 0b011100000) == 0b11000000)  varCharLeft = 1;
+				else if ((b & 0b011110000) == 0b11100000)  varCharLeft = 2;
+				else if ((b & 0b011111000) == 0b11110000)  varCharLeft = 3;
+				else return false;
+			} else {
+				if ((b & 0b011000000) != 0b10000000)  return false;
+				varCharLeft--;
+			}
+		}
+		return varCharLeft==0;
+    }
+}
+
+502. IPO
+public class Solution {
+    public int findMaximizedCapital(int k, int W, int[] Profits, int[] Capital) {
+        //Key:cp,mem   https://discuss.leetcode.com/topic/77768/very-simple-greedy-java-solution-using-two-priorityqueues/2
+        
+        PriorityQueue<int[]> pqCap = new PriorityQueue<>((a, b) -> (a[0] - b[0]));
+        PriorityQueue<int[]> pqPro  = new PriorityQueue<>((a, b) -> (b[1] - a[1]));
+        
+        for (int i = 0; i < Profits.length; i++) {
+            pqCap.add(new int[] {Capital[i], Profits[i]});
+        }
+        
+        for (int i = 0; i < k; i++) {
+            while (!pqCap.isEmpty() && pqCap.peek()[0] <= W) {
+                pqPro.add(pqCap.poll());
+            }
+            
+            if (pqPro.isEmpty()) break;
+            
+            W += pqPro.poll()[1];
+        }
+        
+        return W;
+    }
+}
