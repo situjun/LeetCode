@@ -8211,3 +8211,187 @@ public class Solution {
         return res;
     }   
 }
+
+488. Zuma Game
+public class Solution {
+    
+    //Key:cp.mem  https://discuss.leetcode.com/topic/79820/short-java-solution-beats-98
+    
+    int MAXCOUNT = 6;   // the max balls you need will not exceed 6 since "The number of balls in your hand won't exceed 5"
+    public int findMinStep(String board, String hand) {
+        int[] handCount = new int[32];
+        for (int i = 0; i < hand.length(); ++i) ++handCount[hand.charAt(i) - 'A'];
+        int rs = helper(board + "#", handCount);  // append a "#" to avoid special process while j==board.length, make the code shorter.
+        return rs == MAXCOUNT ? -1 : rs;
+    }
+    private int helper(String s, int[] h) {
+        s = removeConsecutive(s);     
+        if (s.equals("#")) return 0;
+        int  rs = MAXCOUNT, need = 0;
+        for (int i = 0, j = 0 ; j < s.length(); ++j) {
+            if (s.charAt(j) == s.charAt(i)) continue;
+            need = 3 - (j - i);     //balls need to remove current consecutive balls.
+            if (h[s.charAt(i) - 'A'] >= need) {
+                h[s.charAt(i) - 'A'] -= need;
+                rs = Math.min(rs, need + helper(s.substring(0, i) + s.substring(j), h));
+                h[s.charAt(i) - 'A'] += need;
+            }
+            i = j;
+        }
+        return rs;
+    }
+    //remove consecutive balls longer than 3
+    private String removeConsecutive(String board) {
+        for (int i = 0, j = 0; j < board.length(); ++j) {
+            if (board.charAt(j) == board.charAt(i)) continue;
+            if (j - i >= 3) return removeConsecutive(board.substring(0, i) + board.substring(j));
+            else i = j;
+        }
+        return board;
+    }
+    
+}
+
+388. Longest Absolute File Path
+public class Solution {
+    public int lengthLongestPath(String input) {
+        //Key:cp,mem  https://discuss.leetcode.com/topic/55561/two-different-solutions-in-java-using-stack-and-hashmap/2
+        
+        HashMap<Integer, Integer> hashMap = new HashMap<>();
+        hashMap.put(0, 0);
+        int result = 0;
+        for (String s : input.split("\n")) {
+            int level = s.lastIndexOf('\t') + 1;
+            int len = s.length() - level;
+            if (s.contains(".")) {
+                result = Math.max(result, hashMap.get(level) + len);
+            } else {
+                hashMap.put(level + 1, hashMap.get(level) + len + 1);
+            }
+        }
+        return result;
+    }
+}
+
+567. Permutation in String
+public class Solution {
+    //Key:my wrong version
+    /**
+    public boolean checkInclusion(String s1, String s2) {
+        List<Character> list = new ArrayList<>();
+        char[] arr = s1.toCharArray();
+        boolean[] used = new boolean[arr.length];
+        boolean res = helper(list,arr,used,s2);
+        return res;
+    }
+    boolean helper(List<Character> list,char[] arr,boolean[] used,String s2){
+        if(list.size() == s2.length()){
+            StringBuilder sb = new StringBuilder();
+            for(char c:list){
+                sb.append(c);
+            }
+            //System.out.println(sb.toString());
+            if(s2.indexOf(sb.toString()) != -1) return true;
+        } else {
+            for(int i = 0;i<=arr.length-1;i++){
+                if(used[i] == true) continue;
+                used[i] = true;
+                list.add(arr[i]);
+                helper(list,arr,used,s2);
+                list.remove(list.size()-1);
+                used[i] = false;
+            }
+        }
+        return false;
+    }
+    **/
+    
+    //Key:cp,mem  https://discuss.leetcode.com/topic/87845/java-solution-sliding-window/2
+    
+    public boolean checkInclusion(String s1, String s2) {
+        int len1 = s1.length(), len2 = s2.length();
+        if (len1 > len2) return false;
+        
+        int[] count = new int[26];
+        for (int i = 0; i < len1; i++) {
+            count[s1.charAt(i) - 'a']++;
+            count[s2.charAt(i) - 'a']--;
+        }
+        if (allZero(count)) return true;
+        
+        for (int i = len1; i < len2; i++) {
+            count[s2.charAt(i) - 'a']--;
+            count[s2.charAt(i - len1) - 'a']++;
+            if (allZero(count)) return true;
+        }
+        
+        return false;
+    }
+    
+    private boolean allZero(int[] count) {
+        for (int i = 0; i < 26; i++) {
+            if (count[i] != 0) return false;
+        }
+        return true;
+    }
+}
+
+367. Valid Perfect Square
+public class Solution {
+    public boolean isPerfectSquare(int num) {
+        //Key:cp,mem  Newton method:https://discuss.leetcode.com/topic/49325/a-square-number-is-1-3-5-7-java-code/2
+        
+        long x = num;
+        while (x * x > num) {
+            x = (x + num / x) >> 1;
+        }
+        return x * x == num;
+    }
+}
+
+352. Data Stream as Disjoint Intervals
+/**
+ * Definition for an interval.
+ * public class Interval {
+ *     int start;
+ *     int end;
+ *     Interval() { start = 0; end = 0; }
+ *     Interval(int s, int e) { start = s; end = e; }
+ * }
+ */
+public class SummaryRanges {
+    //Key:cp,mem  https://discuss.leetcode.com/topic/46887/java-solution-using-treemap-real-o-logn-per-adding/2
+    
+    TreeMap<Integer, Interval> tree;
+    public SummaryRanges() {
+        tree = new TreeMap<>();
+    }
+
+    public void addNum(int val) {
+        if(tree.containsKey(val)) return;
+        Integer l = tree.lowerKey(val);
+        Integer h = tree.higherKey(val);
+        if(l != null && h != null && tree.get(l).end + 1 == val && h == val + 1) {
+            tree.get(l).end = tree.get(h).end;
+            tree.remove(h);
+        } else if(l != null && tree.get(l).end + 1 >= val) {
+            tree.get(l).end = Math.max(tree.get(l).end, val);
+        } else if(h != null && h == val + 1) {
+            tree.put(val, new Interval(val, tree.get(h).end));
+            tree.remove(h);
+        } else {
+            tree.put(val, new Interval(val, val));
+        }
+    }
+
+    public List<Interval> getIntervals() {
+        return new ArrayList<>(tree.values());
+    }
+}
+
+/**
+ * Your SummaryRanges object will be instantiated and called as such:
+ * SummaryRanges obj = new SummaryRanges();
+ * obj.addNum(val);
+ * List<Interval> param_2 = obj.getIntervals();
+ */
