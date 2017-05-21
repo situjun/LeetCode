@@ -8395,3 +8395,36 @@ public class SummaryRanges {
  * obj.addNum(val);
  * List<Interval> param_2 = obj.getIntervals();
  */
+ 
+ 416. Partition Equal Subset Sum
+ public class Solution {
+    public boolean canPartition(int[] nums) {
+        //Key:cp,mem  https://discuss.leetcode.com/topic/67539/0-1-knapsack-detailed-explanation/2
+        
+        int sum = 0;
+    
+        for (int num : nums) {
+            sum += num;
+        }
+        
+        if ((sum & 1) == 1) {
+            return false;
+        }
+        sum /= 2;
+        
+        int n = nums.length;
+        boolean[] dp = new boolean[sum+1];
+        Arrays.fill(dp, false);
+        dp[0] = true;
+        
+        for (int num : nums) {
+            for (int i = sum; i > 0; i--) {
+                if (i >= num) {
+                    dp[i] = dp[i] || dp[i-num];
+                }
+            }
+        }
+        
+        return dp[sum];
+    }
+}
