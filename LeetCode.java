@@ -1,6 +1,8 @@
 516. Longest Palindromic Subsequence
 public class Solution {
     public int longestPalindromeSubseq(String s) {
+        //V1
+        /**
         //Key:subsequence's子序列，不能调整顺序....
         /**
         
@@ -22,7 +24,8 @@ public class Solution {
         //DP
         //Key:这道DP要整体思考，思考的太细容易绕在里头.....
         //Key:explaination  https://discuss.leetcode.com/topic/78603/straight-forward-java-dp-solution
-        //Key:F[i][j]表示ith和jth间最大的回文长度,宏观的看i可以认为在j前
+        //Key:F[i][j]表示ith和jth间最大的回文长度
+        /**
         int length = s.length();
         int[][] F = new int[length][length];
         for(int i = 0;i<=length-1;i++) F[i][i] = 1;
@@ -31,6 +34,7 @@ public class Solution {
         //下面这句是错误的
         //for(int i = 0;i<=length-1;i++){
         //如果非要从前往后，就该写成F[i-1][j+1]
+        //****************i***j***
         for(int i = length-1;i>=0;i--){
             for(int j = i+1;j<=length-1;j++){
                 if(s.charAt(i) == s.charAt(j)){
@@ -41,6 +45,19 @@ public class Solution {
             }
         }
         return F[0][length-1];
+        
+        **/
+        
+        //V2
+        int[][] dp = new int[s.length()][s.length()];
+        for(int i = 0;i<=s.length()-1;i++) dp[i][i] = 1;
+        for(int i = s.length()-1;i>=0;i--){
+            for(int j =i+1;j<=s.length()-1;j++){
+                if(s.charAt(i) == s.charAt(j)) dp[i][j] = dp[i+1][j-1]+2;
+                else dp[i][j] = Math.max(dp[i][j-1],dp[i+1][j]);
+            }
+        }
+        return dp[0][s.length()-1];
     }
 }
 
@@ -1216,15 +1233,21 @@ public class Solution {
     public int numberOfArithmeticSlices(int[] A) {
         //Key:Just copy  Math
         //这个sol需要发现之间的规律，否则不太好做
+        
         int curr = 0, sum = 0;
         for (int i=2; i<A.length; i++)
             if (A[i]-A[i-1] == A[i-1]-A[i-2]) {
-                curr += 1;
-                sum += curr;
+                //Key:这两行是关键点，要仔细理解
+                //可以这么试着理解，如{1,2,3,4,5} 1,2,3-->1 ,然后2,3,4可以看成倒着来的1,2,3的复制（即为4,3,2），最后再加一个1,2,3,4整体。
+                //所以便是sum += ++curr;
+                //Key:一下两种写法都可以
+                sum += ++curr;
+                //curr += 1;
+                //sum += curr;
             } else {
                 curr = 0;
             }
-        return sum;
+        return sum; 
     }
 }
 
@@ -2229,18 +2252,35 @@ public class Solution {
 357. Count Numbers with Unique Digits
 public class Solution {
     public int countNumbersWithUniqueDigits(int n) {
-        //Key:just cp
+        //Key:just cp，mem  https://discuss.leetcode.com/topic/47983/java-dp-o-1-solution
+        //Key:这两个结合起来看 https://discuss.leetcode.com/topic/48332/java-o-1-with-explanation
+        //Key:0到10^n间，那些位数字完全不同的数的个数。
+        //ex.0~10^2, return 92  excluding [11,22,33,44,55,66,77,88,99]
+        //When n == 10, _ _ _ _ _ _ _ _ _ _ total choice is 9 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1
+        //When n == 11, _ _ _ _ _ _ _ _ _ _ _ total choice is 9 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1 * 0 = 0
         if (n == 0)     return 1;
         
+        
+        int res = 10,foo = 9,item = 9;
+        for(int i = n;i>1;i--){
+            item *= foo--;
+            res += item;
+        }
+        return res;
+        
+        //Key:下面的是原答案写法
+        /**
         int res = 10;
         int uniqueDigits = 9;
         int availableNumber = 9;
-        while (n-- > 1 && availableNumber > 0) {
+        while (n > 1 && availableNumber > 0) {
             uniqueDigits = uniqueDigits * availableNumber;
             res += uniqueDigits;
             availableNumber--;
+            n--;
         }
-        return res;
+        
+        **/
     }
 }
 
@@ -8551,6 +8591,46 @@ public class Solution {
             res[i] = Integer.bitCount(i);
         }
         return res;
+    }
+}
+
+494. Target Sum
+public class Solution {
+    //V1
+    /**
+    public int findTargetSumWays(int[] nums, int S) {
+        //Key point:用递归解
+        if(nums.length == 0) return 0;
+        return helper(nums,0,false,0,S) + helper(nums,0,true,0,S);  
+    }
+    public int helper(int[] nums,int sum,boolean tag,int index,int S){
+        if(index >=0 && index <= nums.length-2){
+            if(tag) sum+= nums[index];
+            else sum-=nums[index];
+            index++;
+            //System.out.println("index "+index+" "+sum+"");
+            return helper(nums,sum,false,index,S) + helper(nums,sum,true,index,S);
+        }
+        //System.out.println("index"+index+"......"+sum+"");
+         //Key point:注意，因为需要在最后一个node处进行判断，所以写起来和TreeNode递归不太一样.....注意下面这句写法
+         //Key:+1+1+1+1-1 在最后一个-1的减号处进行判断。
+        if(!tag && (sum-nums[index])==S || tag && (sum+nums[index] == S)) return 1;
+        return 0;
+    }
+    **/
+    public int findTargetSumWays(int[] nums, int S) {
+        if(nums.length == 0) return 0;
+        return helper(nums,S,false,0,0)+helper(nums,S,true,0,0);
+    }
+    public int helper(int[] nums,int S,boolean tag,int index,int sum){
+        if(index<=nums.length-2){
+            if(tag) sum+=nums[index];
+            else sum-=nums[index];
+            index++;
+            return helper(nums,S,false,index,sum)+helper(nums,S,true,index,sum);
+        }
+        if(tag && (sum+nums[index] == S) ||!tag && (sum-nums[index] == S)) return 1;
+        return 0;
     }
 }
 
