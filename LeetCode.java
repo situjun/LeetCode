@@ -22,7 +22,7 @@ public class Solution {
         //DP
         //Key:这道DP要整体思考，思考的太细容易绕在里头.....
         //Key:explaination  https://discuss.leetcode.com/topic/78603/straight-forward-java-dp-solution
-        //Key:F[i][j]表示ith和jth间最大的回文长度
+        //Key:F[i][j]表示ith和jth间最大的回文长度,宏观的看i可以认为在j前
         int length = s.length();
         int[][] F = new int[length][length];
         for(int i = 0;i<=length-1;i++) F[i][i] = 1;
