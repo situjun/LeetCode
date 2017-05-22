@@ -8634,3 +8634,70 @@ public class Solution {
     }
 }
 
+486. Predict the Winner
+public class Solution {
+    //Key:origin
+    /**
+    public boolean PredictTheWinner(int[] nums) {
+        //Key point:如果大小相同，也算Player1赢。
+        //Corner case:[1,1] 返回true
+        if(nums.length == 0) return false;
+        //Key:因为是player1先拿的，所以>0即为true
+        return helper(nums,0,nums.length-1)<0?false:true;
+    }
+    //这道题也可以用DP来做，不过更绕一些
+    //Recursion version
+    public int helper(int[] nums,int s,int e){
+        //Key:s --> start,e --> end
+        //Key point:这个有点绕。理解成有一个机器可以自动返回最大值，由player1和player2轮流使用...
+        //轮到当前player时，加上两端中的最大值，并且减去另一个player接下来的最大值
+        //Key:两个人的目的都是为了使自己当前回合拿到的能够大于对方当前回合能够拿到的
+        return s == e?nums[e]:Math.max(nums[s] - helper(nums,s+1,e),nums[e] - helper(nums,s,e-1));
+    }
+    **/
+    
+    //V2
+    public boolean PredictTheWinner(int[] nums) {
+        //Corner case:[0]  expected:true  这case给的不怎么好，0有实际意义??
+        return helper(nums,0,nums.length-1)>=0?true:false;
+    }
+    public int helper(int[] nums,int start,int end){
+        return start == end?nums[start]:Math.max(nums[start]-helper(nums,start+1,end),nums[end]-helper(nums,start,end-1));
+    }
+}
+
+474. Ones and Zeroes
+public class Solution {
+    public int findMaxForm(String[] strs, int m, int n) {
+        if(strs.length == 0) return 0;
+        //Key:类似于01pack。value都是1，但是weight限制变成了一个二维数组。仔细想想，有些绕，但不算很难
+        //
+        int[][] arr = new int[m+1][n+1];
+        //Key:fill只能填充一维数组
+        /**
+        public static void fill(int[] a,int val)
+        Assigns the specified int value to each element of the specified array of ints.
+        
+        ****/
+        //Arrays.fill(arr,0);
+        //Key:为了防止数字被重复使用干扰，所以index需要从end开始
+        for(int k = 0;k<=strs.length-1;k++){
+            int count0 = 0,count1 = 0;
+            for(int i = 0;i<=strs[k].length()-1;i++){
+                if(strs[k].charAt(i) == '0') count0++;
+                else count1++;
+            }
+            //Log:System.out.println(count0+"+"+count1);
+            //Key:Corner case:["10","0","1"] 1 1
+            //因为会出现这种单数字，所以除了[0][0],无意义外。[0][1],[1][0]这种也有意义
+            for(int i = m;i>=0;i--){
+                for(int j =n;j>=0;j--){
+                    if(i>=count0 && j >= count1){
+                        if(i-count0 >= 0 && j-count1 >= 0)arr[i][j] = Math.max(arr[i][j],arr[i-count0][j-count1]+1);
+                    }
+                }
+            }      
+        }
+        return arr[m][n];
+    }
+}
