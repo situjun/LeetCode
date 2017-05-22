@@ -8538,3 +8538,19 @@ public class Solution {
         heapSize[0]--;
     }
 }
+
+338. Counting Bits
+public class Solution {
+     public int[] countBits(int num) {
+        //Key:cp,mem 
+        //另一种方法。java中Integer.bitCount(i)可以直接统计二进制中1的个数。
+        //这道题技巧性方法太偏了.....
+
+        int[] res = new int[num+1];
+        for(int i = 0;i<=num;i++){
+            res[i] = Integer.bitCount(i);
+        }
+        return res;
+    }
+}
+
