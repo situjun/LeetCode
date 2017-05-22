@@ -17,8 +17,12 @@ public class Solution {
         return count+maxOdd;
         
         ****/
+        //Key:首先原题意容易使人糊涂，因为没有加continuous限定(可与此题作比较  Shortest Unsorted Continuous Subarray   )，所以可以是非连续的子串。如"bbbab"，最长回文子串为bbbb
+        //详细解释看这里  https://discuss.leetcode.com/topic/80378/what-is-the-meaning-of-example-1/2
         //DP
         //Key:这道DP要整体思考，思考的太细容易绕在里头.....
+        //Key:explaination  https://discuss.leetcode.com/topic/78603/straight-forward-java-dp-solution
+        //Key:F[i][j]表示ith和jth间最大的回文长度
         int length = s.length();
         int[][] F = new int[length][length];
         for(int i = 0;i<=length-1;i++) F[i][i] = 1;
