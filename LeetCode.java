@@ -53,6 +53,8 @@ public class Solution {
         for(int i = 0;i<=s.length()-1;i++) dp[i][i] = 1;
         for(int i = s.length()-1;i>=0;i--){
             for(int j =i+1;j<=s.length()-1;j++){
+				//Key:因为j=i+1&&i>=0,所以j-1永远不会负数。同理，j=i+1,i起始是len-1,所以j起始是len，也就不会进入inner for.
+				//所以也不用担心i+1过界了
                 if(s.charAt(i) == s.charAt(j)) dp[i][j] = dp[i+1][j-1]+2;
                 else dp[i][j] = Math.max(dp[i][j-1],dp[i+1][j]);
             }
@@ -2284,6 +2286,24 @@ public class Solution {
     }
 }
 
+//V2
+public class Solution {
+    public int countNumbersWithUniqueDigits(int n) {
+        //Key:0~9一开始的十个数字不要忘记
+        if(n == 0) return 1; 
+        int res = 10,mult = 9,index = 9;
+        //Key:注意index 是大于1,而不是大于0.其实这道题大于1还是0都能通过，可能是test case做的不好
+        while(n>1 && index > 1){
+            mult = mult * index;
+            index--;
+            n--;
+            res += mult;
+        }
+        return res;
+    }
+}
+
+
 541. Reverse String II
 public class Solution {
     public String reverseStr(String s, int k) {
@@ -2864,6 +2884,23 @@ public class Solution {
            }
        }
        return dp[n];
+    }
+}
+//V2
+public class Solution {
+    public int integerBreak(int n) {
+        //Key:背吧，
+        int[] dp = new int[n+1];
+        
+        dp[0] = 0;
+        dp[1] = 1;
+        for(int i = 1;i<=n;i++){
+            for(int j = i-1;j>0;j--){
+                //Key:后边两个max是关键，使pos,dp[pos]中的最大值与i-pos,nums[i-pos]中的最大值相乘
+                dp[i] = Math.max(dp[i],Math.max(dp[j],j)*Math.max(dp[i-j],i-j));
+            }
+        }
+        return dp[n];
     }
 }
 
@@ -7335,24 +7372,64 @@ public class Solution {
 312. Burst Balloons
 public class Solution {
     public int maxCoins(int[] iNums) {
-        //Key：cp,mem https://discuss.leetcode.com/topic/30746/share-some-analysis-and-explanations/2
+        //Key：cp,只能背 https://discuss.leetcode.com/topic/30746/share-some-analysis-and-explanations/2
+        //Key:http://blog.csdn.net/xyqzki/article/details/50255345 这篇讲的非常好
+        //http://blog.csdn.net/swartz2015/article/details/50561199
         int[] nums = new int[iNums.length + 2];
-        int n = 1;
-        for (int x : iNums) if (x > 0) nums[n++] = x;
-        nums[0] = nums[n++] = 1;
-    
-    
+        int n = nums.length;
+        //int n = 1;
+        for(int i = 0;i<n-2;i++) nums[i+1] = iNums[i];
+        //for (int x : iNums) if (x > 0) nums[n++] = x;
+        nums[0] = nums[n-1] = 1;
+        
+        
+        //dp[i][j]表i与j间的所有气球被扎破后的最大收益
         int[][] dp = new int[n][n];
+        //k是left和right的最小间距(准确的说应该是pos差值)。（1,2,3）扎的话，最小间距只能是2.
+        //这里left是左边界，right是右边界
+        //The dp[start][end] represents the maximum coins when you burst and only burst all the elements in the range of [start, end], 'start' and 'end' inclusive.、
+        //1:确定左右间距大小
         for (int k = 2; k < n; ++k)
-            for (int left = 0; left < n - k; ++left) {
+            //2：定左边界
+            //left+k即为右边界，要小于n
+            for (int left = 0; left+k < n; ++left) {
+                //3:定右边界
                 int right = left + k;
+                //4:i，j范围内遍历找出最大值
                 for (int i = left + 1; i < right; ++i)
-                    dp[left][right] = Math.max(dp[left][right], 
-                    nums[left] * nums[i] * nums[right] + dp[left][i] + dp[i][right]);
+                    //(left,right)范围内的气球爆炸，但并不包括left,right本身，是个开区间
+                    dp[left][right] = Math.max(dp[left][right], nums[left] * nums[i] * nums[right] + dp[left][i] + dp[i][right]);
             }
     
         return dp[0][n - 1];
         
+        
+    }
+}
+
+//V2
+public class Solution {
+    public int maxCoins(int[] nums) {
+        //Key:hard
+        int[] newNums = new int[nums.length+2];
+        int len = newNums.length;
+        //Key:两端的1加上去
+        for(int i = 0;i<=nums.length-1;i++){
+            newNums[i+1] = nums[i];
+        }
+        newNums[0] = newNums[len-1] = 1;
+        int[][] dp = new int[len][len];
+        //Key:此时，旧的nums已经没用了
+        //k小于几可以举例试试，如(1,2,3,4,5) 间距最大为4--->在新nums上操作，即lengh-1
+        for(int k = 2;k<=len-1;k++){
+            for(int left = 0;left+k<=len-1;left++){
+                int right = left+k;
+                for(int i = left+1;i<=right-1;i++){
+                    dp[left][right] = Math.max(dp[left][right],newNums[left]*newNums[i]*newNums[right]+dp[left][i]+dp[i][right]);
+                }
+            }
+        }
+        return dp[0][len-1];
     }
 }
 
@@ -8658,6 +8735,7 @@ public class Solution {
     
     //V2
     public boolean PredictTheWinner(int[] nums) {
+		//Key:试着用{1,2}来理解一下，即要求己方数字差最大即可
         //Corner case:[0]  expected:true  这case给的不怎么好，0有实际意义??
         return helper(nums,0,nums.length-1)>=0?true:false;
     }
