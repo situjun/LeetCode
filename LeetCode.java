@@ -6198,17 +6198,47 @@ public class Solution {
 public class Solution {
     public int numTrees(int n) {
         //Key:cp,背  https://discuss.leetcode.com/topic/8398/dp-solution-in-6-lines-with-explanation-f-i-n-g-i-1-g-n-i/2
-        
+        //http://blog.csdn.net/jiadebin890724/article/details/23305915
+        /**
+         * Taking 1~n as root respectively:
+         *      //F(0)表0个node的bst的数量
+         *      1 as root: # of trees = F(0) * F(n-1)  // F(0) == 1
+         *      2 as root: # of trees = F(1) * F(n-2) 
+         *      3 as root: # of trees = F(2) * F(n-3)
+         *      ...
+         *      n-1 as root: # of trees = F(n-2) * F(1)
+         *      n as root:   # of trees = F(n-1) * F(0)
+         *
+         * So, the formulation is:
+         *      F(n) = F(0) * F(n-1) + F(1) * F(n-2) + F(2) * F(n-3) + ... + F(n-2) * F(1) + F(n-1) * F(0)
+         */
         int [] G = new int[n+1];
+        //G[0]表0个node的bst，G[1]表1个node的bst。
         G[0] = G[1] = 1;
         
         for(int i=2; i<=n; ++i) {
         	for(int j=1; j<=i; ++j) {
+        	    //Key:以i2j1举例，为G[2] += G[0]*G[1]
         		G[i] += G[j-1] * G[i-j];
         	}
         }
     
         return G[n];
+    }
+}
+//V2
+public class Solution {
+    public int numTrees(int n) {
+        int[] dp = new int[n+1];
+        //dp[0]表0个node生成的树数量
+        dp[0] = dp[1] = 1;
+        for(int i = 2;i<=n;i++){
+            for(int j = 1;j<=i;j++){
+                //j-1  +  i-j 应该正好等于 i-1,即除了i以外的所有其他node的数量
+                dp[i] = dp[i] +dp[j-1]*dp[i-j];
+            }
+        }
+        return dp[n];
     }
 }
 
@@ -8777,5 +8807,50 @@ public class Solution {
             }      
         }
         return arr[m][n];
+    }
+}
+
+377. Combination Sum IV
+public class Solution {
+    public int combinationSum4(int[] nums, int target) {
+        //这道题有难度，HARD
+        //Ref link:http://www.cnblogs.com/grandyang/p/5928417.html
+        //状态转移方程   F[i] = F[i]+F[i-a]
+        //应该和完全背包一个思路
+        //只要最后的F[target]，之前的值都是临时存储变量
+        if(nums.length == 0) return 0;
+        int[] F = new int[target+1];
+        
+        //Key Point:Java 填充 数组
+        //Arrays.fill(F,0); 不过默认好像空的都是0吧
+        F[0] = 1;
+        for(int i=1;i<=target;i++){
+            for(int j=0;j<=nums.length-1;j++){
+                if(i>=nums[j]){
+                    //因为这里有个+F[i]，所以前边要全部初始化为0
+                    //Key:以(1,2,3)  4为例，  i==3,j=1,nums[j] = 2,soF[i]等于F[i]之前所有的情况加上F[1]的情况
+                    F[i] = F[i-nums[j]]+F[i];
+                    //System.out.println(F[i]+",I"+i);
+                }
+                //Corner Case:本身也可以算作一个元素--->改一下，把F[0] =1卸载外头，更方便些
+                
+                //if(i == nums[j]) F[i]++;
+            }
+        }
+        return F[target];
+    }
+}
+
+//V2
+public class Solution {
+    public int combinationSum4(int[] nums, int target) {
+        int[] dp = new int[target+1];
+        dp[0] = 1;
+        for(int i = 1;i<=target;i++){
+            for(int j = 0;j<=nums.length-1;j++){
+                if(i>=nums[j]) dp[i] = dp[i] + dp[i-nums[j]];
+            }
+        }
+        return dp[target];
     }
 }
