@@ -738,7 +738,13 @@ public class Solution {
 517. Super Washing Machines
 public class Solution {
     public int findMinMoves(int[] machines) {
-        //Just copy
+        //Just copy  https://discuss.leetcode.com/topic/79938/super-short-easy-java-o-n-solution/5
+        //http://blog.csdn.net/krista_pan/article/details/71534272
+        //http://blog.csdn.net/Ray_sysu/article/details/72630521
+        //http://blog.csdn.net/ljytfsto/article/details/60757973
+        //http://blog.csdn.net/tstsugeg/article/details/62427718
+        
+        /**
         int total = 0; 
         for(int i: machines) total+=i;
         if(total%machines.length!=0) return -1;
@@ -748,6 +754,32 @@ public class Solution {
             max = Math.max(Math.max(max, Math.abs(cnt)), load-avg);
         }
         return max;
+        **/
+        
+        //Key:这道题非常不好理解，而且不好证明。只能背
+        int res = 0,sum = 0;
+        for(int i:machines) sum += i;
+        if(sum%machines.length != 0) return -1;
+        sum = sum/machines.length;
+        int pass = 0,needOrSend = 0;
+        for(int i = 0;i<=machines.length-1;i++){
+            //Key:当前洗衣机需要的或者送出的数量
+            //needOrSend = sum-machines[i];
+            needOrSend = machines[i]-sum;
+            //当前需要的或者送出的+经过它传递的数量
+            pass = pass+needOrSend;
+            
+            //needOrSend绝对值有可能大于pass, 因为pass有可能是负的，加上正的后绝对值会小。如 case(0,0,11,5)
+            //其实needOrSend加上abs也可以，但是貌似没必要  ---->这句话是错的，needorSend不能加abs，会出错
+            //Test case:[9,1,8,8,9] 加了abs后会出错误答案
+            /**
+                        [9, 1, 8, 8, 9]
+            needOrSend   2 -6  1  1  2
+            pass         2 -4  -3 -2 0
+            **/
+            res = Math.max(Math.abs(pass),Math.max(res, needOrSend));
+        }
+        return res;
     }
 }
 
@@ -1748,6 +1780,7 @@ public class Solution {
         dp[n] = Min{ dp[n - i*i] + 1 },  n - i*i >=0 && i >= 1
         and the sample code is like below:
         **/
+        /**
         int[] dp = new int[n + 1];
     	Arrays.fill(dp, Integer.MAX_VALUE);
     	dp[0] = 0;
@@ -1761,6 +1794,21 @@ public class Solution {
     		dp[i] = min;
     	}		
     	return dp[n];
+        **/
+    	
+    	//V2
+        //Key:这道题准确其实我觉得不能够算DP吧，貌似就是纯粹试出来的....
+        int[] dp = new int[n+1];
+        Arrays.fill(dp,Integer.MAX_VALUE);
+        dp[0] = 0;
+        int res = 0;
+        for(int i = 1;i<=n;i++){
+            for(int j = 1;j*j<=i;j++){
+                //Key:不要这么写  dp[i] = Math.min(dp[i],dp[i-j*j])+1;这样一来，即使dp[i]无变化，也会导致自增1的
+                dp[i] = Math.min(dp[i],dp[i-j*j]+1);
+            }
+        }
+        return dp[n];
     }
 }
 
@@ -2368,33 +2416,39 @@ public class Solution {
 541. Reverse String II
 public class Solution {
     public String reverseStr(String s, int k) {
-        //My 1st version
-        if(s == null || s.length() == 0) return "";
-		if(k == 0) return s;
-        int start = 0,end = start+k-1,count = 0;
-		if(end>s.length()-1) end = s.length()-1;
+        //Key:这么写很麻烦，还是用其他方法吧
+        /**
+        int index1 = 0,count = 0;
+        String res = "";
         StringBuilder sb = new StringBuilder();
-        while(end<=s.length()-1){
-			
-			//System.out.println("end"+end);
-            while(end>=start){
-                sb.append(s.charAt(end--));
-            }
-			if(sb.toString().length() == s.length()) break;
-            start += k;
-            count = 0;
-            
-            while(start<=s.length()-1 && count <= k-1){
-                sb.append(s.charAt(start++));
-                count++;
-            }
-			//System.out.println(""+start);
-			if(start >= s.length()-1) end = s.length()-1;
-            else end = start+k-1>s.length()-1?s.length()-1:start+k-1;
-			
+        for(int i = 0;i<=s.length()-1;i=i+2*k){
+            if(i+k<=s.length()-1) sb.append(new StringBuilder(s.substring(i,i+k)).reverse().toString());
+            else sb.append()
+            sb.append(s.substring(i+k,i+2*k));
         }
-		//System.out.println(""+start+","+s.length());
-        return sb.toString();
+        **/
+        char[] c = s.toCharArray();
+        int end = 0,n = c.length;
+        for(int i = 0;i<=n-1;i=i+2*k){
+            //Key:处理i+k-1超出长度的情况
+            end = Math.min(i+k-1,n-1);
+            swap(c,i,end);
+        }
+        //Key:char array转String
+        return String.valueOf(c);
+    }
+    public void swap(char[] c,int s,int e){
+        //Key:注意char 不能等于''，每个字符都要对应着一个unicode。 char tmp = '' 会编译错误
+        //Key:类似于int a =  ;是错误写法 
+        //char tmp = '';
+        char tmp = '0';
+        while(s<=e){
+            tmp = c[e];
+            c[e] = c[s];
+            c[s] = tmp;
+            e--;
+            s++;
+        }
     }
 }
 
@@ -3839,7 +3893,7 @@ public class Solution {
     public String reverseWords(String s) {
         //return new StringBuilder(s.substring(0,s.length())).reverse().toString();
 		if(s == null || s.length() == 0) return "";
-        String[] arr = new StringBuilder(s.substring(0,s.length())).reverse().toString().split(" ");
+        String[] arr = new StringBuilder(s).reverse().toString().split(" ");
 		String res = "";
 		for(int i = arr.length-1;i>=0;i--){
 			res = res + arr[i] + " ";
@@ -5120,7 +5174,7 @@ public class Solution {
 public class Solution {
     public int arrayPairSum(int[] nums) {
         //Key:写起来不难，难点应该是在如何证明结论的正确上
-        //不过可以以{1,2,3,4}来做个例子,1+3( [1,2] [3,4] )明显大于1+2([1,4],[2,3]),来猜测...
+        //不过可以以{1,2,3,4}来做个例子,1+3( min[1,2] min[3,4] )明显大于1+2(min[1,4],min[2,3]),来猜测...
         if(nums == null || nums.length == 0) return 0;
         Arrays.sort(nums);
         int sum = 0;
@@ -6911,7 +6965,9 @@ public class Trie {
  
 213. House Robber II
 public class Solution {
-    //Key:cp,背  https://discuss.leetcode.com/topic/14375/simple-ac-solution-in-java-in-o-n-with-explanation/2
+    //Key:这个sol用的是recursion，不太好记
+    //Key:cp https://discuss.leetcode.com/topic/14375/simple-ac-solution-in-java-in-o-n-with-explanation/2
+    /**
     public int rob(int[] nums) {
         if (nums.length == 1) return nums[0];
         return Math.max(rob(nums, 0, nums.length - 2), rob(nums, 1, nums.length - 1));
@@ -6925,7 +6981,48 @@ public class Solution {
         }
         return Math.max(include, exclude);
     }
-} 
+    **/
+    
+    //Key:为了统一记忆，还是用dp来做
+    //https://discuss.leetcode.com/topic/24060/good-performance-dp-solution-using-java
+    public int rob(int[] nums) {
+        if (nums.length == 0)
+            return 0;
+        if (nums.length < 2)
+            return nums[0];
+        //Key:startFromFirstHouse[0],startFromSecondHouse[0]都只是为了方便才写的，没有实际意义
+        //Key:因为喲抢劫，肯定要从1号房或者2号房开始
+        int[] startFromFirstHouse = new int[nums.length + 1];
+        int[] startFromSecondHouse = new int[nums.length + 1];
+        startFromFirstHouse[1]  = nums[0];
+        startFromSecondHouse[1] = 0;
+        for (int i = 2; i <= nums.length; i++) {
+            startFromFirstHouse[i] = Math.max(startFromFirstHouse[i - 1], startFromFirstHouse[i - 2] + nums[i-1]);
+            startFromSecondHouse[i] = Math.max(startFromSecondHouse[i - 1], startFromSecondHouse[i - 2] + nums[i-1]);
+        }
+        //Key:下面的nums.length - 1是关键，要注意
+        return Math.max(startFromFirstHouse[nums.length - 1], startFromSecondHouse[nums.length]);
+    }
+    
+    //V2
+    /**
+    public int rob(int[] nums) {
+        //Key:相当于把robber1 写了2遍而已
+        if(nums.length == 0) return 0;
+        if(nums.length == 1) return nums[0];
+        int[] dp1 = new int[nums.length+1];
+        int[] dp2 = new int[nums.length+1];
+        dp1[1] = nums[0];
+        dp2[1] = 0;
+        for(int i = 2;i<=nums.length;i++){
+            dp1[i] = Math.max(dp1[i-1],dp1[i-2]+nums[i-1]);
+            //Test case:[1,2,50,6,7,8,99]  dp2[3]时可以在dp2[1],即0时的基础上抢劫
+            dp2[i] = Math.max(dp2[i-1],dp2[i-2]+nums[i-1]);
+        }
+        return Math.max(dp1[nums.length-1],dp2[nums.length]);
+    }
+    **/
+}
 
 220. Contains Duplicate III
 public class Solution {
@@ -8325,6 +8422,8 @@ public class Solution {
 
 375. Guess Number Higher or Lower II
 public class Solution {
+    //Key:这个不太好理解
+    /**
     public int getMoneyAmount(int n) {
         //Key:cp,mem  https://discuss.leetcode.com/topic/51353/simple-dp-solution-with-explanation/2
         
@@ -8340,6 +8439,37 @@ public class Solution {
             }
         }
         return table[1][n];
+    }
+    **/
+    
+    public int getMoneyAmount(int n) {
+        //Key:transition func:dp[i][j] = guessNum +dp[i][guessNum-1]+dp[guessNum+1][j]
+        //Key:i,j表所猜的的数字的范围，dp[i][j]表在i,j范围内猜测所花的最小消费
+        //具体是这样的，在1-n个数里面，我们任意猜一个数(设为i)，保证获胜所花的钱应该为 i + max(w(1 ,i-1), w(i+1 ,n))，这里w(x,y))表示猜范围在(x,y)的数保证能赢应花的钱，则我们依次遍历 1-n作为猜的数，求出其中的最小值即为答案，即最小的最大值问题
+        //https://discuss.leetcode.com/topic/51353/simple-dp-solution-with-explanation
+        //https://discuss.leetcode.com/topic/51494/java-commented-dp-solution/2
+        //https://segmentfault.com/a/1190000008345539
+        //http://www.cnblogs.com/andy1202go/p/5681329.html
+        //http://blog.csdn.net/adfsss/article/details/51951658
+        int[][] dp = new int[n+1][n+1];
+        return helper(dp,1,n);
+        
+    }
+    public int helper(int[][] dp,int start,int end){
+        //Key:注意start一定要有=end，否则只是start>end会无限循环，=时代表着猜到了数字本身
+        if(start >= end) return 0;
+        if(dp[start][end] != 0) return dp[start][end];
+        int minCost =Integer.MAX_VALUE;
+        int cost = Integer.MAX_VALUE;
+        //因为i本身就是由n赋的值，所以dp[][]就不用专门再赋值了
+        for(int i = start;i<=end;i++){
+            //Key:因为最坏的情况只会这样，猜错的数字只在一边，所以需要能够找到能使两边都能猜对的值即可，即最大值
+            cost = i+Math.max(helper(dp,start,i-1),helper(dp,i+1,end));
+            //Key:满足i,j间猜测的最小cost
+            minCost = Math.min(minCost,cost);
+        }
+        dp[start][end] = minCost;
+        return dp[start][end];
     }
 }
 
@@ -9064,4 +9194,126 @@ public class Solution {
         rob = currob;
     }
     return Math.max(rob, notrob);
+}
+
+64. Minimum Path Sum
+public class Solution {
+    public int minPathSum(int[][] grid) {
+        int m =grid.length,n = grid[0].length;
+        if(m == 0 || n == 0 ) return 0;
+        int[][] dp = new int[m+1][n+1];
+        //Key:其实最好是把边界初始化一下，不然后边会很麻烦
+        for(int i = 1;i<=m;i++){
+            for(int j = 1;j<=n;j++){
+                //Key:注意grid与dp的index关系
+                //Key:注意  第一行只能从左往右走，第一列只能从上往下走!!!!
+                if(i == 1) dp[i][j] = dp[i][j-1]+grid[i-1][j-1];
+                else if(j == 1) dp[i][j] = dp[i-1][j]+grid[i-1][j-1];
+                else dp[i][j] = Math.min(dp[i-1][j],dp[i][j-1])+grid[i-1][j-1];
+            }
+        }
+        return dp[m][n];
+    }
+}
+
+1. Two Sum
+public class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        //HashMap solving method
+        //It maybe contains duplicate elements
+        if(nums.length < 2) return null;
+        HashMap<Integer,Integer> map = new HashMap<Integer,Integer>();
+        int[] result = new int[2];
+        int rest = 0;
+        for(int i = 0;i <= nums.length - 1;i++){
+            rest = target - nums[i];
+            
+            if(map.containsKey(rest)){
+            //It maybe contains duplicate elements
+            //we put map.put(nums[i],i); last line,so we needn't to consider duplicate problem
+                // if(map.get(rest) != i){
+                //     result[0] = map.get(rest);
+                //     result[1] = i;
+                // }
+                
+                
+                result[0] = map.get(rest);
+                result[1] = i;
+            }
+            map.put(nums[i],i);
+        }
+        return result;
+    }
+}
+
+//V2
+public class Solution {
+
+    public int[] twoSum(int[] numbers, int target) {
+        // write your code here
+        if(numbers.length == 0) return new int[2];
+        Map<Integer,Integer> map = new HashMap<>();
+        int[] res = new int[2];
+        for(int i = 0;i<=numbers.length-1;i++){
+            if(map.containsKey(target-numbers[i])){
+                res[0] = map.get(target-numbers[i]);
+                res[1] = i;
+            } else {
+                map.put(numbers[i],i);
+            }
+        }
+        return res;
+    }
+}
+
+112. Path Sum
+public class Solution {
+    //Key:第一个sol应该是首先就会想起来的
+    /**
+    boolean tag = false;
+    public boolean hasPathSum(TreeNode root, int sum) {
+        if(root == null) return false;
+        helper(root,sum,0);
+        return tag;
+    }
+    public void helper(TreeNode node,int sum,int tmp){
+        if(node == null) return;
+        tmp += node.val;
+        if(tmp == sum && node.left == null && node.right == null) {
+            tag = true;
+            return;
+        }
+        helper(node.left,sum,tmp);
+        helper(node.right,sum,tmp);
+    }
+    
+    **/
+    
+    //Key:第二个sol更好看些吧
+    public boolean hasPathSum(TreeNode root, int sum) {
+        return helper(root,sum,0);
+    }
+    public boolean helper(TreeNode node,int sum,int tmp){
+        if(node == null) return false;
+        tmp += node.val;
+        if(node.right == null && node.left == null && tmp == sum) return true;
+        return helper(node.left,sum,tmp)||helper(node.right,sum,tmp);
+    }
+}
+
+//V3
+public class Solution {
+    public boolean hasPathSum(TreeNode root, int sum) {
+        return helper(root,sum,0);
+    }
+    public boolean helper(TreeNode node,int target,int sum){
+        if(node!=null){
+            if(node.left == null && node.right == null){
+               if(sum+node.val == target) return true;  
+            } else {
+                return helper(node.left,target,sum+node.val)||helper(node.right,target,sum+node.val)?true:false;
+            }
+        }
+        return false;
+    }
 }
