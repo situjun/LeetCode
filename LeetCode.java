@@ -1512,7 +1512,7 @@ public class Solution {
         }
         return max;
         **/
-        //Key:Just copy II --->using Arrays.binarySearch()
+        //Key:Just copy II --->using Arrays.binarySearch()  回头再看，这个很不好理解
         //效率上这个更好
         //Key:写的太抽象了....
         /**
@@ -1529,21 +1529,49 @@ public class Solution {
         return len;
         **/
         
-        //Key:O(n^2)版本  https://discuss.leetcode.com/topic/28695/share-java-dp-solution
-        if (nums.length == 0) return 0;
-        int n = nums.length, max = 0;
-        int[] dp = new int[n];
-        for (int i = 0; i < n; i++) {
-            dp[i] = 1;
+        //Key:O(n^2)版本  https://leetcode.com/articles/longest-increasing-subsequence/#approach-3-dynamic-programming-accepted
+        if (nums.length == 0) {
+            return 0;
+        }
+        int[] dp = new int[nums.length];
+        dp[0] = 1;
+        int maxans = 1;
+        //Key:dp[i]表截止到i时，最长的sequence
+        for (int i = 1; i < dp.length; i++) {
+            int maxval = 0;
             for (int j = 0; j < i; j++) {
-                if (nums[i] > nums[j] && dp[j] + 1 > dp[i]) {
-                  dp[i] = dp[j] + 1;
+                if (nums[i] > nums[j]) {
+                   
+                    maxval = Math.max(maxval, dp[j]);
                 }
             }
-            max = Math.max(max, dp[i]);
+            //Key:transition func
+            dp[i] = maxval + 1;
+            maxans = Math.max(maxans, dp[i]);
         }
-        
-        return max;
+        return maxans;
+    }
+}
+
+//V2
+public class Solution {
+    public int lengthOfLIS(int[] nums) {
+        if(nums.length == 0) return 0;
+        int res = 0;
+        int[] dp = new int[nums.length];
+        dp[0] = 1;
+        for(int i = 0;i<=nums.length-1;i++){
+            int tmpMax = 0;
+            //Key:find the maxVal between j and i pos
+            for(int j = 0;j<=i-1;j++){
+                if(nums[i]>nums[j]){
+                    tmpMax = Math.max(tmpMax,dp[j]);
+                }
+            }
+            dp[i] = tmpMax+1;
+            res = Math.max(res,dp[i]);
+        }
+        return res;
     }
 }
 
@@ -8901,7 +8929,9 @@ public class Solution {
 474. Ones and Zeroes
 public class Solution {
     public int findMaxForm(String[] strs, int m, int n) {
+        //Key:题意--->使用m个0，n个1构建最多数量的strs中的字符串
         if(strs.length == 0) return 0;
+        //Key:类似于01pack，但是这里的[m][n]作为一个整体考虑，所以可以当成一个三位数组考虑
         //Key:类似于01pack。value都是1，但是weight限制变成了一个二维数组。仔细想想，有些绕，但不算很难
         //
         int[][] arr = new int[m+1][n+1];
@@ -8914,6 +8944,7 @@ public class Solution {
         //Arrays.fill(arr,0);
         //Key:为了防止数字被重复使用干扰，所以index需要从end开始
         for(int k = 0;k<=strs.length-1;k++){
+            //统计每个字符串中0，1个数
             int count0 = 0,count1 = 0;
             for(int i = 0;i<=strs[k].length()-1;i++){
                 if(strs[k].charAt(i) == '0') count0++;
@@ -8922,15 +8953,40 @@ public class Solution {
             //Log:System.out.println(count0+"+"+count1);
             //Key:Corner case:["10","0","1"] 1 1
             //因为会出现这种单数字，所以除了[0][0],无意义外。[0][1],[1][0]这种也有意义
+            //Key:关键!!!  i,j 一定要从前往后，这道题中，一个pair[i][j]相当于01pack中的单一物品[i],(其实要对应01pack的话，这道题应该想象成一个3维数组，[m][n]作为一个整体考虑)如果从前往后的话，现状态会覆盖之前状态的
             for(int i = m;i>=0;i--){
                 for(int j =n;j>=0;j--){
                     if(i>=count0 && j >= count1){
-                        if(i-count0 >= 0 && j-count1 >= 0)arr[i][j] = Math.max(arr[i][j],arr[i-count0][j-count1]+1);
+                        arr[i][j] = Math.max(arr[i][j],arr[i-count0][j-count1]+1);
                     }
                 }
             }      
         }
         return arr[m][n];
+    }
+}
+
+//V2
+public class Solution {
+    public int findMaxForm(String[] strs, int m, int n) {
+        
+        int[][] dp = new int[m+1][n+1];
+        int res = 0,count0 = 0,count1 = 0;
+        for(String s:strs){
+            count0 = 0;
+            count1 = 0;
+            for(int i = 0;i<=s.length()-1;i++){
+                if(s.charAt(i) == '0') count0++;
+                else count1++;
+            }
+            //Key:关键!!!  i,j 一定要从前往后，这道题中，一个pair[i][j]相当于01pack中的单一物品[i],(其实要对应01pack的话，这道题应该想象成一个3维数组，[m][n]作为一个整体考虑)如果从前往后的话，现状态会覆盖之前状态的
+            for(int i = m;i>=0;i--){
+                for(int j = n;j>=0;j--){
+                    if(i>=count0 && j >= count1) dp[i][j] = Math.max(dp[i-count0][j-count1]+1,dp[i][j]);
+                }
+            }
+        }
+        return dp[m][n];
     }
 }
 
@@ -8977,4 +9033,35 @@ public class Solution {
         }
         return dp[target];
     }
+}
+
+198. House Robber
+public class Solution {
+    public int rob(int[] nums) {
+        int[] dp = new int[nums.length];
+        if(nums.length == 0) return 0;
+        dp[0] = nums[0];
+        if(nums.length == 1) return nums[0];
+        dp[1] = Math.max(nums[0],nums[1]);
+        for(int i = 2;i<=nums.length-1;i++){
+            //Key:因为隔天抢劫，dp[i-2]+nums[i]说明是两天前的状态，也就是说昨天没抢，今天抢没事。dp[i-1]意味着接着昨天的状态，不管他抢没抢，反正今天也不抢，也没事。
+            //Key:状态，和stock cooldown 一起看
+            dp[i] = Math.max(dp[i-2]+nums[i],dp[i-1]);
+        }
+        return dp[nums.length-1];
+    }
+}
+
+//V2
+//Key:https://discuss.leetcode.com/topic/12024/java-dp-solution-o-n-runtime-and-o-1-space-with-inline-comment
+//Key:这个sol可以和stock cooldown一起看
+ public int rob(int[] num) {
+    int rob = 0; //max monney can get if rob current house
+    int notrob = 0; //max money can get if not rob current house
+    for(int i=0; i<num.length; i++) {
+        int currob = notrob + num[i]; //if rob current value, previous house must not be robbed
+        notrob = Math.max(notrob, rob); //if not rob ith house, take the max value of robbed (i-1)th house and not rob (i-1)th house
+        rob = currob;
+    }
+    return Math.max(rob, notrob);
 }
