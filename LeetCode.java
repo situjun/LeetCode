@@ -1288,6 +1288,21 @@ public class Solution {
         return max;
     }
 }
+//V2
+public class Solution {
+    public int maxSubArray(int[] nums) {
+        if(nums.length == 0) return 0;
+        int[] dp = new int[nums.length];
+        int res = nums[0];
+        dp[0] = nums[0];
+        for(int i = 1;i<=nums.length-1;i++){
+            dp[i] = Math.max(nums[i],dp[i-1]+nums[i]);
+            res = Math.max(dp[i],res);
+        }
+        return res;
+    }
+}
+
 36. Valid Sudoku
 public class Solution {
     public boolean isValidSudoku(char[][] board) {
@@ -1497,9 +1512,10 @@ public class Solution {
         }
         return max;
         **/
-        
         //Key:Just copy II --->using Arrays.binarySearch()
         //效率上这个更好
+        //Key:写的太抽象了....
+        /**
         int[] dp = new int[nums.length];
         int len = 0;
 
@@ -1511,6 +1527,23 @@ public class Solution {
         }
 
         return len;
+        **/
+        
+        //Key:O(n^2)版本  https://discuss.leetcode.com/topic/28695/share-java-dp-solution
+        if (nums.length == 0) return 0;
+        int n = nums.length, max = 0;
+        int[] dp = new int[n];
+        for (int i = 0; i < n; i++) {
+            dp[i] = 1;
+            for (int j = 0; j < i; j++) {
+                if (nums[i] > nums[j] && dp[j] + 1 > dp[i]) {
+                  dp[i] = dp[j] + 1;
+                }
+            }
+            max = Math.max(max, dp[i]);
+        }
+        
+        return max;
     }
 }
 
@@ -6141,6 +6174,7 @@ public class Solution {
  * }
  */
 public class Solution {
+    //Key:下边两个解法一样....
     //Key:another version --> divide and conquer cp,背 https://discuss.leetcode.com/topic/8410/divide-and-conquer-f-i-g-i-1-g-n-i
     /**
      public List<TreeNode> generateTrees(int n) {
@@ -6168,6 +6202,7 @@ public class Solution {
     	return res;
     }
     **/
+    //Brute force
     //Key:https://discuss.leetcode.com/topic/3079/a-simple-recursive-solution/14
     public List<TreeNode> generateTrees(int n) {
         if(n<1) return new ArrayList<TreeNode>();
@@ -6179,11 +6214,52 @@ public class Solution {
             list.add(null);
         }
         for(int idx = start; idx <= end; idx++) {
+            //kEY:因为 是 1....n，所以左边的肯定都小于右边的
             List<TreeNode> leftList = genTreeList(start, idx - 1);
             List<TreeNode> rightList = genTreeList(idx + 1, end);
             for (TreeNode left : leftList) {
                 for(TreeNode right: rightList) {
                     TreeNode root = new TreeNode(idx);
+                    root.left = left;
+                    root.right = right;
+                    list.add(root);
+                }
+            }
+        }
+        return list;
+    }
+}
+
+//V2
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    public List<TreeNode> generateTrees(int n) {
+        if(n <= 0) return new ArrayList<TreeNode>();
+        return helper(1,n);
+    }
+    public List<TreeNode> helper(int start,int end){
+        List<TreeNode> list = new ArrayList<>();
+        if(start>end) {
+            //Key:因为底下的两个inner loop需要读取list内的node，所以还是需要add一下null的，否则直接返回一个空的list也是不对的
+            list.add(null);
+            return list;
+        }
+        //Key:遍历一遍所有节点，使它们都能作为root处理。
+        for(int i = start;i<=end;i++){
+            List<TreeNode> leftSubTrees = helper(start,i-1);
+            List<TreeNode> rightSubTrees = helper(i+1,end);
+            //Key:左右子树重新组合
+            for(TreeNode left:leftSubTrees){
+                for(TreeNode right:rightSubTrees){
+                    TreeNode root = new TreeNode(i);
                     root.left = left;
                     root.right = right;
                     list.add(root);
@@ -7031,8 +7107,33 @@ public class Solution {
 309. Best Time to Buy and Sell Stock with Cooldown
 public class Solution {
     public int maxProfit(int[] prices) {
-        //Key:DP,cp,背  https://discuss.leetcode.com/topic/30421/share-my-thinking-process/2
-        int sell = 0, prev_sell = 0, buy = Integer.MIN_VALUE, prev_buy;
+        //Key:这道题可以和那个predict winner 一起看，都是状态机的样子
+        //Key:DP,cp,只能背  https://discuss.leetcode.com/topic/30421/share-my-thinking-process/2、
+        /**
+            For each of them we make an array, buy[n], sell[n] and rest[n].
+    
+            buy[i] means before day i what is the maxProfit for any sequence end with buy.
+            
+            sell[i] means before day i what is the maxProfit for any sequence end with sell.
+            
+            rest[i] means before day i what is the maxProfit for any sequence end with rest.
+            
+            Then we want to deduce the transition functions for buy sell and rest. By definition we have:
+            
+            buy[i]  = max(rest[i-1]-price, buy[i-1]) 
+            sell[i] = max(buy[i-1]+price, sell[i-1])
+            rest[i] = max(sell[i-1], buy[i-1], rest[i-1])
+            Where price is the price of day i. All of these are very straightforward. They simply represents :
+            
+            (1) We have to `rest` before we `buy` and 
+            (2) we have to `buy` before we `sell`
+                
+        **/
+
+
+        //Key:这个方法好是好，但是不是特别容易理解
+        /**
+        int sell = 0, prev_sell = 0, buy = Integer.MIN_VALUE, prev_buy = 0;
         for (int price : prices) {
             prev_buy = buy;
             buy = Math.max(prev_sell - price, prev_buy);
@@ -7040,7 +7141,30 @@ public class Solution {
             sell = Math.max(prev_buy + price, prev_sell);
         }
         return sell;
+        **/
         
+        
+        //Key：下边这个较容易理解
+        
+        if(prices == null || prices.length <= 1) {
+            return 0;
+        }
+        //Key:buy[]和sell[]均表示当第i天买或卖时手上钱的最大值
+        int len = prices.length;
+        int[] buy = new int[len];
+        int[] sell = new int[len];
+        //Key:buy[0]本身是可以等于0的，即第0天不买，可是如果等于0的话，sell[i-1]就会出错。
+        buy[0] = -prices[0];
+        buy[1] = Math.max(-prices[0], -prices[1]);
+        sell[0] = 0;
+        sell[1] = Math.max(0, prices[1]-prices[0]);
+        for(int i = 2; i < len; i++) {
+            //Key：不过一直有个困惑，他是如何保证sell时手上一定有股票的???
+            //Key: 因为buy[0] = -prices[0];buy[1]都设置的是-prices，所以buy[]手里一定有股票
+            buy[i] = Math.max(buy[i-1], sell[i-2]-prices[i]);
+            sell[i] = Math.max(sell[i-1], buy[i-1]+prices[i]);
+        }
+        return sell[len-1];
     }
 }
 
