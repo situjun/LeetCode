@@ -9380,3 +9380,145 @@ public class Solution {
         return false;
     }
 }
+
+2. Add Two Numbers
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+       //Key:写的还是有点乱
+       /**
+        //Key:这题给的example太不好了...正着来反着来都一样...
+        //Key:test case [2,4,3] [5,6,5] expect：[7,0,9]
+        int more = 0,cur = 0;
+        ListNode res = l1,prev = l1;
+        while(l1 != null && l2 != null){
+            
+            int tmp = l1.val +l2.val+more;
+            if(tmp>=10){
+                cur = tmp-10;
+                more = 1;
+            } else {
+                cur = tmp;
+                more = 0;
+            }
+            l1.val = cur;
+            prev = l1;
+            l1 = l1.next;
+            l2 = l2.next;
+        }
+        while(l1 != null){
+           
+            int tmp = l1.val + more;
+            if(tmp>=10){
+                cur = tmp-10;
+                more = 1;
+            } else {
+                cur = tmp;
+                more = 0;
+            }
+            l1.val = cur;
+            prev = l1;
+            l1 = l1.next;
+        }
+        while(l2 != null){
+            
+            int tmp = l2.val + more;
+            if(tmp>=10){
+                cur = tmp-10;
+                more = 1;
+            } else {
+                cur = tmp;
+                more = 0;
+            }
+            l1.next = new ListNode(cur);
+            prev = l1;
+            l1 = l1.next;
+        }
+        if(more == 1) prev.next = new ListNode(1);
+        return res;
+    }
+    
+       **/
+        //Key:cp,参考一下
+        //Key:如果不需要改node值，判断node == null就好了。但需要改变node值时，会因为node == null时，node.next会报错
+        //Key:因为这个要改变node的值，所以最好不要在当前node上改，因为会有node==null时的干扰。so最好是在next上改
+        //https://discuss.leetcode.com/topic/39130/4ms-11lines-java-solution
+        ListNode ln1 = l1, ln2 = l2, head = null, node = null;
+        int carry = 0, remainder = 0, sum = 0;
+        head = node = new ListNode(0);
+        
+        while(ln1 != null || ln2 != null || carry != 0) {
+            sum = (ln1 != null ? ln1.val : 0) + (ln2 != null ? ln2.val : 0) + carry;
+            carry = sum / 10;
+            remainder = sum % 10;
+            node = node.next = new ListNode(remainder);
+            ln1 = (ln1 != null ? ln1.next : null);
+            ln2 = (ln2 != null ? ln2.next : null);
+        }
+        return head.next;
+    }
+}
+
+public class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        
+        //Key:这个Corner case处理起来太麻烦了！！！
+        //V3
+        /*
+        ListNode res = new ListNode(0);
+        ListNode head = res;
+        int sum = 0,more = 0;
+        //Key:清晰点的思路：[1]先计算出每个点的值，【2】再赋值给node    
+        while(l1!= null || l2 != null){
+            //Key:1->和是三部分，不要忘记进位
+            //Key:2->注意判断l1,l1是否为null,如果是null则定为0
+            int a = (l1 == null)?0:l1.val;
+            int b = (l2 == null)?0:l2.val;
+            //System.out.println(a+","+b);
+            sum = a + b + more;
+            //System.out.println(more+"mm");
+            more = sum/10;
+            sum = sum%10;
+            //System.out.println(sum+"");
+            res.val = sum;
+            //System.out.println(res.val+"");
+            res.next = new ListNode(0);
+            res = res.next;
+            l1 = (l1 == null)?null:l1.next;
+            l2 = (l2 == null)?null:l2.next;
+        }
+        if(more == 1)res.val = 1;
+        else res = null;
+        return head;
+        **/
+        //Case problem
+        //V4
+        ListNode tmp = new ListNode(0);
+        ListNode res = tmp;
+        int sum = 0,more = 0;
+        while(l1 != null || l2 != null){
+            int a = l1==null?0:l1.val;
+            int b = l2==null?0:l2.val;
+            sum = a+b+more;
+            //Key:进位
+            more = sum/10;
+            //Key:当前位
+            sum = sum%10;
+            tmp.next = new ListNode(sum);
+            tmp = tmp.next;
+            //Key:关键点
+            l1 = l1 == null?null:l1.next;
+            l2 = l2 == null?null:l2.next;
+        }
+        if(more == 1) tmp.next = new ListNode(more);
+        //Key:因为当前节点赋值时会有点问题，所以不如用node.next来赋值比较好。
+        return res.next;
+    }
+}
