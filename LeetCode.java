@@ -8257,24 +8257,87 @@ public class Solution {
 368. Largest Divisible Subset
 public class Solution {
     public List<Integer> largestDivisibleSubset(int[] nums) {
-        //Key:cp,mem  https://discuss.leetcode.com/topic/49652/classic-dp-solution-similar-to-lis-o-n-2/10
-        if (nums.length == 0) return new ArrayList<>();
+        //Key:cp,mem  https://discuss.leetcode.com/topic/49741/easy-understood-java-dp-solution-in-28ms-with-o-n-2-time/2
+        //Step:1->sort
+        //2-->找出每个元素对应的最长长度,并记录下最长长度元素对应的index
+        //3->然后将那些元素逐个加入
+        List<Integer> res = new ArrayList<Integer>();
+        if (nums == null || nums.length == 0) return res;
         Arrays.sort(nums);
-        Map <Integer, List<Integer>> map = new HashMap <>();
-        for (int num : nums) {
-        	Integer copyKey = null;
-            for (Integer key : map.keySet())
-                if (num % key == 0) 
-                    if (copyKey == null || map.get (copyKey).size() < map.get (key).size()) copyKey = key;
-                    
-            map.put (num, copyKey != null ? new ArrayList<> (map.get (copyKey)) : new ArrayList<>());
-			map.get (num).add (num);
+        int[] dp = new int[nums.length];
+        dp[0] = 1;
+    
+        //for each element in nums, find the length of largest subset it has.
+        //Key:这个过程类似于insertion sort中的外部循环向前插入的查找过程
+        for (int i = 1; i < nums.length; i++){
+            for (int j = i-1; j >= 0; j--){
+                if (nums[i] % nums[j] == 0){
+                    dp[i] = Math.max(dp[i],dp[j] + 1);
+                }
+            }
         }
-        
-        List<Integer> max = null;
-        for (Map.Entry<Integer, List<Integer>> entry : map.entrySet())
-            if (max == null || max.size() < entry.getValue().size()) max = entry.getValue();
-        return max;
+    
+        //pick the index of the largest element in dp.
+        int maxIndex = 0;
+        for (int i = 1; i < nums.length; i++){
+            maxIndex = dp[i] > dp[maxIndex] ?  i :  maxIndex;
+        }
+    
+        //from nums[maxIndex] to 0, add every element belongs to the largest subset.
+        int temp = nums[maxIndex];
+        int curDp = dp[maxIndex];
+        for (int i = maxIndex; i >= 0; i--){
+            if (temp % nums[i] == 0 && dp[i] == curDp){
+                res.add(nums[i]);
+                temp = nums[i];
+                curDp--;
+            }
+        }
+        return res;
+    }
+}
+
+//V2
+public class Solution {
+    public List<Integer> largestDivisibleSubset(int[] nums) {
+		//Key:2点-->找到最长长度的末端那个数，然后判断前面的数字哪些能被他整除，且最长长度正好比它小1
+        List<Integer> list = new ArrayList<>();
+        if(nums.length == 0) return list;
+        //step 1
+        Arrays.sort(nums);
+        int[] dp = new int[nums.length];
+        Arrays.fill(dp,1);
+        int maxIndex = 0;
+        //step 2
+        for(int i = 1;i<=nums.length-1;i++){
+            for(int j = i-1;j>=0;j--){
+                if(nums[i]%nums[j] == 0){
+                    dp[i] = Math.max(dp[i],dp[j]+1);
+                    //step 3
+                    //System.out.println(dp[i]);
+                }
+            }
+            //dp[i]
+            maxIndex = dp[i]>dp[maxIndex]?i:maxIndex;
+        }
+        //System.out.println(maxIndex);
+        //step 4
+        //Key:先要把nums[maxIndex]这个元素加进去，否则因为一开始因为dp[maxIndex]==dp[i],loop里的if不会起作用，导致会漏掉第一个数
+        list.add(nums[maxIndex]);
+        for(int i = maxIndex;i>=0;i--){
+            
+            if(nums[maxIndex]%nums[i] == 0 && dp[maxIndex]-dp[i] == 1){
+                //System.out.println(maxIndex);
+                list.add(nums[i]);
+                maxIndex = i;
+            }
+        }
+        Collections.sort(list,new Comparator<Integer>(){
+            public int compare(Integer i1,Integer i2){
+                return i1.compareTo(i2);
+            }
+        });
+        return list;
     }
 }
 
