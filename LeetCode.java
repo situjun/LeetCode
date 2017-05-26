@@ -1588,19 +1588,19 @@ public class Solution {
 //V2
 public class Solution {
     public int lengthOfLIS(int[] nums) {
-        if(nums.length == 0) return 0;
+        //Key:DP中i,j不是必须要有关系，例如此题中，完全就是个i,j完全就是为了元素遍历而使用的
+        //dp[i] = max(dp[j]+1,dp[i])
+        int n = nums.length;
+        if(n == 0) return 0;
         int res = 0;
-        int[] dp = new int[nums.length];
-        dp[0] = 1;
-        for(int i = 0;i<=nums.length-1;i++){
-            int tmpMax = 0;
-            //Key:find the maxVal between j and i pos
+        int[] dp = new int[n];
+        Arrays.fill(dp,1);
+        for(int i = 0;i<=n-1;i++){
             for(int j = 0;j<=i-1;j++){
                 if(nums[i]>nums[j]){
-                    tmpMax = Math.max(tmpMax,dp[j]);
-                }
+                    dp[i] = Math.max(dp[j]+1,dp[i]);
+                } 
             }
-            dp[i] = tmpMax+1;
             res = Math.max(res,dp[i]);
         }
         return res;
@@ -1751,6 +1751,8 @@ public class Solution {
 }
 
 279. Perfect Squares
+//dp[i] = min(dp[i-k^2]+dp[k^2],dp[i])
+//dp[0]一定要设置为0，否则dp[i-k*k]+dp[k*k]当i==k*k时，dp[0]会是MAX_VALUE,导致错误
 public class Solution {
     public int numSquares(int n) {
         //Key:Just copy - 貌似还是得找规律
@@ -1806,6 +1808,27 @@ public class Solution {
             for(int j = 1;j*j<=i;j++){
                 //Key:不要这么写  dp[i] = Math.min(dp[i],dp[i-j*j])+1;这样一来，即使dp[i]无变化，也会导致自增1的
                 dp[i] = Math.min(dp[i],dp[i-j*j]+1);
+            }
+        }
+        return dp[n];
+		
+		//V3
+		//dp[i]表数字取i时，最少的数字组合
+		//dp[i] = min(dp[i-k^2]+dp[k^2],dp[i])
+        int res = 0;
+        int[] dp = new int[n+1];
+        Arrays.fill(dp,Integer.MAX_VALUE);
+		//dp[0]一定要设置为0，否则dp[i-k*k]+dp[k*k]当i==k*k时，dp[0]会是MAX_VALUE,导致错误
+        dp[0] = 0;
+        int count = 1;
+		//Key:当i为平方时，dp[i] 设置为1
+        for(int i = 1;i<=n;i=count*count){
+            dp[i] = 1;
+            count++;
+        }
+        for(int i = 1;i<=n;i++){
+            for(int k = 1;k*k<=i;k++){
+                dp[i] = Math.min(dp[i-k*k]+dp[k*k],dp[i]);
             }
         }
         return dp[n];
@@ -2361,6 +2384,28 @@ public class Solution {
 }
 
 357. Count Numbers with Unique Digits
+//Key:背，corner case
+public class Solution {
+    public int countNumbersWithUniqueDigits(int n) {
+        if(n == 0) return 1;
+        //Key:关键 count != 0 ，count =1时base还能再增加一次
+        //Key:这么记，
+        //9以内，10个数都不同（1位） ->0,1,2,3,4,5,6,7,8,9
+        //99以内，10+9*9个数不同(2位数，比如1可以接0,2~9,2接0~9，3接0~9....9接0~8)
+        //999以内，10+9*9*8个数不同(3位数，比如10接2~9,20接1或者3~9...90接1~8)
+        //.....
+        int res = 0;
+        int base = 10,mult = 9,count = 9;
+        while(n != 1 && count != 0){
+            mult = mult * count;
+            base += mult;
+            count--;
+            n--;
+        }
+        return base;
+    }
+}
+//背
 public class Solution {
     public int countNumbersWithUniqueDigits(int n) {
         //Key:just cp，mem  https://discuss.leetcode.com/topic/47983/java-dp-o-1-solution
@@ -2986,22 +3031,27 @@ public class Solution {
     }
 }
 
-343. Integer Break
+343. Integer Break //Key:因为有可能出现dp[i-k]<i-k的情况 -->如dp[2-1]==dp[1]<2-1,所以内部也需要max一下
 public class Solution {
     public int integerBreak(int n) {
-        //Key:DP or Math
-        //Just cp:https://discuss.leetcode.com/topic/42978/java-dp-solution DP
-       int[] dp = new int[n + 1];
-       dp[1] = 1;
-       for(int i = 2; i <= n; i ++) {
-           for(int j = 1; j < i; j ++) {
-               dp[i] = Math.max(dp[i], (Math.max(j,dp[j])) * (Math.max(i - j, dp[i - j])));
-           }
-       }
-       return dp[n];
+        //Key:dp[i] = max(dp[i],dp[i-k]*dp[k])  -->dp[10] = max(dp[10],dp[3]*dp[7])
+        int res = 0;
+        int[] dp = new int[n+1];
+        dp[0] = 0;
+        dp[1] = 0;
+        for(int i = 2;i<=n;i++){
+            for(int k = 1;k<=i-1;k++){
+                //Key:因为有可能出现dp[i-k]<i-k的情况 -->如dp[2-1]<2-1,所以内部也需要max一下
+                dp[i] = Math.max(dp[i],Math.max(dp[k],k)*Math.max(dp[i-k],i-k));
+            }
+        }
+        return dp[n];
     }
 }
+
 //V2
+//Key:DP or Math
+//Just cp:https://discuss.leetcode.com/topic/42978/java-dp-solution DP
 public class Solution {
     public int integerBreak(int n) {
         //Key:背吧，
@@ -6245,7 +6295,7 @@ public class Solution {
     }
 }
 
-95. Unique Binary Search Trees II
+95. Unique Binary Search Trees II  //背
 /**
  * Definition for a binary tree node.
  * public class TreeNode {
@@ -6963,7 +7013,7 @@ public class Trie {
  * boolean param_3 = obj.startsWith(prefix);
  */
  
-213. House Robber II
+213. House Robber II  //Math.max(startFromFirstHouse[nums.length - 1], startFromSecondHouse[nums.length]);
 public class Solution {
     //Key:这个sol用的是recursion，不太好记
     //Key:cp https://discuss.leetcode.com/topic/14375/simple-ac-solution-in-java-in-o-n-with-explanation/2
@@ -7233,7 +7283,10 @@ public class Solution {
 public class Solution {
     public int maxProfit(int[] prices) {
         //Key:这道题可以和那个predict winner 一起看，都是状态机的样子
-        //Key:DP,cp,只能背  https://discuss.leetcode.com/topic/30421/share-my-thinking-process/2、
+        //Key:DP,cp,只能背  https://discuss.leetcode.com/topic/30421/share-my-thinking-process
+		//http://www.cnblogs.com/grandyang/p/4997417.html
+		//http://www.cnblogs.com/lasclocker/p/5003534.html
+		//http://blog.csdn.net/xyqzki/article/details/50262315
         /**
             For each of them we make an array, buy[n], sell[n] and rest[n].
     
@@ -7274,11 +7327,14 @@ public class Solution {
         if(prices == null || prices.length <= 1) {
             return 0;
         }
-        //Key:buy[]和sell[]均表示当第i天买或卖时手上钱的最大值
+        //Key:buy[]和sell[]均表示当第i天买或卖状态结束时手上钱的最大值。下边这行的理解应该更准确些
+		//即buy[i]表i天手上有股票时的最大值，sell[i]表第i天手上无股票时的最大值
         int len = prices.length;
         int[] buy = new int[len];
         int[] sell = new int[len];
         //Key:buy[0]本身是可以等于0的，即第0天不买，可是如果等于0的话，sell[i-1]就会出错。
+		//Key:但是如果buy[i]表最大收益，第一天和第二天buy[i]=0，即什么都不买不是更符合含义吗？？？
+		//Key:上面这行理解错误。准确的说，buy[i]表i天手上有股票时的最大值，sell[i]表第i天手上无股票时的最大值。所以前两天buy手上一定有股票
         buy[0] = -prices[0];
         buy[1] = Math.max(-prices[0], -prices[1]);
         sell[0] = 0;
@@ -7711,6 +7767,34 @@ public class Solution {
         return dp[0][len-1];
     }
 }
+
+	//Key:dp[i]  nums[i]最后被戳爆时的最大乘积(i在1~n的范围内)最后被戳爆 dp[i] = dp[1~i-1]*nums[i]*dp[i+1~n])
+	// 进一步推出 -> dp[start][end] = max(dp[start][end],dp[start][i-1]+nums[start]*nums[i]*nums[start]+dp[i+1][end])  start,end为气球的范围
+	//Key:思路是对的，但是具体细节老是写错...
+	/**
+	int n = nums.length;
+	if(n == 0) return 0;
+	int[][] dp = new int[n+2][n+2];
+	//Key:初始化记住：dp[i][i]就是指在i~i的范围内戳爆所有气球的最大值，自然是nums[i]本身...
+	//Key:因为是乘积，所以一开始其他要全赋值为1。如果是其他的题相加那种类型，要赋值为0
+
+
+	int[] newNums = new int[n+2];
+	for(int i = 1;i<=n;i++) newNums[i] = nums[i-1];
+	newNums[0] = newNums[n+1] = 1;
+	for(int i:newNums) System.out.print(i+",");
+	//for(int[] i:dp) Arrays.fill(i,1);
+	for(int i = 1;i<=n;i++) dp[i][i] = newNums[i];
+	for(int i = 1;i<=n;i++){
+		for(int j = 1;j<=n;j++){
+			for(int k = i+1;k<=j-1;k++){
+				//Key:dp[i][j] = Math.max(dp[i][j],dp[i][k-1]+newNums[k]+dp[k+1][j]); 这个转换方程不对，因为newNums[start] 和newNums[end] 并不一定是1
+				dp[i][j] = Math.max(dp[i][j],dp[i][k-1]+newNums[i]*newNums[k]*newNums[j]+dp[k+1][j]);
+			}
+		}
+	}
+	return dp[0][n+1];
+	**/
 
 330. Patching Array
 public class Solution {
@@ -8257,43 +8341,34 @@ public class Solution {
 368. Largest Divisible Subset
 public class Solution {
     public List<Integer> largestDivisibleSubset(int[] nums) {
-        //Key:cp,mem  https://discuss.leetcode.com/topic/49741/easy-understood-java-dp-solution-in-28ms-with-o-n-2-time/2
-        //Step:1->sort
-        //2-->找出每个元素对应的最长长度,并记录下最长长度元素对应的index
-        //3->然后将那些元素逐个加入
-        List<Integer> res = new ArrayList<Integer>();
-        if (nums == null || nums.length == 0) return res;
+        //Key:关键-》别忘记把一开始的最大值给加进去 list.add(nums[maxIndex]);
+        
+        //dp[i]表长度，这个transit func与此题有关
+        //关键2步走：1先找出对应的dp[i],2找出dp[i]最大值对应的maxIndex,再按照dp[i]-dp[i-k]==1 && dp[i]%dp[i-k] ==0 依次加入
+        //Key:if(nums[i]%nums[i-k] == 0) dp[i] = max(dp[i], dp[i-k]+1)
+        
+        List<Integer> list = new ArrayList<>();
+        if(nums.length == 0) return list;
         Arrays.sort(nums);
-        int[] dp = new int[nums.length];
-        dp[0] = 1;
-    
-        //for each element in nums, find the length of largest subset it has.
-        //Key:这个过程类似于insertion sort中的外部循环向前插入的查找过程
-        for (int i = 1; i < nums.length; i++){
-            for (int j = i-1; j >= 0; j--){
-                if (nums[i] % nums[j] == 0){
-                    dp[i] = Math.max(dp[i],dp[j] + 1);
-                }
-            }
-        }
-    
-        //pick the index of the largest element in dp.
+        int n = nums.length;
+        int[] dp = new int[n];
         int maxIndex = 0;
-        for (int i = 1; i < nums.length; i++){
-            maxIndex = dp[i] > dp[maxIndex] ?  i :  maxIndex;
-        }
-    
-        //from nums[maxIndex] to 0, add every element belongs to the largest subset.
-        int temp = nums[maxIndex];
-        int curDp = dp[maxIndex];
-        for (int i = maxIndex; i >= 0; i--){
-            if (temp % nums[i] == 0 && dp[i] == curDp){
-                res.add(nums[i]);
-                temp = nums[i];
-                curDp--;
+        Arrays.fill(dp,1);
+        for(int i = 1;i<=n-1;i++){
+            for(int k = 0;k<=i-1;k++){
+                if(nums[i]%nums[k] == 0) dp[i] = Math.max(dp[i],dp[k]+1);
+                if(dp[i]>dp[maxIndex]) maxIndex = i;
             }
         }
-        return res;
+        list.add(nums[maxIndex]);
+        for(int i = n-1;i>=0;i--){
+            if(dp[maxIndex]-dp[i] == 1 && nums[maxIndex]%nums[i] == 0) {
+                list.add(nums[i]);
+                maxIndex = i;
+            }
+        }
+        Collections.sort(list);
+        return list;
     }
 }
 
@@ -8338,6 +8413,48 @@ public class Solution {
             }
         });
         return list;
+    }
+}
+
+public class Solution {
+    public List<Integer> largestDivisibleSubset(int[] nums) {
+        //Key:cp,mem  https://discuss.leetcode.com/topic/49741/easy-understood-java-dp-solution-in-28ms-with-o-n-2-time/2
+        //Step:1->sort
+        //2-->找出每个元素对应的最长长度,并记录下最长长度元素对应的index
+        //3->然后将那些元素逐个加入
+        List<Integer> res = new ArrayList<Integer>();
+        if (nums == null || nums.length == 0) return res;
+        Arrays.sort(nums);
+        int[] dp = new int[nums.length];
+        dp[0] = 1;
+    
+        //for each element in nums, find the length of largest subset it has.
+        //Key:这个过程类似于insertion sort中的外部循环向前插入的查找过程
+        for (int i = 1; i < nums.length; i++){
+            for (int j = i-1; j >= 0; j--){
+                if (nums[i] % nums[j] == 0){
+                    dp[i] = Math.max(dp[i],dp[j] + 1);
+                }
+            }
+        }
+    
+        //pick the index of the largest element in dp.
+        int maxIndex = 0;
+        for (int i = 1; i < nums.length; i++){
+            maxIndex = dp[i] > dp[maxIndex] ?  i :  maxIndex;
+        }
+    
+        //from nums[maxIndex] to 0, add every element belongs to the largest subset.
+        int temp = nums[maxIndex];
+        int curDp = dp[maxIndex];
+        for (int i = maxIndex; i >= 0; i--){
+            if (temp % nums[i] == 0 && dp[i] == curDp){
+                res.add(nums[i]);
+                temp = nums[i];
+                curDp--;
+            }
+        }
+        return res;
     }
 }
 
@@ -9259,7 +9376,7 @@ public class Solution {
     return Math.max(rob, notrob);
 }
 
-64. Minimum Path Sum
+64. Minimum Path Sum  //Key:注意  第一行只能从左往右走，第一列只能从上往下走!!!!
 public class Solution {
     public int minPathSum(int[][] grid) {
         int m =grid.length,n = grid[0].length;
@@ -9279,7 +9396,7 @@ public class Solution {
     }
 }
 
-1. Two Sum
+1. Two Sum  //Key:[2,3,4] 6 注意如果先把3存进去，然后在读一遍3的话，会把之前存进去的3误算进去
 public class Solution {
     public int[] twoSum(int[] nums, int target) {
         //HashMap solving method
@@ -9381,7 +9498,7 @@ public class Solution {
     }
 }
 
-2. Add Two Numbers
+2. Add Two Numbers  //注意在改变node值时，node是否为空。所以最好操作node.next，返回时返回head.next就可以解决这个问题。即head作为无意义node
 /**
  * Definition for singly-linked list.
  * public class ListNode {
@@ -9520,5 +9637,92 @@ public class Solution {
         if(more == 1) tmp.next = new ListNode(more);
         //Key:因为当前节点赋值时会有点问题，所以不如用node.next来赋值比较好。
         return res.next;
+    }
+}
+
+70. Climbing Stairs  //if(n <= 1) return n;
+public class Solution {
+    public int climbStairs(int n) {
+        int[] dp = new int[n+1];
+        if(n <= 1) return n;
+        dp[1] = 1;
+        dp[2] = 2;
+        for(int i = 3;i<=n;i++){
+            dp[i] = dp[i-1]+dp[i-2];
+        }
+        return dp[n];
+    }
+}
+
+120. Triangle
+//Excellent cp,背 
+//https://discuss.leetcode.com/topic/22254/7-lines-neat-java-solution
+int[] A = new int[triangle.size()+1];
+    for(int i=triangle.size()-1;i>=0;i--){
+        for(int j=0;j<triangle.get(i).size();j++){
+            A[j] = Math.min(A[j],A[j+1])+triangle.get(i).get(j);
+        }
+    }
+    return A[0];
+//DP
+public int minimumTotal(List<List<Integer>> triangle) {
+        //AA:Corner case:难点在边界处理上 -->就是下面inner loop中的3个if
+        //AA:Key:关键 for(int j = 1;j<=triangle.get(row-1).size();j++){  还有j的范围，因为下边有triangle.get(i-1).get(j-1);
+        
+        //dp[row][col] 表到达第row行col列的所有数字之和最小的值
+        //dp[row][col] = min(dp[row-1][col-1],dp[row-1][col])+nums[row][col]
+        if(triangle.size() == 0 || triangle.get(0).size() == 0) return 0;
+        int res = Integer.MAX_VALUE;
+        int row = triangle.size(),col = triangle.get(triangle.size()-1).size();
+        int[][] dp = new int[row+1][row+1];
+        for(int[] i:dp) Arrays.fill(i,0);
+        for(int i = 1;i<=row;i++){
+            for(int j = 1;j<=triangle.get(i-1).size();j++){
+                if(j == 1) dp[i][j] = dp[i-1][j]+triangle.get(i-1).get(j-1);
+                else if(j == triangle.get(i-1).size())dp[i][j] = dp[i-1][j-1]+triangle.get(i-1).get(j-1);
+                else dp[i][j] = Math.min(dp[i-1][j],dp[i-1][j-1])+triangle.get(i-1).get(j-1);
+            }
+        }
+        for(int i = 1;i<=col;i++){
+            res = Math.min(dp[row][i],res);
+        }
+        return res;
+    }
+
+//Ugly code
+public class Solution {
+    public int minimumTotal(List<List<Integer>> triangle) {
+        if(triangle == null) return 0;
+        if(triangle.get(0) == null) return 0;
+        //Line 5: error: List is abstract; cannot be instantiated   So:List<List<Integer>> temp = new List<List<Integer>>(); is Wrong!!!!!
+        List<List<Integer>> temp = new ArrayList<List<Integer>>();
+        ArrayList<Integer> a = new ArrayList<Integer>();
+        a.add(triangle.get(0).get(0));
+        temp.add(a);
+        //int minSum = 0;WRONG!!!!     因为只有一个元素时，比如[[2]]，很明显要大于0，所以指定minSum = triangle.get(0).get(0)时最好了。另外[[-2]]也是可以的，可以存在负数。
+        int minSum = triangle.get(0).get(0);
+        int size = triangle.size();
+        //只有一个element时，size=1,size-1=0,所以不会进入for循环。
+        for(int i=1;i<=size-1;i++){
+            temp.add(new ArrayList<Integer>());
+            for(int j=0;j<=i;j++){
+                int curSum;
+                
+                if(j == 0){
+                    
+                    curSum = temp.get(i-1).get(0)+triangle.get(i).get(j);
+                    if(i == size-1)minSum = curSum;
+                } else if(j == i){
+                    curSum = temp.get(i-1).get(j-1)+triangle.get(i).get(j);
+                } else {
+                    curSum = Math.min(temp.get(i-1).get(j-1),temp.get(i-1).get(j))+triangle.get(i).get(j);
+                }
+                temp.get(i).add(curSum);
+                if(i == size-1){
+                    if(minSum > curSum) minSum = curSum;
+                }
+            }
+        }
+        return minSum;
     }
 }
