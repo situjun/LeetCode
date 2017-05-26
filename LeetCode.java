@@ -8654,38 +8654,94 @@ public class Solution {
 }
 
 410. Split Array Largest Sum
+/*170526*/
 public class Solution {
     public int splitArray(int[] nums, int m) {
-        //Key:cp,mem  https://discuss.leetcode.com/topic/61405/dp-java
-        //https://discuss.leetcode.com/topic/61405/dp-java
-        
-        int L = nums.length;
-        int[] S = new int[L+1];
-        S[0]=0;
-        for(int i=0; i<L; i++)
-            S[i+1] = S[i]+nums[i];
-    
-        int[] dp = new int[L];
-        for(int i=0; i<L; i++)
-            dp[i] = S[L]-S[i];
-    
-        for(int s=1; s<m; s++)
-        {
-            for(int i=0; i<L-s; i++)
-            {
-                dp[i]=Integer.MAX_VALUE;
-                for(int j=i+1; j<=L-s; j++)
-                {
-                    int t = Math.max(dp[j], S[j]-S[i]);
-                    if(t<=dp[i])
-                        dp[i]=t;
-                    else
-                        break;
+        //Thinking170526
+        //dp[i][j] = min(max(dp[k][j-1],sum[i]-sum[k]),dp[i][j])  ->子数组之和最大的最小情况 ，最小最大值问题
+        //前i个数放进j组中，   前k个数放入j-1组中，后边几个数放入一组中  k范围（因为要分成j-1组，所以最少有j-1个，最大有i-1个）
+        int n = nums.length;
+        if(n == 0) return 0;
+        int[] sums = new int[n+1];
+        int[][] dp = new int[n+1][m+1];
+        //Key170526:关键的两句
+        for(int[] i:dp)Arrays.fill(i,Integer.MAX_VALUE);
+        dp[0][0] = 0;
+        for(int i = 1;i<=n;i++){
+            sums[i] = sums[i-1]+nums[i-1];
+        }
+        for(int i = 1;i<=nums.length;i++){
+            for(int j = 1;j<=m;j++){
+                for(int k = j-1;k<=i-1;k++){
+                    //Key170526:dp[0][0] = 0;很关键如果dp[0][0]也初始化为MAX_VALUE，那么i==1,j==1时，dp[k][j-1]>sums[i]-sums[k]会导致第一步就错误了
+                    dp[i][j] = Math.min(dp[i][j],Math.max(dp[k][j-1],sums[i]-sums[k]));
                 }
             }
         }
-    
-        return dp[0];
+        return dp[n][m];
+    }
+}
+/*170524*/
+public class Solution {
+    public int splitArray(int[] nums, int m) {
+        //Key:题意，使  和最大的数群的和  尽可能小
+        //Key:这道题的二分法根本就不可能想出来...
+        //找了一个dp的c++方法，改写成了java,里面也有二分的解释  http://www.cnblogs.com/grandyang/p/5933787.html
+        
+        //Origin:
+        /**
+        int n = nums.length;
+        int[] sums = new int[n+1];
+        int[][] dp = new int[m+1][n+1];
+        for(int[] i:dp){
+            Arrays.fill(i,Integer.MAX_VALUE);
+        }
+        dp[0][0] = 0;
+        for (int i = 1; i <= n; ++i) {
+            //Key:截止到i时，之前的所有数字之和
+            sums[i] = sums[i - 1] + nums[i - 1];
+        }
+        for (int i = 1; i <= m; ++i) {
+            for (int j = 1; j <= n; ++j) {
+                for (int k = i - 1; k < j; ++k) {
+                    int val = Math.max(dp[i - 1][k], sums[j] - sums[k]);
+                    dp[i][j] = Math.min(dp[i][j], val);
+                }
+            }
+        }
+        return dp[m][n];
+        **/
+        
+        //V2
+        
+        //Key170524:hard，能背就背吧....
+        if(nums.length == 0) return 0;
+        int[] sums = new int[nums.length+1];
+        int[][] dp = new int[m+1][nums.length+1];
+        for(int[] i:dp){
+            Arrays.fill(i,Integer.MAX_VALUE);
+        }
+        //Key:dp[0][0] = 0非常重要
+        dp[0][0] = 0;
+        //Key:下面两句错误的
+        ////for(int i = 0;i<=m;i++) dp[i][0] = 0;
+        //for(int i = 0;i<=nums.length;i++) dp[0][i] = 0;
+        for(int i = 0;i<=nums.length-1;i++){
+            sums[i+1] = sums[i]+nums[i];
+        }
+        for(int i = 1;i<=m;i++){
+            for(int j = 1;j<=nums.length;j++){
+                //Key:一定要注意k的取值范围，下面这句错误
+                //for(int k = i;k<=j;k++){
+                //只有k范围是i-1  ~ j-1时才有意义，否则结果就不对了，反正这道题挺不好理解的....
+                for(int k = i-1;k<=j-1;k++){
+                    //Key：举例 i1,j1,k=i-1时，此时sums[1]-sums[0]。而如果撇弃k=i-1，而直接写k从1开始的话，就变成了sums[1]-sums[1]了。答案显然就变了，所以不对
+                    dp[i][j] =Math.min(dp[i][j],Math.max(dp[i-1][k],sums[j]-sums[k]));
+                }
+            }
+        }
+        return dp[m][nums.length];
+        
     }
 }
 
@@ -9656,14 +9712,18 @@ public class Solution {
 
 120. Triangle
 //Excellent cp,背 
+//看不太懂
 //https://discuss.leetcode.com/topic/22254/7-lines-neat-java-solution
-int[] A = new int[triangle.size()+1];
+//https://discuss.leetcode.com/topic/1669/dp-solution-for-triangle/2
+public int minimumTotal(List<List<Integer>> triangle) {
+    int[] A = new int[triangle.size()+1];
     for(int i=triangle.size()-1;i>=0;i--){
         for(int j=0;j<triangle.get(i).size();j++){
             A[j] = Math.min(A[j],A[j+1])+triangle.get(i).get(j);
         }
     }
     return A[0];
+}
 //DP
 public int minimumTotal(List<List<Integer>> triangle) {
         //AA:Corner case:难点在边界处理上 -->就是下面inner loop中的3个if
@@ -9724,5 +9784,50 @@ public class Solution {
             }
         }
         return minSum;
+    }
+}
+
+264. Ugly Number II
+/*170526*/
+public class Solution {
+    public int nthUglyNumber(int n) {
+        //Key170526:dp[l] = min(2*dp[i],3*dp[j],5*dp[k])  l,i,j,k 范围从1到n
+        //当min得出的值选择的是2*dp[i],则i++。相同的，min是3*dp[j]，则j++....每当选择出一个min，则l++
+        int[] dp = new int[n+1];
+        dp[1] = 1;
+        int count = 2;
+        int i = 1,j = 1,k = 1;
+        Set<Integer> set = new HashSet<>();
+        set.add(1);
+        while(count <= n){
+            //Key170526:注意2*dp[2] 和3*dp[2]这种相同的结果会导致重复，所以需要排除一下这些duplicates
+            dp[count] = Math.min(2*dp[i],Math.min(3*dp[j],5*dp[k]));
+            if(dp[count] == 2*dp[i]) i++;
+            else if(dp[count] == 3*dp[j]) j++;
+            else k++;
+            //Key170526:用set排除重复项
+            if(set.add(dp[count])) count++;
+            
+        }
+        return dp[n];
+    }
+}
+/*origin*/
+public class Solution {
+    public int nthUglyNumber(int n) {
+        //https://discuss.leetcode.com/topic/21791/o-n-java-solution/2
+        int[] arr = new int[n];
+        arr[0] = 1;
+        int index2 = 0,index3 = 0,index5 = 0;
+        //Key point:这么一看，倒的确是DP
+        //相当于在2,3,5分别的最小值上乘以2或3或5.然后比较
+        for(int i=1;i<=n-1;i++){
+            arr[i] = Math.min(arr[index2]*2,Math.min(arr[index3]*3,arr[index5]*5));
+            //Key170526:因为三个if是顺序执行的，所以即使arr[i] == 3*2,但是同时也把 arr[i] == 2*3这个判断也给进行了,所以index2和index3都会++,也就不会因为2*3和3*2这样产生冗余项了
+            if(arr[i] == arr[index2]*2) index2++;
+            if(arr[i] == arr[index3]*3) index3++;
+            if(arr[i] == arr[index5]*5) index5++;
+        }
+        return arr[n-1];
     }
 }
