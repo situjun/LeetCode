@@ -5747,6 +5747,55 @@ public class Solution {
 }
 
 63. Unique Paths II
+/*170527*/
+public class Solution {
+    public int uniquePathsWithObstacles(int[][] obstacleGrid) {
+        //Key170527:Corner case是难点
+        //Key170527:dp[i][j] = dp[i-1][j]+dp[i][j] i->row,j->col  为了排除第一行和第一列只能从左边走和只能从上边走的干扰，我们可以只算dp[1][1]开始的结果。但是第一行，第一列“没有障碍物&&可以到达的位置”我们要先全部初始化为1
+        //Key:当第一个grid是1，起始就没法走，所以要设为0。能走，要设为1
+        //dp[0][0] = obstacleGrid[0][0] == 0?1:0;
+        /*
+        [ [1,0,0],
+          [0,1,0],
+          [1,0,0],
+          [1,0,0],
+          [1,1,0],
+          [0,0,0]
+        ]  
+        */
+        //Key170527:如果左边的是grid是1，即使当前grid是0，但当前dp也只能设为0。行同理所以下边的是wrong
+        //if(obstacleGrid[i][0] == 0) dp[i][0] = 1;错误的
+        int m = obstacleGrid.length,n = obstacleGrid[0].length;
+        if(m == 0 || n == 0) return 0;
+        int[][] dp = new int[m][n];
+        //Key:当第一个grid是1，起始就没法走，所以要设为0。能走，要设为1
+        dp[0][0] = obstacleGrid[0][0] == 0?1:0;
+        for(int i = 1;i<=m-1;i++) {
+            //Key170527:如果左边的是grid是1，即使当前grid是0，但当前dp也只能设为0。行同理所以下边的是wrong
+            //if(obstacleGrid[i][0] == 0) dp[i][0] = 1;
+            if(obstacleGrid[i][0] == 0) dp[i][0] = dp[i-1][0];
+            
+        }
+        for(int i = 1;i<=n-1;i++) {
+            //if(obstacleGrid[0][i] == 0) dp[0][i] = 1;
+            if(obstacleGrid[0][i] == 0) dp[0][i] = dp[0][i-1];
+        }
+        //Key170527:打印Array  System.out.println(Arrays.toString(array));
+        //for(int[] i:dp) System.out.println(String.valueOf(i));  ->Wrong
+        //for(int[] i:dp) System.out.println(Arrays.toString(i));
+        for(int i = 1;i<=m-1;i++){
+            for(int j = 1;j<=n-1;j++){
+                //Key170527:分类讨论  1->当前grid是1，continue  2->上一个grid是0，叠加
+                if(obstacleGrid[i][j] == 1) continue;
+                if(obstacleGrid[i-1][j] != 1) dp[i][j] += dp[i-1][j];
+                if(obstacleGrid[i][j-1] != 1) dp[i][j] += dp[i][j-1];
+            }
+        }
+        return dp[m-1][n-1];
+    }
+}
+
+//Key170527:这解法太巧
 public class Solution {
     public int uniquePathsWithObstacles(int[][] obstacleGrid) {
         //Key:DP,cp,背,同时可解 Unique Paths     https://discuss.leetcode.com/topic/10974/short-java-solution/2
