@@ -1,11 +1,67 @@
 516. Longest Palindromic Subsequence
+/*170527*/
+public class Solution {
+    public int longestPalindromeSubseq(String s) {
+        //Key170527:dp[i][j] = max(dp[i+1][j],dp[i][j-1],dp[i+1][j-1]+2)  i表起始位置,j表终止位置。dp[i]j]表i位置到j位置时最长的回文子序列长度
+        //Key170527:要注意当只有2个元素时,dp[i+1][j-1]的i+1会交换顺序。所以就不对了，所以要特殊处理一下
+        //Key170527:当做内嵌循环做遍历，由内部循环的后边向前遍历
+            //Key170527:注意,如果按照下边这种顺序是错误的，会导致先算出了dp[0][4]，再去算dp[1][3]。这很明显没有用到之前的dp值，也就不是从底至上的DP算法了（起始如果这样写inner loop，根本就是错误的dp）
+            //for(int j = i+1;j<=n-1;j++){
+            //Key170527：而下面这个是正确的运算结果输出顺序：
+            /**
+            i3j4-1
+            i2j3-1
+            i2j4-3
+            i1j2-2
+            i1j3-2
+            i1j4-3
+            i0j1-2
+            i0j2-3
+            i0j3-3
+            i0j4-4
+            **/
+        int n = s.length();
+        if(n == 0) return 0;
+        if(n == 1) return 1;
+        int[][] dp = new int[n][n];
+        for(int i = 0;i<=n-1;i++) dp[i][i] = 1;
+        for(int i = n-2;i>=0;i--){
+            //Key170527:当做内嵌循环做遍历，由内部循环的后边向前遍历
+            //Key170527:注意,如果按照下边这种顺序是错误的，会导致先算出了dp[0][4]，再去算dp[1][3]。这很明显没有用到之前的dp值，也就不是从底至上的DP算法了（起始如果这样写inner loop，根本就是错误的dp）
+            //for(int j = i+1;j<=n-1;j++){
+            //Key170527：而下面这个是正确的运算结果输出顺序：
+            /**
+            i3j4-1
+            i2j3-1
+            i2j4-3
+            i1j2-2
+            i1j3-2
+            i1j4-3
+            i0j1-2
+            i0j2-3
+            i0j3-3
+            i0j4-4
+            **/
+            for(int j = i+1;j<=n-1;j++){
+                if(s.charAt(i) == s.charAt(j) ) {
+                    //Key170527:要注意当只有2个元素时,dp[i+1][j-1]的i+1会交换顺序。所以就不对了，所以要特殊处理一下
+					//不过其实处不处理无所谓，因为两者交换顺序后,索引并没有变...
+                    dp[i][j] = i+1==j?2:Math.max(dp[i][j],dp[i+1][j-1]+2);
+                }
+                dp[i][j] = Math.max(dp[i][j],Math.max(dp[i+1][j],dp[i][j-1]));
+                //System.out.println("i"+i+"j"+j+"-"+dp[i][j]);
+            }
+        }
+        return dp[0][n-1];
+    }
+}
+
 public class Solution {
     public int longestPalindromeSubseq(String s) {
         //V1
         /**
         //Key:subsequence's子序列，不能调整顺序....
         /**
-        
         if(s == null || s.equals("")) return 0;
         int oddMax = 0,count = 0;
         Map<Character,Integer> map = new HashMap<>();
@@ -17,7 +73,6 @@ public class Solution {
             if(entry.getValue()%2 == 1)oddMax = Math.max(oddMax,entry.getValue());
         }
         return count+maxOdd;
-        
         ****/
         //Key:首先原题意容易使人糊涂，因为没有加continuous限定(可与此题作比较  Shortest Unsorted Continuous Subarray   )，所以可以是非连续的子串。如"bbbab"，最长回文子串为bbbb
         //详细解释看这里  https://discuss.leetcode.com/topic/80378/what-is-the-meaning-of-example-1/2
