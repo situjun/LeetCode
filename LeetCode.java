@@ -9935,3 +9935,99 @@ public class Solution {
         return arr[n-1];
     }
 }
+
+598. Range Addition II
+/*170528*/
+public class Solution {
+    public int maxCount(int m, int n, int[][] ops) {
+        if(m == 0 || n == 0 ) return 0;
+        if(ops.length == 0) return m * n;
+        int width = Integer.MAX_VALUE,length = Integer.MAX_VALUE;
+        for(int[] i:ops){
+            width = Math.min(i[0],width);
+            length = Math.min(i[1],length);
+        }
+        return width*length;
+        //Key170528:错误且麻烦的做法
+        /**
+        int[][] dp = new int[m][n];
+        int max = Integer.MIN_VALUE,count = 0;
+        for(int[] i:ops){
+            for(int j = 0;j<=i[0]-1;j++){
+                for(int k = 0;k<i[1]-1;k++){
+                    dp[j][j]++;
+                    max = Math.max(dp[j][k],max);
+                }
+            }
+        }
+        for(int i = 0;i<=m-1;i++){
+            for(int j = 0;j<=n-1;j++){
+                if(dp[i][j] == max)count++;
+            }
+        }
+        return count;
+        **/
+    }
+}
+
+565. Array Nesting
+/*170528*/
+public class Solution {
+    public int arrayNesting(int[] nums) {
+        //Key150528:这道题最好看着例子写，然后corner case就比较好写了
+        if(nums.length == 0) return 0;
+        if(nums.length == 1) return 1;
+        int max = 1;
+        int n = nums.length;
+        Set<Integer> set = new HashSet<>();
+        for(int i = 0;i<=n-1;i++){
+            int index = i;
+            int count = 1;
+            //Key170528:set去除已经算过的数字是关键，否则会因为一个巨大的case导致TLE
+            //Key170528:判断的是nums[i](也可以把i的判断也加上),而不仅仅是是i。因为后边的是set.add(i),只有当前i之前的i会被加上，而当前i则不会被加上。所以如果仅仅判断当前i是否存在的话，是无意义的行为!!!
+            if(set.contains(nums[i])||set.contains(i)) continue;
+            while(nums[index] != i){
+                index = nums[index];
+                //Key170528:在这里也加句会减掉更多不必要的
+                set.add(index);
+                count++;
+                max = Math.max(max,count);
+            }
+            //Key170528:
+            set.add(i);
+        }
+        return max;
+    }
+}
+
+599. Minimum Index Sum of Two Lists
+/*170528*/
+public class Solution {
+    public String[] findRestaurant(String[] list1, String[] list2) {
+        //Key170528:map<restaurant,index>
+        if(list1.length == 0 || list2.length == 0) return new String[0];
+        Map<String,Integer> map = new HashMap<>();
+        List<String> list = new ArrayList<>();
+        int min = Integer.MAX_VALUE;
+        for(int i = 0;i<=list1.length-1;i++){
+            map.put(list1[i],i);
+        }
+        for(int i = 0;i<=list2.length-1;i++){
+            //Key170528:Corner case:Shogun index之和等于KFC (4)，所以要注意一下
+            //["Shogun","Tapioca Express","Burger King","KFC"]
+            //["Piatti","The Grill at Torrey Pines","Hungry Hunter Steakhouse","Shogun"]
+            if(map.containsKey(list2[i])){
+                int sum = map.get(list2[i])+i;
+                list.add(list2[i]);
+                min = Math.min(min,sum);
+                map.put(list2[i],sum);
+            } 
+        }
+        for(Map.Entry<String,Integer> entry:map.entrySet()){
+            if(entry.getValue() != min) list.remove(entry.getKey());
+        }
+        
+        return list.toArray(new String[0]);
+    }
+}
+
