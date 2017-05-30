@@ -10023,10 +10023,11 @@ public class Solution {
                 map.put(list2[i],sum);
             } 
         }
+		//Key:Map遍历 for(Map.Entry<String,Integer> entry:map.entrySet())
         for(Map.Entry<String,Integer> entry:map.entrySet()){
             if(entry.getValue() != min) list.remove(entry.getKey());
         }
-        
+				
         return list.toArray(new String[0]);
     }
 }
