@@ -10033,3 +10033,60 @@ public class Solution {
 }
 
 //Key:Test -> 170603
+
+606. Construct String from Binary Tree
+//Key170604:original
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    String res = "";
+    public String tree2str(TreeNode t) {
+        if(t == null) return "";
+        helper(true,t);
+        return res.substring(1,res.length()-1);
+    }
+    public boolean helper(boolean tag,TreeNode node){
+        if(node == null) return false;
+        if(!tag) res += "()";
+        res += "(";
+        res += node.val;
+        boolean left = helper(true,node.left);
+        helper(left,node.right);
+        res += ")";
+        return true;
+    }
+}
+
+605. Can Place Flowers
+//Key170604:original
+public class Solution {
+    public boolean canPlaceFlowers(int[] flowerbed, int n) {
+        boolean res = true;
+        
+        int length = flowerbed.length,count = 0;
+        if(length == 0 || length < n) return false;
+        //Key170604: Test case太烦人，扩大一下边界吧
+        int[] tmp = new int[length+2];
+        for(int i = 0;i<=length-1;i++){
+            tmp[i+1] = flowerbed[i];
+        }
+        
+        for(int i = 1;i<=tmp.length-2;i++){
+            if(tmp[i-1] == 0 && tmp[i] == 0  && tmp[i+1] == 0) {
+                count++;
+                tmp[i] = 1;
+            }
+        }
+        //Key170604:count>n也可以!!!  [0,0,1,0,0] 1
+        return count >= n?res:false;
+        //Test case:[1,0,0,0,0,0,1] 2
+        //Test case:[1,0,0,0,0,1]  2
+    }
+}
