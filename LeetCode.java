@@ -4851,11 +4851,29 @@ public class Solution {
 /*170605   背*/
 public class Solution {
     public int maxProduct(int[] nums) {
+		//Key170605:因为可能存在负数，所以需要额外保持一个min,当nums[i]为负数时可以求到max。另外因为有可能为0,所以也需要判断一下nums[i]是否最大
+		//
         //Key170605:dp[i][j] = max(dp[i][j-1]*nums[j],dp[i+1][j]*nums[i],dp[i][j-1],dp[i+1][j]) -->wrong(因为这是contiguos，所以数组元素必须是连续的)
-        //Key170605:dp1[i] = max(dp[i-1]*nums[i],nums[i]),dp2[i] = max(dp[i-1]*nums[i],nums[i])
+        //Key170605:dp1[i] = max(dp[i-1]*nums[i],nums[i]),dp2[i] = max(dp[i-1]*nums[i],nums[i])  --->wrong
+		
         int n = nums.length,res = Integer.MIN_VALUE;
-        if(n == 0) return 0;
-        //Key170605:wrong 
+        if(n == 0) return 0;    
+        //Key170605:需要考虑偶数个负数相乘的情况
+        int max = nums[0],min = nums[0];
+        res = nums[0];
+        for(int i = 1;i<=n-1;i++){
+			//Key170605关键：tmp额外保存下max
+            int tmp = max;
+            max = Math.max(nums[i],Math.max(max*nums[i],min*nums[i]));
+            //Key170605:注意此时max有可能改变了，所以之前要存储一下
+            min = Math.min(nums[i],Math.min(tmp*nums[i],min*nums[i]));
+            res = Math.max(max,res);
+        }
+        return res;
+    }
+    
+	
+	//Key170605:wrong 
         /**
         int[] dpLeft = new int[n];
         int[] dpRight = new int[n];
@@ -4899,11 +4917,11 @@ public class Solution {
         }
         return res;
         **/
-    }
+        
 }
 
 public class Solution {
-    public int maxProduct(int[] a) {
+    public int maxProduct(int[] A) {
         //Key:My wrong version
         /**
         if(nums.length == 0) return 0;
@@ -4925,24 +4943,21 @@ public class Solution {
         return res;
         **/
         
-        //Key:Just cp,背  -->典型DP
-        //和那道Maximum Contiguous Subarray比较像
-        //https://discuss.leetcode.com/topic/18203/accepted-java-solution
-        if (a == null || a.length == 0) return 0;
-        int ans = a[0], min = ans, max = ans;
-        for (int i = 1; i < a.length; i++) {
-            if (a[i] >= 0) {
-              max = Math.max(a[i], max * a[i]);
-              min = Math.min(a[i], min * a[i]);
-            } else {
-              int tmp = max;
-              max = Math.max(a[i], min * a[i]);
-              min = Math.min(a[i], tmp * a[i]);
-            }
-            ans = Math.max(ans, max);
+        //Key:Just cp,背 --> 准确的说不应该算dp...
+        //https://discuss.leetcode.com/topic/5161/simple-java-code/2
+        //Key170605:只需要考虑max * A[i](A[i]为正数), min * A[i](A[i]为负数), A[i](min和max为0的情况)三者中谁最大的关系。因为参数是int[]，所以不用考虑元素值为分数的影响-->因为都是整数，所以乘积绝对值一定大于等于本身
+        if (A == null || A.length == 0) {
+            return 0;
         }
-          
-        return ans;
+        int max = A[0], min = A[0], result = A[0];
+        for (int i = 1; i < A.length; i++) {
+            int temp = max;
+            //Key170605:下面这两句比较关键
+            max = Math.max(Math.max(max * A[i], min * A[i]), A[i]);
+            min = Math.min(Math.min(temp * A[i], min * A[i]), A[i]);
+            result = Math.max(result,max);
+        }
+        return result;
     }
 }
 
@@ -10159,5 +10174,27 @@ public class Solution {
         return count >= n?res:false;
         //Test case:[1,0,0,0,0,0,1] 2
         //Test case:[1,0,0,0,0,1]  2
+    }
+}
+
+238. Product of Array Except Self
+public class Solution {
+    public int[] productExceptSelf(int[] nums) {
+        //Key170605:这个完全就是凭感觉做出来的.....
+        //Key170605:思路是将问题拆分为分别求出nums[i]左边和右边的乘积，优化时即正序逆序各遍历一遍
+        int n = nums.length,tmp = 1;
+        if(n == 0) return new int[0];
+        int[] res = new int[n];
+        res[0] = 1;
+        for(int i = 1;i<=n-1;i++){
+            tmp = tmp * nums[i-1];
+            res[i] = tmp;
+        }
+        tmp = 1;
+        for(int i = n-2;i>=0;i--){
+            tmp = tmp*nums[i+1];
+            res[i] = res[i]*tmp;
+        }
+        return res;
     }
 }
