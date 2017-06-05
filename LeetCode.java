@@ -1357,6 +1357,23 @@ public class Solution {
         }
         return arr[m-1][n-1];
     }
+	
+}
+
+//Key170605:
+public class Solution {
+    public int uniquePaths(int m, int n) {
+        //Key170605
+        int res = 0;
+        if(m == 0 || n ==0) return 0;
+        int[][] dp = new int[m][n];
+        for(int i = 0;i<=n-1;i++) dp[0][i] = 1;
+        for(int i = 0;i<=m-1;i++) dp[i][0] = 1;
+        for(int i = 1;i<=m-1;i++){
+            for(int j = 1;j<=n-1;j++) dp[i][j] = dp[i-1][j] + dp[i][j-1];
+        }
+        return dp[m-1][n-1];
+    }
 }
 
 53. Maximum Subarray
@@ -4831,6 +4848,60 @@ public class Solution {
 }
 
 152. Maximum Product Subarray
+/*170605   背*/
+public class Solution {
+    public int maxProduct(int[] nums) {
+        //Key170605:dp[i][j] = max(dp[i][j-1]*nums[j],dp[i+1][j]*nums[i],dp[i][j-1],dp[i+1][j]) -->wrong(因为这是contiguos，所以数组元素必须是连续的)
+        //Key170605:dp1[i] = max(dp[i-1]*nums[i],nums[i]),dp2[i] = max(dp[i-1]*nums[i],nums[i])
+        int n = nums.length,res = Integer.MIN_VALUE;
+        if(n == 0) return 0;
+        //Key170605:wrong 
+        /**
+        int[] dpLeft = new int[n];
+        int[] dpRight = new int[n];
+        dpLeft[0] = nums[0];
+        dpRight[n-1] = nums[n-1];
+        if(n == 1) return nums[0];
+        for(int i = 1;i<=n-1;i++) {
+            dpLeft[i] = Math.max(dpLeft[i-1]*nums[i],nums[i]);
+            res = Math.max(res,dpLeft[i]);
+        }
+        
+        return res;
+        **/
+        
+        //Key170605:wrong version
+        /**
+        int[][] dp = new int[n][n];
+        for(int i = 0;i<=n-1;i++) {
+            dp[i][i] = nums[i];
+            res = Math.max(res,nums[i]);
+        }
+        int tmp = 1;
+        for(int i = 0;i<=n-1;i++){
+            int j = i-1,k = i+1;
+            while(j>=0 && k <=n-1){
+                tmp = tmp *nums[j] *nums[k];
+                res = Math.max(res,tmp);
+                j--;
+                k++;
+            }
+            while(j>=0){
+               tmp = tmp *nums[j] *nums[k];
+                res = Math.max(res,tmp);
+                j--;
+            }
+            while(k <=n-1){
+               tmp = tmp *nums[j] *nums[k];
+                res = Math.max(res,tmp);
+                k++; 
+            }
+        }
+        return res;
+        **/
+    }
+}
+
 public class Solution {
     public int maxProduct(int[] a) {
         //Key:My wrong version
