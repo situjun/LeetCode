@@ -4848,6 +4848,23 @@ public class Solution {
 }
 
 152. Maximum Product Subarray
+/*170606*/
+//Key17060:状态机??
+public class Solution {
+    public int maxProduct(int[] nums) {
+        int n =nums.length;
+        if(n == 0) return 0;
+        int res = nums[0],max = nums[0],min = nums[0];
+        if(n == 1) return res;
+        for(int i = 1;i<=n-1;i++){
+            int tmp = max;
+            max = Math.max(max*nums[i],Math.max(min*nums[i],nums[i]));
+            min = Math.min(tmp*nums[i],Math.min(min*nums[i],nums[i]));
+            res = Math.max(max,res);
+        }
+        return res;
+    }
+}
 /*170605   背*/
 public class Solution {
     public int maxProduct(int[] nums) {
@@ -5923,6 +5940,47 @@ public class Solution {
 }
 
 72. Edit Distance
+/*170606*/
+public class Solution {
+    public int minDistance(String word1, String word2) {
+        //Key170606:dp[i][j] 表word1前i个字符转为word2前j个字符所需的最小step,背
+        //dp[i][j] = Math.min(dp[i-1][j-1],Math.min(dp[i-1][j],dp[i][j-1]))+1;
+        /**
+              Ø a b c d
+            Ø 0 1 2 3 4
+            b 1 1 1 2 3
+            b 2 2 1 2 3
+            c 3 3 2 1 2
+        **/
+        //Key170606:牛逼的方法-->http://www.cnblogs.com/grandyang/p/4344107.html
+        //http://www.cnblogs.com/lihaozy/archive/2012/12/31/2840152.html
+        //Key170606:当实在找不出transition func时，举个例子，然后把表关系的二维数组写出来，找一下关系!!!
+        
+        
+        int m = word1.length(),n = word2.length();
+        if(m == 0) return n;
+        else if(n == 0) return m;
+        int[][] dp = new int[m+1][n+1];
+        for(int i = 1;i<=n;i++){
+            dp[0][i] = i;
+        }
+        for(int i = 1;i<=m;i++){
+            dp[i][0] = i;
+        }
+        for(int i = 1;i<=m;i++){
+            for(int j = 1;j<=n;j++){
+                if(word1.charAt(i-1) == word2.charAt(j-1)){
+                    dp[i][j] = dp[i-1][j-1];
+                }
+                else {
+                    dp[i][j] = Math.min(dp[i-1][j-1],Math.min(dp[i-1][j],dp[i][j-1]))+1;
+                }
+            }
+        }
+        return dp[m][n];
+    }
+}
+
 public class Solution {
     public int minDistance(String word1, String word2) {
         //Key:cp,背 https://discuss.leetcode.com/topic/27929/concise-java-dp-solution-with-comments
