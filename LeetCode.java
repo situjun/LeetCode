@@ -5940,6 +5940,29 @@ public class Solution {
 }
 
 72. Edit Distance
+public class Solution {
+    public int minDistance(String word1, String word2) {
+        //Key170608:dp[i][j] 表word1中的前i个字符转为word2中的前j个字符所需要的最少step，dp[i][j-1]表word1前i个字符转为word2前j个字符最少dp[i][j-1]步，因此dp[i][j]中长度为i的word1如果要转为长度为j的word2，需要在dp[i][j-1]基础上insert一个字符
+        //Key170608:其实如果写成dp[i][j+1]=F(dp[i][j]....)应该更好理解些
+        //Key170608:dp[i][j] = min(dp[i-1][j],min(dp[i][j-1]),dp[i-1][j-1])+1
+        int m = word1.length(),n = word2.length();;
+        int[][] dp = new int[m+1][n+1];
+        for(int i = 1;i<=m;i++) dp[i][0] = i;
+        for(int i = 1;i<=n;i++) dp[0][i] = i;
+        for(int i = 1;i<=m;i++){
+            for(int j = 1;j<=n;j++){
+                //Key170608:注意chatAt()中的index需要-1，这个index是string中的下表，而dp[i][j]表word1中的前i个字符转为word2中的前j个字符所需要的最少step
+                if(word1.charAt(i-1) == word2.charAt(j-1)){
+                    dp[i][j] = dp[i-1][j-1];
+                } else {
+                    dp[i][j] = Math.min(dp[i-1][j-1],Math.min(dp[i-1][j],dp[i][j-1]))+1;
+                }
+            }
+        }
+        return dp[m][n];
+    }
+}
+
 /*170606*/
 public class Solution {
     public int minDistance(String word1, String word2) {
@@ -7528,6 +7551,28 @@ public class Solution {
 }
 
 309. Best Time to Buy and Sell Stock with Cooldown
+/*170609*/
+public class Solution {
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        //Key:sell[i]第i天卖出状态时的收益,即手里没有stock的状态
+        if(n <= 1) return 0;
+        if(n == 2) return Math.max(0,prices[1]-prices[0]);
+        int[] sell = new int[n];
+        int[] buy = new int[n];
+        sell[0] = 0;
+        sell[1] = Math.max(prices[1] - prices[0],0);
+        buy[0] = -prices[0];
+        buy[1] = Math.max(-prices[1],-prices[0]);
+        for(int i = 2;i<=n-1;i++){
+            //Key:buy[i],sell[i] transition func的顺序千万不能错!!!
+            buy[i] = Math.max(buy[i-1],sell[i-2]-prices[i]);
+            sell[i] = Math.max(sell[i-1],buy[i-1]+prices[i]);
+        }
+        return sell[n-1];
+    }
+}
+
 public class Solution {
     public int maxProfit(int[] prices) {
         //Key:这道题可以和那个predict winner 一起看，都是状态机的样子
@@ -10254,5 +10299,41 @@ public class Solution {
             res[i] = res[i]*tmp;
         }
         return res;
+    }
+}
+
+85. Maximal Rectangle
+public class Solution {
+    public int maximalRectangle(char[][] matrix) {
+        //Key170606:wrong
+        /**
+        int row = matrix.length,col = matrix[0].length;
+        if(row == 0 || col == 0) return 0;
+        int res = 0;
+        int[][] dp = new int[row][col];
+        dp[0][0] = matrix[0][0] == '1'?1:0;
+        for(int i = 1;i<=col-1;i++){
+            if(matrix[0][i] == '1') dp[0][i] = dp[0][i-1]+1;
+            else dp[0][i] = 0;
+            res = Math.max(dp[0][i],res);
+        }
+        for(int i = 1;i<=row-1;i++){
+            if(matrix[i][0] == '1') dp[i][0] = dp[i-1][0]+1;
+            else dp[i][0] = 0;
+            res = Math.max(dp[i][0],res);
+        }
+        for(int i = 1;i<=row-1;i++){
+            for(int j = 1;j<=col-1;j++){
+                if(matrix[i][j] == '1'){
+                    if(Math.max(dp[i-1][j],dp[i][j-1]) == 1) dp[i][j] = 2;
+                    else dp[i][j] = dp[i-1][j] + dp[i][j-1] -1;
+                } else {
+                    dp[i][j] = 0;
+                }
+                res = Math.max(res,dp[i][j]);
+            }
+        }
+        return res;
+        **/
     }
 }
