@@ -3732,6 +3732,8 @@ public class Solution {
 public class Solution {
     //Key:Hard,just cp
     //这两个解法比较容易理解
+	//http://blog.csdn.net/linhuanmars/article/details/23236995
+	//http://www.cnblogs.com/grandyang/p/4295761.html
     //https://discuss.leetcode.com/topic/24079/easy-understanding-and-can-be-easily-modified-to-different-situations-java-solution/2
     //https://discuss.leetcode.com/topic/29489/clean-java-dp-o-nk-solution-with-o-k-space
     //hold[i][k]  ith day k transaction have stock and maximum profit
@@ -10335,5 +10337,45 @@ public class Solution {
         }
         return res;
         **/
+    }
+}
+
+
+392. Is Subsequence
+/*20170615*/
+public class Solution {
+    public boolean isSubsequence(String s, String t) {
+        //Key170615:这道题容易被他给的tag给带弯,tag里有个dp,但是实际上用dp写起来很麻烦。而且其实根本就用不上dp......下面的dp是错误思路
+        //Key170615:if s[i] == t[j] -->dp[i][j] =  dp[i-1][j-1] && true;
+        int index1 = 0,index2 = 0;
+        int length1 = s.length(),length2 = t.length();
+        while(index1 <= length1-1 && index2 <= length2-1){
+            if(s.charAt(index1) == t.charAt(index2)){
+                index1++;
+                index2++;
+            } else {
+                index2++;
+            }
+        }
+        return index1 == length1?true:false;
+    }
+}
+
+//Key170615:这道题容易被他给的tag给带弯,tag里有个dp,但是实际上用dp写起来很麻烦。而且其实根本就用不上dp......
+public class Solution {
+    public boolean isSubsequence(String s, String t) {
+        //2pointers
+        if(s == null || t == null ) return false;
+        if(s.equals("")) return true;
+        int index1 = 0,index2 = 0,length1 = s.length(),length2 = t.length();
+        while(index1 <= length1-1 && index2 <= length2-1){
+            if(s.charAt(index1) == t.charAt(index2)){
+                index1++;
+                index2++;
+            } else {
+                index2++;
+            }
+        }
+        return length1 == index1?true:false;
     }
 }
