@@ -9748,6 +9748,25 @@ public class Solution {
 }
 
 1. Two Sum  //Key:[2,3,4] 6 注意如果先把3存进去，然后在读一遍3的话，会把之前存进去的3误算进去
+/*170616*/
+public class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        int n = nums.length;
+        //if(n <= 1) return new int[2];
+        int[] res = new int[2];
+        Map<Integer,Integer> map = new HashMap<>();
+        for(int i = 0;i<=n-1;i++){
+            int tmp = target-nums[i];
+            if(map.containsKey(tmp)){
+                res[0] = map.get(tmp);
+                res[1] = i;
+            } else {
+                map.put(nums[i],i);
+            }
+        }
+        return res;
+    }
+}
 public class Solution {
     public int[] twoSum(int[] nums, int target) {
         //HashMap solving method
@@ -9771,6 +9790,7 @@ public class Solution {
                 result[0] = map.get(rest);
                 result[1] = i;
             }
+			//Key170616:关键在于正确做法需要加个else，以便使下面这句无法生效
             map.put(nums[i],i);
         }
         return result;
