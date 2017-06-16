@@ -3427,9 +3427,17 @@ public class Solution {
 }
 
 4. Median of Two Sorted Arrays
+//Star
+/**
+1：
+此题关键，记住。这个思考起来很绕，但是结论肯定没错。用个特殊case来背 -> [1,2,3,4,5,6,7]  [11,12,13,14,15,16,17] ，所以是从[4,5,6,7,11,12,13,14]中找
+	if (aMid < bMid) Keep [aRight + bLeft]     
+	else Keep [bRight + aLeft]
+**/
 public class Solution {
     //My wrong version
     /**
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
         int start1=0,start2=0,end1=nums1.length-1,end2=nums2.length-1;
         return findMedian(start1,end1,nums1,start2,end2,nums2);
@@ -3454,27 +3462,61 @@ public class Solution {
     }
     **/
     //Just cp
+	//Key:思路一样，但他这种写法不是很容易理解。另一种较容易理解的写法是下面的code4.2
     //https://discuss.leetcode.com/topic/28602/concise-java-solution-based-on-binary-search/2
+	//Key:下面参考里的方法里用到了Arrays.copyOfRange(nums2, j, n),其实等价于nums2从j位置到n位置，只不过他这里额外的新cp了一个数组。
+	//其实直接给个start和end范围，直接在原数组上操作就可
+	//http://www.cnblogs.com/grandyang/p/4465932.html
     public double findMedianSortedArrays(int[] A, int[] B) {
     	    int m = A.length, n = B.length;
     	    int l = (m + n + 1) / 2;
     	    int r = (m + n + 2) / 2;
     	    return (getkth(A, 0, B, 0, l) + getkth(A, 0, B, 0, r)) / 2.0;
     	}
-    
+    //A从aStart找到两个数组中第k大的元素
     public double getkth(int[] A, int aStart, int[] B, int bStart, int k) {
+		/**
+		我们要判断小的数组是否为空，为空的话，直接在另一个数组找第K个即可。
+		还有一种情况是当K = 1时，表示我们要找第一个元素，只要比较两个数组的第一个元素，返回较小的那个即可。
+		*/
+		//范围为astart~A.length和bstart~B.length范围中的第k大元素
+		//aStart > A.length - 1,start位置大于A数组长度，意味着A中从start位置开始，不存在着这个两数组中第k大的元素，所以无需在A中找了。
+		//所以直接返回B中第k个元素
+		//Key:下面这两句是用来排除Test case的语句，非core思路内容
     	if (aStart > A.length - 1) return B[bStart + k - 1];            
     	if (bStart > B.length - 1) return A[aStart + k - 1];                
     	if (k == 1) return Math.min(A[aStart], B[bStart]);
     	
     	int aMid = Integer.MAX_VALUE, bMid = Integer.MAX_VALUE;
+		//Key:分别找出两个数组中的中间值
     	if (aStart + k/2 - 1 < A.length) aMid = A[aStart + k/2 - 1]; 
     	if (bStart + k/2 - 1 < B.length) bMid = B[bStart + k/2 - 1];        
     	
+	
     	if (aMid < bMid) 
     	    return getkth(A, aStart + k/2, B, bStart,k - k/2);// Check: aRight + bLeft 
     	else 
     	    return getkth(A, aStart,B,bStart + k/2, k - k/2);// Check: bRight + aLeft
+    }
+}
+//code4.2
+//Key:另一种较容易理解的写法
+public class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        int m = nums1.length, n = nums2.length, left = (m + n + 1) / 2, right = (m + n + 2) / 2;
+        return (findKth(nums1, nums2, left) + findKth(nums1, nums2, right)) / 2.0;
+    }
+    int findKth(int[] nums1, int[] nums2, int k) {
+        int m = nums1.length, n = nums2.length;
+        if (m > n) return findKth(nums2, nums1, k);
+        if (m == 0) return nums2[k - 1];
+        if (k == 1) return Math.min(nums1[0], nums2[0]);
+        int i = Math.min(m, k / 2), j = Math.min(n, k / 2);
+        if (nums1[i - 1] > nums2[j - 1]) {
+            return findKth(nums1, Arrays.copyOfRange(nums2, j, n), k - j);
+        } else {
+            return findKth(Arrays.copyOfRange(nums1, i, m), nums2, k - i);
+        }
     }
 }
 
@@ -9747,7 +9789,10 @@ public class Solution {
     }
 }
 
-1. Two Sum  //Key:[2,3,4] 6 注意如果先把3存进去，然后在读一遍3的话，会把之前存进去的3误算进去
+1. Two Sum  
+//Key:
+//1:[2,3,4] 6 注意如果先把3存进去，然后在读一遍3的话，会把之前存进去的3误算进去。
+//即不能先map.put(nums[i],i),再map.containskKey(target-nums[i])。这两者的顺序应该反过来才对
 /*170616*/
 public class Solution {
     public int[] twoSum(int[] nums, int target) {
@@ -9790,7 +9835,6 @@ public class Solution {
                 result[0] = map.get(rest);
                 result[1] = i;
             }
-			//Key170616:关键在于正确做法需要加个else，以便使下面这句无法生效
             map.put(nums[i],i);
         }
         return result;
@@ -9869,7 +9913,37 @@ public class Solution {
     }
 }
 
-2. Add Two Numbers  //注意在改变node值时，node是否为空。所以最好操作node.next，返回时返回head.next就可以解决这个问题。即head作为无意义node
+2. Add Two Numbers  
+//Star:
+//1.注意在改变node值时，node是否为空。所以最好操作node.next，返回时返回head.next就可以解决这个问题。即head作为无意义node
+//2.因为返回的是ListNode，假如传进来的参数是两个null，那么返回null和返回一个new ListNode(0)本质上没有什么区别。所以不用
+//担心当传入两个null时会造成错误,最后return res.next直接返回一个null也是符合题意的 --> 即[null,null]
+/*170616*/
+public class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        ListNode res = new ListNode(0);
+        //Key:返回一个null和new ListNode(0)本质上一样，所以不用加上下面这句
+        //res.next = new ListNode(0);
+        ListNode pointer = res;
+        int tmp = 0;
+        while(l1 != null || l2 != null){
+            int sum = tmp;
+            if(l1 != null){
+                sum+=l1.val;
+                l1 = l1.next;
+            }
+            if(l2 != null){
+                sum+=l2.val;
+                l2 = l2.next;
+            }
+            tmp = sum/10;
+            pointer.next= new ListNode(sum%10);
+            pointer = pointer.next;
+        }
+        if(tmp == 1) pointer.next = new ListNode(tmp);
+        return res.next;
+    }
+}
 /**
  * Definition for singly-linked list.
  * public class ListNode {
