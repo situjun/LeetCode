@@ -3428,12 +3428,54 @@ public class Solution {
 
 4. Median of Two Sorted Arrays
 //Star
+//Star ~ code4.2 
+//1.规定，num1.length<=nums2.length.较短序列所有元素都被抛弃，可直接返回较长序列的第k大元素，可以不用分情况讨论了。
+//不用再乱七八糟的讨论了。所需的(k-1)/2位置可能大于某个数组总长度，规定A短之后，只需要考虑超过A的长度，
+//不需要再分情况讨论了。
 /**
 1：
 此题关键，记住。这个思考起来很绕，但是结论肯定没错。用个特殊case来背 -> [1,2,3,4,5,6,7]  [11,12,13,14,15,16,17] ，所以是从[4,5,6,7,11,12,13,14]中找
 	if (aMid < bMid) Keep [aRight + bLeft]     
 	else Keep [bRight + aLeft]
 **/
+
+/*170616*/
+//Star
+//1.两个数组的元素总数量有可能是偶数，也有可能是奇数。所以要除以2.0 -> 当为奇数个时，则right,left指向的均是中间这个元素。为偶数时，举一反三
+//2.findKth（...,k）中的k是第k大元素(从1开始)，而不是index==k的元素(从0开始)。So,left = (m+n+1)/2,而不是(m-1+n-1+1)/2。right同理
+//Key170616:背，实际上这个func是用来查找第k大的元素
+//Step
+//1.不断地把两个原数组拆分成只有一般大小的两个新数组
+//2.如果其中一个数组已经无法拆分了/不可操作了，则另一个数组的第x大元素即为两个数组的第x大元素
+//如果两个数组均只剩一个元素了，则返回其中的最小值即可
+public class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        double res = 0.0;
+        //Key170616:从左到右编译，所以先算出m，再算出n，此时m,n值已经存入stack，可直接使用
+        int m = nums1.length,n = nums2.length,left = (m+n+1)/2,right = (m+n+2)/2;
+        int aStart = 0,bStart = 0;
+        return (findKth(nums1,aStart,nums2,bStart,left)+findKth(nums1,aStart,nums2,bStart,right))/2.0;
+    }
+    public int findKth(int[] nums1,int aStart,int[] nums2,int bStart,int k){
+        if(aStart>=nums1.length) return nums2[bStart+k-1];
+        if(bStart>=nums2.length) return nums1[aStart+k-1];
+        if(k == 1) return Math.min(nums1[aStart],nums2[bStart]);
+        int aMidIdx = (aStart+k/2)-1,bMidIdx = (bStart+k/2)-1;
+        //Key170617:aMidVal和bMidVal必须要先赋值为max_value
+        int aMidVal = Integer.MAX_VALUE,bMidVal = Integer.MAX_VALUE;
+        if(aMidIdx <= nums1.length-1) aMidVal = nums1[aMidIdx];
+        if(bMidIdx <= nums2.length-1) bMidVal = nums2[bMidIdx];
+        if(aMidVal<bMidVal)
+        
+        //Key170617:下面的是Wrong,
+        //return findKth(nums1,aMidIdx,nums2,bStart,k/2);
+        //Key170617:背，findKth()中的index参数和前面的aMidIdx不同。还有是k-k/2，而不是k/2!!!这部分非常绕
+            return findKth(nums1,aMidIdx+1,nums2,bStart,k-k/2);
+        else 
+            return findKth(nums1,aStart,nums2,bMidIdx+1,k-k/2);
+    }
+}
+
 public class Solution {
     //My wrong version
     /**
@@ -3467,6 +3509,9 @@ public class Solution {
 	//Key:下面参考里的方法里用到了Arrays.copyOfRange(nums2, j, n),其实等价于nums2从j位置到n位置，只不过他这里额外的新cp了一个数组。
 	//其实直接给个start和end范围，直接在原数组上操作就可
 	//http://www.cnblogs.com/grandyang/p/4465932.html
+	//https://segmentfault.com/a/1190000002988010
+	//http://www.cnblogs.com/ganganloveu/p/4180523.html
+	
     public double findMedianSortedArrays(int[] A, int[] B) {
     	    int m = A.length, n = B.length;
     	    int l = (m + n + 1) / 2;
@@ -3483,6 +3528,7 @@ public class Solution {
 		//aStart > A.length - 1,start位置大于A数组长度，意味着A中从start位置开始，不存在着这个两数组中第k大的元素，所以无需在A中找了。
 		//所以直接返回B中第k个元素
 		//Key:下面这两句是用来排除Test case的语句，非core思路内容
+		
     	if (aStart > A.length - 1) return B[bStart + k - 1];            
     	if (bStart > B.length - 1) return A[aStart + k - 1];                
     	if (k == 1) return Math.min(A[aStart], B[bStart]);
@@ -3494,6 +3540,8 @@ public class Solution {
     	
 	
     	if (aMid < bMid) 
+			//Key170617:因为要找的是从aStart开始的第k个元素，所以知道不知道尾部无影响。
+			//即使k超过了A.length,那么舍弃A即可
     	    return getkth(A, aStart + k/2, B, bStart,k - k/2);// Check: aRight + bLeft 
     	else 
     	    return getkth(A, aStart,B,bStart + k/2, k - k/2);// Check: bRight + aLeft
@@ -3506,11 +3554,23 @@ public class Solution {
         int m = nums1.length, n = nums2.length, left = (m + n + 1) / 2, right = (m + n + 2) / 2;
         return (findKth(nums1, nums2, left) + findKth(nums1, nums2, right)) / 2.0;
     }
+	//Key170617:
+	/**
+	下面重点来看如何实现找到第K个元素，
+	首先我们需要让数组1的长度小于或等于数组2的长度，那么我们只需判断如果数组1的长度大于数组2的长度的话，交换两个数组即可，
+	然后我们要判断小的数组是否为空，为空的话，直接在另一个数组找第K个即可。 ??有没有可能两数组均为空??
+	还有一种情况是当K = 1时，表示我们要找第一个元素，只要比较两个数组的第一个元素，返回较小的那个即可。
+	**/
     int findKth(int[] nums1, int[] nums2, int k) {
         int m = nums1.length, n = nums2.length;
+		//Key170617:第一个数组长度必须小于第二个，因为当特殊情况下，
+		//较短序列所有元素都被抛弃，可以返回较长序列的第k个元素（在数组中下标是k-1）。不用再
+		//乱七八糟的讨论了。所需的(k-1)/2位置可能大于某个数组总长度，规定A短之后，只需要考虑超过A的长度，
+		//不需要再分情况讨论了。
         if (m > n) return findKth(nums2, nums1, k);
         if (m == 0) return nums2[k - 1];
         if (k == 1) return Math.min(nums1[0], nums2[0]);
+		//Key170617:判断中间值的位置顺序是否在新数组长度内。比如说m==3,k/2==4这种情况，因此中值只能选择nums1[3]了
         int i = Math.min(m, k / 2), j = Math.min(n, k / 2);
         if (nums1[i - 1] > nums2[j - 1]) {
             return findKth(nums1, Arrays.copyOfRange(nums2, j, n), k - j);
@@ -9791,7 +9851,7 @@ public class Solution {
 
 1. Two Sum  
 //Key:
-//1:[2,3,4] 6 注意如果先把3存进去，然后在读一遍3的话，会把之前存进去的3误算进去。
+//1:case [2,3,4],6 -> 注意如果先把3存进去，然后在读一遍3的话，会把之前存进去的3误算进去。
 //即不能先map.put(nums[i],i),再map.containskKey(target-nums[i])。这两者的顺序应该反过来才对
 /*170616*/
 public class Solution {
@@ -9916,8 +9976,9 @@ public class Solution {
 2. Add Two Numbers  
 //Star:
 //1.注意在改变node值时，node是否为空。所以最好操作node.next，返回时返回head.next就可以解决这个问题。即head作为无意义node
-//2.因为返回的是ListNode，假如传进来的参数是两个null，那么返回null和返回一个new ListNode(0)本质上没有什么区别。所以不用
-//担心当传入两个null时会造成错误,最后return res.next直接返回一个null也是符合题意的 --> 即[null,null]
+//2.case:[null,null]->因为返回的是ListNode，假如传进来的参数是两个null，那么while(l1 != null || l2 != null){}这个核心方法体就会被跳过。
+//但是返回null和返回一个new ListNode(0)因该说均符合这个答案要求。
+//所以不用担心当传入两个null时会造成错误,最后return res.next直接返回一个null也是符合题意的
 /*170616*/
 public class Solution {
     public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
