@@ -3439,6 +3439,28 @@ public class Solution {
 	else Keep [bRight + aLeft]
 **/
 
+/*170618*/
+public class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        int n = nums1.length,m = nums2.length,left = (n+m+1)/2,right = (n+m+2)/2,aStart = 0,bStart = 0;
+        return (findKth(nums1,aStart,nums2,bStart,left)+findKth(nums1,aStart,nums2,bStart,right))/2.0;
+    }
+    public int findKth(int[] nums1,int aStart,int[] nums2,int bStart,int k){
+        if(aStart>=nums1.length) return nums2[bStart+k-1];
+        if(bStart>=nums2.length) return nums1[aStart+k-1];
+        if(k == 1) return Math.min(nums1[aStart],nums2[bStart]);
+        //Key170618:比如说在[0,1,2]中找k==2的数字，那么该数字index就是0+2-1
+        int aMidInd = (aStart+k/2-1),bMidInd = (bStart+k/2-1);
+        int aMidVal = aMidInd<=nums1.length-1?nums1[aMidInd]:Integer.MAX_VALUE;
+        int bMidVal = bMidInd<=nums2.length-1?nums2[bMidInd]:Integer.MAX_VALUE;
+        if(aMidVal<bMidVal)
+        //Key170618:这里aMidInd+1而不是直接aMid，应该是因为mid值已经被判断过了，所以不要了。而且如果直接aMidInd，那么答案是错的
+            return findKth(nums1,aMidInd+1,nums2,bStart,k-k/2);
+        else 
+            return findKth(nums1,aStart,nums2,bMidInd+1,k-k/2);
+    }
+}
+
 /*170616*/
 //Star
 //1.两个数组的元素总数量有可能是偶数，也有可能是奇数。所以要除以2.0 -> 当为奇数个时，则right,left指向的均是中间这个元素。为偶数时，举一反三
@@ -3461,7 +3483,7 @@ public class Solution {
         if(bStart>=nums2.length) return nums1[aStart+k-1];
         if(k == 1) return Math.min(nums1[aStart],nums2[bStart]);
         int aMidIdx = (aStart+k/2)-1,bMidIdx = (bStart+k/2)-1;
-        //Key170617:aMidVal和bMidVal必须要先赋值为max_value
+        //Key170617:aMidVal和bMidVal必须要先赋值为max_value，为了比较
         int aMidVal = Integer.MAX_VALUE,bMidVal = Integer.MAX_VALUE;
         if(aMidIdx <= nums1.length-1) aMidVal = nums1[aMidIdx];
         if(bMidIdx <= nums2.length-1) bMidVal = nums2[bMidIdx];
