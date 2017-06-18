@@ -10519,7 +10519,7 @@ public class Solution {
 //Key170615:这道题容易被他给的tag给带弯,tag里有个dp,但是实际上用dp写起来很麻烦。而且其实根本就用不上dp......
 public class Solution {
     public boolean isSubsequence(String s, String t) {
-        //2pointers
+        //2pointers方法更好
         if(s == null || t == null ) return false;
         if(s.equals("")) return true;
         int index1 = 0,index2 = 0,length1 = s.length(),length2 = t.length();
@@ -10534,3 +10534,4 @@ public class Solution {
         return length1 == index1?true:false;
     }
 }
+
