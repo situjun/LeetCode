@@ -2386,6 +2386,56 @@ public class Solution {
 }
 
 76. Minimum Window Substring
+//Star
+//1.counter = t中共有多少种字符，map<char,frequence>表每种字符各有多少个。如果所有char的frequence为0，则counter=0,
+//意味着s中从begin到end满足t。接下来如果某个frequnce==1，则意味着s中此时begin到end中的字符少一个来匹配t。
+//所以counter此时加1。此时，每当任意的char的frequence加1，则counter+1。
+//2.注意后来的while(counter == 0),所以内部while中的counter最多也就可能==1，而不可能超过1.所以意味着一旦s中
+//少一个字符匹配后，直到s中"该字符"被补上后，否则inner while不会被执行。
+//3.因此不用担心->case:"aaaaccbcccba","abc"中a先被消了后，c因为也在t中而被误判断为map.containsKey(c)，进而导致counter--.
+//因为此时counter==1，只有当被消了的a被补充后，counter才会再度==0.
+/*170618*/
+public class Solution {
+    public String minWindow(String s, String t) {
+        int sLen = s.length(),tLen = t.length(),begin = 0,start = 0,minLen = Integer.MAX_VALUE;
+        String res = "";
+        Map<Character,Integer> map = new HashMap<>();
+        for(char c:t.toCharArray()){
+            map.put(c,map.getOrDefault(c,0)+1);
+        }
+        int counter = map.size();
+        //Key170619:其实这里用while(end<=sLen-1)更好。这样end可以先++,后面可以直接写成minLen > end-begin更好看些，而且两个while也比1个for1个while好看些
+        for(int i = 0;i<=sLen-1;i++){
+        //while(end<=sLen-1){
+            char c = s.charAt(i);
+            if(map.containsKey(c)){
+                map.put(c,map.get(c)-1);
+                if(map.get(c) == 0) counter--;
+            }
+            //Key170618:counter == 0意味着s字符串begin~i，存在着使t满足的字符串,且s.charAt(i)一定是t中的某一个字符。
+            //加入counter == 1,那么意味着t中有一个字符没被匹配上...
+            while(counter == 0){
+                //if(begin>s.length()-1) break;
+                c = s.charAt(begin);
+                if(map.containsKey(c)){
+                    map.put(c,map.get(c)+1);
+                    if(map.get(c) >0 ){
+                        counter++;
+                    }
+                }
+                //Key170618:case -> s="abc",t="a"。那么很明显此时的长度应为1，但是这时i还没有++，所以是i+1-begin。或者把最外层的for换成while即可
+                if(minLen > (i+1-begin)){
+                    minLen = i+1-begin;
+                    start = begin;
+                }
+                begin++;
+            }
+        }
+        //Key170618:s中没有t的话，那么minLen会是MAX_VALUE
+        return minLen == Integer.MAX_VALUE?"":s.substring(start,start+minLen);
+    }
+}
+
 public class Solution {
     public String minWindow(String s, String t) {
         //Key:模板方法  https://discuss.leetcode.com/topic/68976/sliding-window-algorithm-template-to-solve-all-the-leetcode-substring-search-problem
