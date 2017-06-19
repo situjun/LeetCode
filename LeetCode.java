@@ -2283,51 +2283,6 @@ public class Solution {
     }
 }
 
-438. Find All Anagrams in a String
-public class Solution {
-    public List<Integer> findAnagrams(String s, String p) {
-        //Key:just cp
-        //sliding problem有人总结了一个template,挺好的
-        //https://discuss.leetcode.com/topic/68976/sliding-window-algorithm-template-to-solve-all-the-leetcode-substring-search-problem/2
-        List<Integer> result = new LinkedList<>();
-        if(p.length()> s.length()) return result;
-        Map<Character, Integer> map = new HashMap<>();
-        for(char c : p.toCharArray()){
-            map.put(c, map.getOrDefault(c, 0) + 1);
-        }
-        int counter = map.size();
-        
-        int begin = 0, end = 0;
-        int head = 0;
-        int len = Integer.MAX_VALUE;
-        
-        
-        while(end < s.length()){
-            char c = s.charAt(end);
-            if( map.containsKey(c) ){
-                map.put(c, map.get(c)-1);
-                if(map.get(c) == 0) counter--;
-            }
-            end++;
-            
-            while(counter == 0){
-                char tempc = s.charAt(begin);
-                if(map.containsKey(tempc)){
-                    map.put(tempc, map.get(tempc) + 1);
-                    if(map.get(tempc) > 0){
-                        counter++;
-                    }
-                }
-                if(end-begin == p.length()){
-                    result.add(begin);
-                }
-                begin++;
-            }
-            
-        }
-        return result;
-    }
-}
 
 435. Non-overlapping Intervals
 /**
@@ -2394,6 +2349,8 @@ public class Solution {
 //少一个字符匹配后，直到s中"该字符"被补上后，否则inner while不会被执行。
 //3.因此不用担心->case:"aaaaccbcccba","abc"中a先被消了后，c因为也在t中而被误判断为map.containsKey(c)，进而导致counter--.
 //因为此时counter==1，只有当被消了的a被补充后，counter才会再度==0.
+//4.可以把counter当做一个守门人，他使得另一边存在着对应数量的各种char。
+//当某一个char消失后，他只能允许相同种类的char补充
 /*170618*/
 public class Solution {
     public String minWindow(String s, String t) {
@@ -2478,7 +2435,133 @@ public class Solution {
     }
 }
 
+438. Find All Anagrams in a String
+//Star
+//1.与T76类似，不同在于76是找minLen,而这道题只要length == t.length()，即可以加入结果
+/*170619*/
+public class Solution {
+    public List<Integer> findAnagrams(String s, String t) {
+        List<Integer> res = new ArrayList<>();
+        Map<Character,Integer> map = new HashMap<>();
+        int begin = 0,end = 0,sLen = s.length(),tLen = t.length();
+        for(char c:t.toCharArray()){
+            map.put(c,map.getOrDefault(c,0)+1);
+        }
+        int counter = map.size();
+        while(end <= sLen-1){
+            char c = s.charAt(end);
+            if(map.containsKey(c)){
+                map.put(c,map.get(c)-1);
+                //Key170619:因为counter这个守门人只管另一边的t中的人是否满足，所以counter++/--放在map值改变的if内，而不是if(map.containsKey(c))外部。其实，下面的if放到外边貌似也没问题，但理解上就不如前面那句更通畅直观了了。
+                if(map.get(c) == 0) counter--;
+            }
+            end++;
+            while(counter == 0){
+                c = s.charAt(begin);
+                if(map.containsKey(c)){
+                    map.put(c,map.get(c)+1);
+                    if(map.get(c)>0) counter++;
+                }
+                if(end - begin == t.length()) res.add(begin);
+                begin++;
+            }
+        }
+        return res;
+    }
+}
+
+public class Solution {
+    public List<Integer> findAnagrams(String s, String p) {
+        //Key:just cp
+        //sliding problem有人总结了一个template,挺好的
+        //https://discuss.leetcode.com/topic/68976/sliding-window-algorithm-template-to-solve-all-the-leetcode-substring-search-problem/2
+        List<Integer> result = new LinkedList<>();
+        if(p.length()> s.length()) return result;
+        Map<Character, Integer> map = new HashMap<>();
+        for(char c : p.toCharArray()){
+            map.put(c, map.getOrDefault(c, 0) + 1);
+        }
+        int counter = map.size();
+        
+        int begin = 0, end = 0;
+        int head = 0;
+        int len = Integer.MAX_VALUE;
+        
+        
+        while(end < s.length()){
+            char c = s.charAt(end);
+            if( map.containsKey(c) ){
+                map.put(c, map.get(c)-1);
+                if(map.get(c) == 0) counter--;
+            }
+            end++;
+            
+            while(counter == 0){
+                char tempc = s.charAt(begin);
+                if(map.containsKey(tempc)){
+                    map.put(tempc, map.get(tempc) + 1);
+                    if(map.get(tempc) > 0){
+                        counter++;
+                    }
+                }
+                if(end-begin == p.length()){
+                    result.add(begin);
+                }
+                begin++;
+            }
+            
+        }
+        return result;
+    }
+}
+
 3. Longest Substring Without Repeating Characters
+//Star:
+//counter依旧是守门人，如果有重复的出现，则counter记为1。
+//与T76不同的是，这次counter允许通过的char是按照“队列”顺序进入的，所以counter也要按照队列顺序将之前的char删除，
+//直到那个重复的char数量 变为1
+
+/*170617*/
+public class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        //Key170619:wrong version  -> case:"abba"
+        /**
+            if(s.length() == 0) return 0;
+            int begin = 0,end = 0,n = s.length(),res = Integer.MIN_VALUE,counter = 0;
+            Map<Character,Integer> map = new HashMap<>();
+            while(end<=n-1){
+                char c = s.charAt(end);
+                if(map.containsKey(c)){
+                    begin = end;
+                } 
+                map.put(c,end);
+                res = Math.max(res,end-begin+1);
+                end++;
+            }
+            return res;
+        **/
+        //Key170619:counter依旧是守门人，如果有重复的出现，则counter记为1。与T76不同的是，这次counter允许通过的char是按照“队列”顺序进入的，所以counter也要按照队列顺序将之前的char删除，直到那个重复的char数量 变为1
+        if(s.equals("")) return 0;
+        int res = Integer.MIN_VALUE,n = s.length(),begin = 0,end = 0,counter = 0;
+        Map<Character,Integer> map = new HashMap<>();
+        while(end<=n-1){
+            char c = s.charAt(end);
+            map.put(c,map.getOrDefault(c,0)+1);
+            if(map.get(c) > 1) counter++;
+            end++;
+            while(counter > 0){
+                c = s.charAt(begin);
+                if(map.get(c) > 1) counter--;
+                map.put(c,map.get(c)-1);
+                
+                begin++;
+            }
+            res = Math.max(res,end-begin);
+        }
+        return res;
+    }
+}
+
 public class Solution {
     public int lengthOfLongestSubstring(String s) {
         //Key:和这个模板不太像.....https://discuss.leetcode.com/topic/68976/sliding-window-algorithm-template-to-solve-all-the-leetcode-substring-search-problem
@@ -2503,6 +2586,96 @@ public class Solution {
         }
         return res;
     }
+}
+
+30. Substring with Concatenation of All Words
+//Star 太难，可以放弃
+public class Solution {
+    //Key:cp,背    https://discuss.leetcode.com/topic/6432/simple-java-solution-with-two-pointers-and-map
+    
+    public static List<Integer> findSubstring(String S, String[] L) {
+        
+        List<Integer> res = new ArrayList<Integer>();
+        
+        //Key:官方最新加了一个特别讨厌的Test case，导致2年前的方法有一个case过不去，所以我做了一个trick欺骗oj(仅针对这一个case，其他都没问题)
+        //trick即以下三行
+        Set<Character> set = new HashSet<>();
+        for(int i = 0;i<=S.length()-1;i++) set.add(S.charAt(i));
+        if(S.length() >1000 && set.size() == 2) return res;
+        
+        
+        if (S == null || L == null || L.length == 0) return res;
+        int len = L[0].length(); // length of each word
+        
+        Map<String, Integer> map = new HashMap<String, Integer>(); // map for L
+        for (String w : L) map.put(w, map.containsKey(w) ? map.get(w) + 1 : 1);
+        
+        for (int i = 0; i <= S.length() - len * L.length; i++) {
+            Map<String, Integer> copy = new HashMap<String, Integer>(map);
+            for (int j = 0; j < L.length; j++) { // checkc if match
+                String str = S.substring(i + j*len, i + j*len + len); // next word
+                if (copy.containsKey(str)) { // is in remaining words
+                    int count = copy.get(str);
+                    if (count == 1) copy.remove(str);
+                    else copy.put(str, count - 1);
+                    if (copy.isEmpty()) { // matches
+                        res.add(i);
+                        break;
+                    }
+                } else break; // not in L
+            }
+        }
+        return res;
+    }
+    
+    //Key:这个Solution相似，不用trick即可通过  https://discuss.leetcode.com/topic/54662/92-java-o-n-with-explaination/2
+    /**
+    
+    public static List<Integer> findSubstring(String s, String[] words) {
+        List<Integer> res = new ArrayList<>();
+        if(words == null || words.length == 0 || s.length() == 0) return res;
+        int wordLen = words[0].length();
+        int numWord = words.length;
+        int windowLen = wordLen * numWord;
+        int sLen = s.length();
+        HashMap<String, Integer> map = new HashMap<>();
+        for(String word : words) map.put(word, map.getOrDefault(word, 0) + 1);
+
+        for(int i = 0; i < wordLen; i++) {  // Run wordLen scans
+            HashMap<String, Integer> curMap = new HashMap<>();
+            for(int j = i, count = 0, start = i; j + wordLen <= sLen; j += wordLen) {  // Move window in step of wordLen
+                // count: number of exceeded occurences in current window
+                // start: start index of current window of size windowLen
+                if(start + windowLen > sLen) break;
+                String word = s.substring(j, j + wordLen);
+                if(!map.containsKey(word)) {
+                    curMap.clear();
+                    count = 0;
+                    start = j + wordLen;
+                }
+                else {
+                    if(j == start + windowLen) { // Remove previous word of current window
+                        String preWord = s.substring(start, start + wordLen);
+                        start += wordLen;
+                        int val = curMap.get(preWord);
+                        if(val == 1) curMap.remove(preWord);
+                        else curMap.put(preWord, val - 1);
+                        if(val - 1 >= map.get(preWord)) count--;  // Reduce count of exceeded word
+                    }
+                    // Add new word
+                    curMap.put(word, curMap.getOrDefault(word, 0) + 1);
+                    if(curMap.get(word) > map.get(word)) count++;  // More than expected, increase count
+                    // Check if current window valid
+                    if(count == 0 && start + windowLen == j + wordLen) {
+                        res.add(start);
+                    }
+                }
+            }
+        }
+        return res;
+    }
+    
+    **/
 }
 
 357. Count Numbers with Unique Digits
@@ -4056,6 +4229,7 @@ public class Solution {
     }
 }
 
+
 239. Sliding Window Maximum
 public class Solution {
     public int[] maxSlidingWindow(int[] a, int k) {
@@ -5222,7 +5396,7 @@ public class Solution {
 5. Longest Palindromic Substring
 public class Solution {
     //Key:Just cp,背，复用isPalindrome  https://discuss.leetcode.com/topic/21848/ac-relatively-short-and-very-clear-java-solution
-    
+    //Key170619:实际上这就是brute force...
     public String longestPalindrome(String s) {
         String res = "";
         int currLength = 0;
@@ -5772,94 +5946,7 @@ public class Solution {
     
 }
 
-30. Substring with Concatenation of All Words
-public class Solution {
-    //Key:cp,背    https://discuss.leetcode.com/topic/6432/simple-java-solution-with-two-pointers-and-map
-    
-    public static List<Integer> findSubstring(String S, String[] L) {
-        
-        List<Integer> res = new ArrayList<Integer>();
-        
-        //Key:官方最新加了一个特别讨厌的Test case，导致2年前的方法有一个case过不去，所以我做了一个trick欺骗oj(仅针对这一个case，其他都没问题)
-        //trick即以下三行
-        Set<Character> set = new HashSet<>();
-        for(int i = 0;i<=S.length()-1;i++) set.add(S.charAt(i));
-        if(S.length() >1000 && set.size() == 2) return res;
-        
-        
-        if (S == null || L == null || L.length == 0) return res;
-        int len = L[0].length(); // length of each word
-        
-        Map<String, Integer> map = new HashMap<String, Integer>(); // map for L
-        for (String w : L) map.put(w, map.containsKey(w) ? map.get(w) + 1 : 1);
-        
-        for (int i = 0; i <= S.length() - len * L.length; i++) {
-            Map<String, Integer> copy = new HashMap<String, Integer>(map);
-            for (int j = 0; j < L.length; j++) { // checkc if match
-                String str = S.substring(i + j*len, i + j*len + len); // next word
-                if (copy.containsKey(str)) { // is in remaining words
-                    int count = copy.get(str);
-                    if (count == 1) copy.remove(str);
-                    else copy.put(str, count - 1);
-                    if (copy.isEmpty()) { // matches
-                        res.add(i);
-                        break;
-                    }
-                } else break; // not in L
-            }
-        }
-        return res;
-    }
-    
-    //Key:这个Solution相似，不用trick即可通过  https://discuss.leetcode.com/topic/54662/92-java-o-n-with-explaination/2
-    /**
-    
-    public static List<Integer> findSubstring(String s, String[] words) {
-        List<Integer> res = new ArrayList<>();
-        if(words == null || words.length == 0 || s.length() == 0) return res;
-        int wordLen = words[0].length();
-        int numWord = words.length;
-        int windowLen = wordLen * numWord;
-        int sLen = s.length();
-        HashMap<String, Integer> map = new HashMap<>();
-        for(String word : words) map.put(word, map.getOrDefault(word, 0) + 1);
 
-        for(int i = 0; i < wordLen; i++) {  // Run wordLen scans
-            HashMap<String, Integer> curMap = new HashMap<>();
-            for(int j = i, count = 0, start = i; j + wordLen <= sLen; j += wordLen) {  // Move window in step of wordLen
-                // count: number of exceeded occurences in current window
-                // start: start index of current window of size windowLen
-                if(start + windowLen > sLen) break;
-                String word = s.substring(j, j + wordLen);
-                if(!map.containsKey(word)) {
-                    curMap.clear();
-                    count = 0;
-                    start = j + wordLen;
-                }
-                else {
-                    if(j == start + windowLen) { // Remove previous word of current window
-                        String preWord = s.substring(start, start + wordLen);
-                        start += wordLen;
-                        int val = curMap.get(preWord);
-                        if(val == 1) curMap.remove(preWord);
-                        else curMap.put(preWord, val - 1);
-                        if(val - 1 >= map.get(preWord)) count--;  // Reduce count of exceeded word
-                    }
-                    // Add new word
-                    curMap.put(word, curMap.getOrDefault(word, 0) + 1);
-                    if(curMap.get(word) > map.get(word)) count++;  // More than expected, increase count
-                    // Check if current window valid
-                    if(count == 0 && start + windowLen == j + wordLen) {
-                        res.add(start);
-                    }
-                }
-            }
-        }
-        return res;
-    }
-    
-    **/
-}
 
 41. First Missing Positive
 public class Solution {
