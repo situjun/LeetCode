@@ -5394,9 +5394,45 @@ public class Solution {
 }
 
 5. Longest Palindromic Substring
+/*170620*/
+//Star
+//Trans Func:dp[i][j] = s.charAt(i)==s.charAt(j) && dp[i+1][j-1],basic -> 奇数情况：dp[i][i] = true,偶数情况：dp[i][i+1] = charAt(i) == charA(i+1)
+//1.难点在于奇偶判断上  case:"abbab" 如果基础点是b,按照charAt(i-1)==charAt(i+1)判断,得到结果bab,会忽视abba.
+//如果按照bb判断，当case:"aabbbaa",很明显会忽视掉aabbbaa这种奇数情况
+//2.end = 0,而不是end = n-1 -> case:"abcde"时，inner for的dp[i][j]都是false，因为下面的初始是j == i+1。而dp[0][0]这种是在外面判断的，所以start和end没变过，也就是错的
+public class Solution {
+    public String longestPalindrome(String s) {
+        //Key170619:这道题用DP非常非常麻烦，所以不建议用dp
+            //Key170619:dp[i][j] = s.charAt(i)==s.charAt(j) && dp[i+1][j-1]
+        String res = "";
+        int n = s.length(),start = 0,end = 0,max = 0;
+        if(n == 0) return res;
+        boolean[][] dp = new boolean[n][n];
+        for(int i = 0;i<=n-1;i++) {
+            dp[i][i] = true;
+        }
+        for(int j = 0;j<=n-1;j++){
+            //Key170619:case -> "aaaa"  dp[0][3]是由dp[1][2]推出来的，可是此时dp[1][2]还没有算出来。无法用dp，因为s.charAt(i) == s.charAt(j)时，需要判断dp[i+1][j-1]，但此时并未计算出来。如果用dp[i][j-1]判断的话，则需要dp[i][j-1]为false加上其它条件才可判断出来dp[i][j]是否为true。思考起来比较麻烦
+            for(int i = j-1;i>=0;i--){
+                if(j == i+1) dp[i][j] = s.charAt(i)==s.charAt(j);
+                else dp[i][j] = (s.charAt(i)==s.charAt(j)) && dp[i+1][j-1];
+                if(dp[i][j]) {
+                    if(max<j-i+1){
+                        max = j-i+1;
+                        start = i;
+                        end = j;
+                    }
+                }
+            }
+        }
+        return s.substring(start,end+1);
+        
+    }
+}
+
 public class Solution {
     //Key:Just cp,背，复用isPalindrome  https://discuss.leetcode.com/topic/21848/ac-relatively-short-and-very-clear-java-solution
-    //Key170619:实际上这就是brute force...
+    //Key170619:实际上这就是brute force... #170620:wrong,这个不是brute force#
     public String longestPalindrome(String s) {
         String res = "";
         int currLength = 0;
