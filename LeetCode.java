@@ -1,3 +1,6 @@
+//Refrence:
+//http://www.cnblogs.com/grandyang
+
 516. Longest Palindromic Subsequence
 /*170527*/
 public class Solution {
@@ -5394,12 +5397,15 @@ public class Solution {
 }
 
 5. Longest Palindromic Substring
-/*170620*/
+
 //Star
+//http://www.cnblogs.com/grandyang/p/4464476.html
 //Trans Func:dp[i][j] = s.charAt(i)==s.charAt(j) && dp[i+1][j-1],basic -> 奇数情况：dp[i][i] = true,偶数情况：dp[i][i+1] = charAt(i) == charA(i+1)
 //1.难点在于奇偶判断上  case:"abbab" 如果基础点是b,按照charAt(i-1)==charAt(i+1)判断,得到结果bab,会忽视abba.
 //如果按照bb判断，当case:"aabbbaa",很明显会忽视掉aabbbaa这种奇数情况
 //2.end = 0,而不是end = n-1 -> case:"abcde"时，inner for的dp[i][j]都是false，因为下面的初始是j == i+1。而dp[0][0]这种是在外面判断的，所以start和end没变过，也就是错的
+
+/*170620*/
 public class Solution {
     public String longestPalindrome(String s) {
         //Key170619:这道题用DP非常非常麻烦，所以不建议用dp
@@ -10730,3 +10736,294 @@ public class Solution {
     }
 }
 
+6. ZigZag Conversion
+//Star
+//Thinking:按照题意code -- My version 
+//1.建个list，分别存储每行的字符串，然后合并。用个boolean表向上or向下遍历
+//2.注意，例如向下走，当counter == numRows时，counter需要-2，如果减1的话。重复计算了。
+//还有往上走时，判断的是counter == -1，而不是counter == 0
+//3.注意*：如果numRows == 1时，那么counter-2不适用，要单独判断下==1的情况
+//另一种sol隔几个距离取一个char。https://discuss.leetcode.com/topic/3162/easy-to-understand-java-solution 
+
+
+/*170620*/
+public class Solution {
+    public String convert(String s, int numRows) {
+        String res = "";
+        boolean down = true;
+        int n = s.length(),counter = 0;
+        if(n == 0 || numRows == 0) return "";
+        //Key170620:如果numRows == 1时，那么counter-2不适用，要单独判断下
+        if(numRows == 1) return s;
+        List<String> list = new ArrayList<>();
+        for(int i = 0;i<=numRows-1;i++) list.add("");
+        for(int i = 0;i<=n-1;i++){
+            list.set(counter,list.get(counter)+s.charAt(i));
+            //down时，向下走
+            if(down) counter++;
+            else counter --;
+            if(counter == numRows){
+                //Key170620:case:"PAYPALISHIRING" couner == 3时,往回的话,counter需要置为1，即counter-2.如果只是--的话，counter==2的话，那么会重复加入一次
+                counter -= 2;
+                down = false;
+                //Key170620:同理，只不过这减过头的话是-1，而不是0
+            //Wrong: } else if (counter == 0){
+            } else if (counter == -1){
+                counter += 2;
+                down = true;
+            }
+        }
+        for(String tmp:list) res = res + tmp;
+        return res;
+    }
+}
+
+public class Solution {
+    public String convert(String s, int numRows) {
+        //我这个方法想起来太乱了，很麻烦
+        if(s.equals("") || numRows == 0) return "";
+        boolean flag = true;
+        ArrayList<ArrayList<Character>> list = new ArrayList<ArrayList<Character>>();
+        for(int i=0;i<=numRows-1;i++){
+            list.add(new ArrayList<Character>());
+        }
+        int index = 0;
+        int count = 0;
+        while(count != s.length()){
+            if(index == numRows) {
+                flag = false;
+                index = (numRows-2)>=0?(numRows-2):0;
+            }
+            if(index == -1){
+                flag = true;
+                index = numRows >=2?1:0;
+            } 
+            list.get(index).add(s.charAt(count));
+            if(flag){
+                index++;
+            } else {
+                index--;
+            }
+            count++;
+        }
+        StringBuffer sb = new StringBuffer();
+        index = 0;
+        while(index < numRows){
+            for(Character c:list.get(index)){
+                sb.append(c);
+            }
+            index++;
+        }
+        return sb.toString();
+    }
+}
+
+9. Palindrome Number
+
+//Star
+//1.int转为String，然后向内夹逼  
+//      String s = x+"";  or  String s = String.valueOf(x);
+//2.负数(-1,-2,etc)不算panlidrome number。但是我这个sol直接把负数干扰排掉了，因为"-123"中的"-"肯定无法匹配啊
+
+/*170620*/
+public class Solution {
+    public boolean isPalindrome(int x) {
+        boolean res = false;
+        String s = String.valueOf(x);
+        int begin = 0,end = s.length()-1;
+        while(begin <= end){
+            if(s.charAt(begin++) != s.charAt(end--)) return false;
+        }
+        return true;
+    }
+}
+
+public class Solution {
+    public boolean isPalindrome(int x) {
+        //KEY POINT
+        //String转int
+        //String s = (String)x; 是错的，转不了，直接n+""吧
+        //还有，这道题他给的答案里，-11,不算回文数
+        String s = x+"";
+        boolean flag = true;
+        int index1 = 0;
+
+        int index2 = s.length()-1;
+        while(index1<=index2 && flag){
+            if(s.charAt(index1) != s.charAt(index2)){
+                flag = false;
+            }
+            index1++;
+            index2--;
+        }
+        return flag;
+    }
+}
+
+125. Valid Palindrome
+//Star
+//1.这道题的case真TM烦人!!!
+//1.1:为了避免inner while中和外部的begin++重复，所以用if else做个选择判断
+//1.2:mark1~千万不能忘记，如果left == right，begin++，end-- 
+//2.Character.isLetterOrDigit() ->判断字符或者数字
+//https://discuss.leetcode.com/topic/8282/accepted-pretty-java-solution-271ms 
+//或者 正则匹配方法  https://discuss.leetcode.com/topic/25405/my-three-line-java-solution
+//corner case:"..." == "",如果一个character或者digit都没有的话，那么就相当于一个空字符串
+
+/*170620*/
+public class Solution {
+    //My wrong version
+    /**
+        public boolean isPalindrome(String s) {
+            s = s.toLowerCase();
+            boolean res = true;
+            int begin = 0,end = s.length()-1;
+            while(begin <= end){
+                char left = s.charAt(begin),right = s.charAt(end);
+                
+                while(!Character.isLetter(left) && !Character.isDigit(left) && begin <=s.length()-1){
+                    //Key170620:charAt()前判断下begin，别超过了length-1
+                    left = s.charAt(begin++);
+                }
+                while(!Character.isLetter(right) && !Character.isDigit(right) && end >= 0){
+                    right = s.charAt(end--);
+                }
+                //Key170620:首先left和right必须先是alphanumric,然后不相等的情况下才false。如果仅是Corner case:".,",这种，根本就不是alphanumric，是true的
+                if(begin == s.length() && end == -1) return true;
+                if(left != right) return false;
+                //Key170620:如果s中全部都是alphanumric，那么下面的begin++，end--没问题。但是如果s中有,. 这种特殊符号。涉嫌在上面的两个while中最后就会重复++或者--。造成错误 
+                //如 case："A man, a plan, a canal: Panama"
+                begin++;
+                end--;
+            }
+            return res;
+        }
+    **/
+    public boolean isPalindrome(String s) {
+        int n = s.length(),begin = 0,end = n-1;
+        s = s.toLowerCase();
+        while(begin <= end){
+            char left = s.charAt(begin),right = s.charAt(end);
+            if(!Character.isLetterOrDigit(left)){
+                begin++;
+            } else if(!Character.isLetterOrDigit(right)){
+                end--;
+            } else {
+                if(left != right) return false;
+                //Key170620~mark1:千万不能忘记，如果左右两端字符相等时，begin要++，end要--
+                begin++;
+                end--;
+            }
+        }
+        return true;
+    }
+}
+
+public class Solution {
+    public boolean isPalindrome(String s) {
+        //有句刚句，这道题我觉得纯粹是恶心人来的....
+        //这道题题目有问题，他把数字也算作合法字符了
+        //对于 TestCase: "0P"，答案居然是false.按理说忽略数字后，应该是true的.......
+        //two pointers 向中间靠拢  upper word(65~90) lower word(97~122)
+        //用Character.isLetter(char ch)判断更方便
+        //Corner Case:要考虑的太多
+        if(s.trim().equals("")) return true;
+        boolean result = true;
+        int index1 = 0;
+        int index2 = s.length();
+        boolean flag = false;
+        //Corner Case:"." 因为有index2--，所以加大了判断难度
+        while(index1 <= index2 && result && index1 <= s.length()-1){
+            if(!flag){
+                //KEY POINT 
+                //Character.isLetter(char ch)可以直接判断是否是字母
+                //对于 TestCase: "0P"，答案居然是false.按理说忽略数字后，应该是true的.......
+                if(Character.isLetter(s.charAt(index1)) || Character.isDigit(s.charAt(index1))){
+                    flag = true;
+                    index2--;
+                } else {
+                    index1++;
+                }
+                
+                
+            } else {
+                if(Character.isLetter(s.charAt(index2))||Character.isDigit(s.charAt(index2))){
+                    
+                    //System.out.println(Math.abs(s.charAt(index2) - s.charAt(index1)) +"");
+                    if(s.charAt(index2) != s.charAt(index1) ) result = false;
+                    //Corner Case:"aA"要返回true
+                    //Corner Case:ASCII  0=>48,P=>80 差值正好是32，所以单纯只写32会出问题
+                    if(Math.abs(s.charAt(index2) - s.charAt(index1)) == 32 && Character.isLetter(s.charAt(index2)) && Character.isLetter(s.charAt(index1))) result = true;
+                    flag = false;
+                    index1++;
+                } else {
+                    index2--;
+                }
+            }
+        }
+        return result;
+    }
+}
+
+7. Reverse Integer
+//Star
+//0:case:-2147483648 -> !!!非常重要的一点  Math.abs(-2147483648) == -2147483648,具体解释看链接。因为这种坑爹的case，所以要先把x转为long -> mark2
+//https://www.zhihu.com/question/51632291?from=profile_question_card
+//1.Long.parseLong(String)  Math.abs(int)
+//2.注意是StringBuilder().reverse() 而不是 s.reverse() 也不是String.reverse(s) -> mark3
+//3.记得返回时加上负号 mark1,neg?-tmp:tmp要用()括起来，因为(int)neg优先于neg?-tmp:tmp
+
+/*170620*/
+public class Solution {
+    public int reverse(int x) {
+        int res = 0;
+        boolean neg = x<0?true:false;
+        //mark2
+        //wrong -> String s = String.valueOf(Math.abs(x));
+        String s = String.valueOf(Math.abs((long)x));
+        //mark3
+        s = new StringBuilder(s).reverse().toString();
+        long tmp = Long.parseLong(s);
+        if(tmp > Integer.MAX_VALUE || (-tmp<Integer.MIN_VALUE && neg)) tmp = 0;
+        //mark1 
+        return (int)(neg?-tmp:tmp);
+    }
+}
+
+public class Solution {
+    public int reverse(int x) {
+        //速度不知道为什么很慢，76ms.....
+        //可以用Stack处理或者StringBuffer 处理
+        //考虑Int范围
+        //Test Case：1534236469时返回0。说明越界int范围时，直接舍弃了
+        boolean flag = true;
+        //不要自己计算，直接用Integer.MAX_VALUE、MIN_VALUE就可以了...... 
+        //long high = (long)Math.pow(2,32);
+        long high = (long)Integer.MAX_VALUE;
+        long low = (long)Integer.MIN_VALUE; 
+        //long low = (long)(0-Math.pow(2,32));
+      
+        int result = 0;
+        if(x<0) flag = false;
+        //mark1 -> Math.abs(越界的int时，会从起始int的low范围开始返回)，所以要先把x转为long
+        //如果用下面注释掉的代码，Test Case：-2147483648时，会产生错误
+        //String s = Math.abs(x)+"";
+        String s = Math.abs((long)x)+"";
+        StringBuffer sb = new StringBuffer();
+        if(!flag) sb.append("-");
+        for(int i=s.length()-1;i>=0;i--){
+            sb.append(s.charAt(i));
+        }
+        s = sb.toString();
+        //Key Point
+        //Integer.parseInt() 把String转为int
+        //判断是否越界int范围
+        if(Long.parseLong(s)>= high || Long.parseLong(s) <=low){
+            //System.out.println(Long.parseLong(s)+"");
+            return 0;
+        } else{
+            result = Integer.parseInt(s)+0;
+        }
+        return result;
+    }
+}
