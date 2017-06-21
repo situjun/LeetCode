@@ -3168,6 +3168,9 @@ public class Solution {
 }
 
 17. Letter Combinations of a Phone Number
+//Star
+//1.String[] strs = {"abc","def","ghi","jkl","mno","pqrs","tuv","wxyz"} + helper()
+//2.mark1 注意，按键2对应的是strs[0],所以数字要-2.  或者strs = {"","","abc","def","ghi","jkl","mno","pqrs","tuv","wxyz"}更好看些
 public class Solution {
     //Key:想起来不麻烦，但是写起来可能会有些乱...
     public List<String> letterCombinations(String digits) {
@@ -3183,7 +3186,7 @@ public class Solution {
             list.add(tmp);
         } else {
             int index = digits.charAt(depth)-'2';
-            //Key:排除0,1这种无效按键的干扰
+            //Key,mark1:排除0,1这种无效按键的干扰
             if(index >= 0){
                 for(int i = 0;i<=strs[index].length()-1;i++){
                     tmp = tmp+String.valueOf(strs[index].charAt(i));
@@ -4027,6 +4030,9 @@ public class Solution {
 }
 
 18. 4Sum
+//Star
+//1.4Sum和3Sum都可以用helper(),只不过都会TLE...
+//2.这两道题符合的解法很相似
 public class Solution {
     public List<List<Integer>> fourSum(int[] num, int target) {
         //Key:BackTracking 会TLE
@@ -11184,4 +11190,39 @@ public class Solution {
     }
 }
 
-        
+19. Remove Nth Node From End of List
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+ //Star
+ //Moon:corner case+处理这链表的题，最好在首端自己加个node，会处理起来更舒服
+ //1.2pointers
+ //2.mark1:case:[1],1 [1,2,3,4],4 即n==连表长度。不要写(right != null)这个，会有些问题
+public class Solution {
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode res = null,index = new ListNode(0),left = index,right = index;
+        index.next = head;
+        int counter = 0;
+        while(counter < n){
+            right = right.next;
+            counter++;
+        }
+        /** mark1
+            while(right != null){ 
+            left= left.next;
+            处理[1],1时，left虽然被赋值为null了，但是index.next还是1.很奇怪，所以不要这么写了
+        **/
+        //mark1,用 case[1],1来记
+        while(right.next != null){
+            left = left.next;
+            right = right.next;
+        }
+        left.next= left.next.next;
+        return index.next;
+    }
+}
