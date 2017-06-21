@@ -5728,6 +5728,10 @@ public class Solution {
 }
 
 10. Regular Expression Matching
+//Star  
+//170621-hard
+//0.正则匹配规则很难理解
+//http://www.cnblogs.com/grandyang/p/4461713.html
 public class Solution {
     public boolean isMatch(String s, String p) {
         //Key:背
@@ -10861,6 +10865,26 @@ public class Solution {
 }
 
 125. Valid Palindrome
+//Star
+//Version 2
+//1.mark1  s.toLowerCase()  s.replaceAll用法  reg expression外部记得加[]，^取非
+//2.mark2  reverse()只能作用在StringBuilder上。 s.reverse()是错的
+
+/*170621*/
+public class Solution {
+    public boolean isPalindrome(String s) {
+        //170621:mark1:replaceAll("^a-z0-9","s")是错的，记得要在匹配式外部加上[]。
+        //还有^表取反/非的意思,所以replace ^a-z0-9表将非a-z0-9字符替换为空
+        String tmp = s.toLowerCase().replaceAll("[^a-z0-9]","");
+        
+        //Log:"amanaplanacanalpanama"
+        //System.out.println("Log:"+tmp);
+        
+        //mark2
+        return new StringBuilder(tmp).reverse().toString().equals(tmp);
+    }
+}
+
 //Star
 //1.这道题的case真TM烦人!!!
 //1.1:为了避免inner while中和外部的begin++重复，所以用if else做个选择判断
