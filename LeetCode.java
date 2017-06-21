@@ -1683,12 +1683,50 @@ public class Solution {
 }
 
 11. Container With Most Water
+//Star
+//Version 1:  -> TLE mark1
+//1.brute force->O(n*n)  i=0~n-1,j=0~i,找出max
+//Version 2 -> mark2
+//1.pointer1,pointer2分别指向两端，然后max=min(height[pointer1],height[pointer2])*height.length.
+//2.两个值中的最小值向中间移动一步(水桶的高度由最小值决定)，然后再取其中最小值*此时的间距，更新max.因为水桶的长度再一直变小，所以要想有更大的值，水桶边缘要更高
+//3.mark3注意高度比的是height[left]<=height[right]，不要错写成if(left<=right) left++;
+
+/*170621*/
+public class Solution {
+    //TLE mark1
+    /**
+        public int maxArea(int[] height) {
+            int res = 0,n = height.length;
+            for(int i = 1;i<=n-1;i++){
+                for(int j = 0;j<=i-1;j++){
+                    //System.out.println(i+"-"+j);
+                    res = Math.max(res,Math.min(height[i],height[j])*(i-j));
+                }
+            }
+            return res;
+        }
+    **/
+    public int maxArea(int[] height) {
+        //mark2
+        int res = 0,n = height.length;
+        int left = 0,right = n-1;
+        while(left<right){
+            res = Math.max(res,Math.min(height[left],height[right])*(right-left));
+            //170621,mark3:
+            //不要错写成if(left<=right) left++;
+            if(height[left]<=height[right]) left++;
+            else right--;
+        }
+        return res;
+    }
+}
+
 public class Solution {
     public int maxArea(int[] height) {
         //Key:just copy  这道题需要背，思路不好证明正确性
-        //这个解法的难点在于如何证明正确性!!!!
-        //拿个case举例说明，[99,1,2,3,4,200,100]   
-        //max一开始等于99*length，然后left=1。容易担心的是99~200的影响，不过因为max受制于lower height，所以它永远是小于99*length的。然后剩下的可以想成一个递归的过程
+        //这个解法的难点在于如何证明正确性!!!!  170621:证明：初始两个指针分别指向两端，这时长度最长，高度取min(height[0],height[n-1])。然后指针向中间移动，这时长度一定在减少，所以要找到两指针中最小的那个值*长度，再比较max
+        //拿个case举例说明，[99,1,2,3,4,200,100]   pointer i，j分别指向99和100
+        //这时max一开始等于min(99,100)*height.length，然后left++。容易担心的是99~200的影响，不过因为max受制于lower height，所以它永远是小于99*length的。然后剩下的可以想成一个递归的过程
         
         //Key:这个理解思路较容易理解
         /**
@@ -1697,7 +1735,7 @@ public class Solution {
         The widest container (using first and last line) is a good candidate, because of its width. Its water level is the height of the smaller one of first and last line.
         All other containers are less wide and thus would need a higher water level in order to hold more water.
         The smaller one of first and last line doesn't support a higher water level and can thus be safely removed from further consideration.
-        因为max一开始是由i0和in决定的，而要找一个更大的值，在width减小的情况下，height必须变大。所以i0和in中最小的那个就没必要考虑了
+        因为max一开始是由height[0]和height[n-1]中最小值和长度决定的，而要找一个更大的值，在width减小的情况下，height必须变大。所以i0和in中最小的那个就没必要考虑了
         
         ***/
         int maxWater=0, left=0, right=height.length-1;
@@ -1911,6 +1949,29 @@ public class Solution {
 }
 
 14. Longest Common Prefix
+//Star
+//1.赋值第一个String给result，然后遍历数组，找出结果与每个String间的共同前缀，更新result
+//2.mark1 substring(0,index)没错。result与strs[i]完全相等退出时index还要++。当不相等时，index的值正好是最后一个相等字符的位置多一位
+/*170621*/
+public class Solution {
+    public String longestCommonPrefix(String[] strs) {
+        String res = "";
+        int n = strs.length;
+        if(n == 0) return res;
+        else res = strs[0];
+        for(int i = 0;i<=n-1;i++){
+            int index = 0;
+            while(index <= Math.min(strs[i].length(),res.length())-1){
+                if(res.charAt(index) != strs[i].charAt(index)) break;
+                index++;
+            }
+            //Key170621，mark1:这个substring(0,index)没错。case:["abc","abc"] 两者相等，index最后会加到3，此时是substring(0,3)。case["abc","ac"]的index循环退出时index==1,此时是substring(0,1)
+            res = res.substring(0,index);
+        }
+        return res;
+    }
+}
+
 public class Solution {
     public String longestCommonPrefix(String[] strs) {
         //Key:有点不理解了，这题不难啊，而且corner case应该也不太复杂，不知道为什么正确率那么低.....
@@ -10991,11 +11052,13 @@ public class Solution {
 
 7. Reverse Integer
 //Star
-//0:case:-2147483648 -> !!!非常重要的一点  Math.abs(-2147483648) == -2147483648,具体解释看链接。因为这种坑爹的case，所以要先把x转为long -> mark2
-//https://www.zhihu.com/question/51632291?from=profile_question_card
-//1.Long.parseLong(String)  Math.abs(int)
-//2.注意是StringBuilder().reverse() 而不是 s.reverse() 也不是String.reverse(s) -> mark3
-//3.记得返回时加上负号 mark1,neg?-tmp:tmp要用()括起来，因为(int)neg优先于neg?-tmp:tmp
+/**
+	https://www.zhihu.com/question/51632291?from=profile_question_card
+	0:case:-2147483648 -> !!!非常重要的一点  Math.abs(-2147483648) == -2147483648,具体解释看链接。因为这种坑爹的case，所以要先把x转为long -> mark2
+	1.Long.parseLong(String)  Math.abs(int)
+	2.注意是StringBuilder().reverse() 而不是 s.reverse() 也不是String.reverse(s) -> mark3
+	3.记得返回时加上负号 mark1,neg?-tmp:tmp要用()括起来，因为(int)neg优先于neg?-tmp:tmp
+**/
 
 /*170620*/
 public class Solution {
@@ -11051,3 +11114,74 @@ public class Solution {
         return result;
     }
 }
+
+12. Integer to Roman
+//http://www.cnblogs.com/grandyang/p/4123374.html
+//Trick sol
+public class Solution {
+    public String intToRoman(int num) {
+        /**
+
+        I	1
+        V	5
+        X	10
+        L	50
+        C	100
+        D	500
+        M	1,000
+        
+        1954 as MCMLIV
+        1990 as MCMXC
+        2014 as MMXIV
+        
+        ***/
+    
+        String[] g = {"", "I","II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
+        String[] s = {"", "X","XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+        String[] b = {"", "C","CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
+        String[] q = {"", "M","MM", "MMM"};
+            
+        return q[num / 1000]+b[num / 100 % 10]+s[num / 10 % 10]+g[num % 10];
+    
+    
+    }   
+}
+
+15. 3Sum
+public class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+       //if(nums.length < 3) return null;  下面新建的ArrayList就是空的
+        int target = 0;
+        //题目要求的是List
+        List<List<Integer>> result = new ArrayList<>();
+        Arrays.sort(nums);
+        for(int i = 0;i <= nums.length - 3;i++){
+            //    ||前面成功了，后面应该就不执行了吧？
+            if(i == 0 || (i>0 && nums[i] != nums[i-1])){
+                int start = i+1,end = nums.length -1;
+                int rest = target - nums[i];
+                while(start < end){
+                    int sum = nums[start] + nums[end];
+                    if(sum == rest){
+                        result.add(Arrays.asList(nums[i],nums[start],nums[end]));
+                        
+                        //discard duplicate values
+                        while(start < end && nums[start] == nums[start+1]) start++;
+                        while(start < end && nums[end] == nums[end-1]) end--;
+                       
+                       //head & nail move to new position
+                       start++;
+                       end--;
+                    } else if(sum > rest){
+                        end--;
+                    } else {
+                        start++;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+}
+
+        
