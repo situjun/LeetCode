@@ -1684,6 +1684,7 @@ public class Solution {
 
 11. Container With Most Water
 //Star
+//core:因为height.length*min(height[0],height[height.length-1])《这个值肯定会被算到》，所以一开始从这个值为基准开始算起，此时width最大，等于length.然后逐渐想中间移动，更新max
 //Version 1:  -> TLE mark1
 //1.brute force->O(n*n)  i=0~n-1,j=0~i,找出max
 //Version 2 -> mark2
@@ -1951,7 +1952,8 @@ public class Solution {
 14. Longest Common Prefix
 //Star
 //1.赋值第一个String给result，然后遍历数组，找出结果与每个String间的共同前缀，更新result
-//2.mark1 substring(0,index)没错。result与strs[i]完全相等退出时index还要++。当不相等时，index的值正好是最后一个相等字符的位置多一位
+//2.mark1 substring(0,index)没错。result与strs[i]完全相等退出时index还要++。当不相等时，index的值正好是最后一个相等字符的位置多一位。
+//或者不用substring()截取，而是相等时追加字符，更容易思考些.StringBuilder.append(c)
 /*170621*/
 public class Solution {
     public String longestCommonPrefix(String[] strs) {
@@ -3199,11 +3201,46 @@ public class Solution {
 }
 
 20. Valid Parentheses
+//Star
+//core:Stack
+//1.mark1:case "}(){}[]",最后还要判断下stack是否为空
+//2.mark2.Stack是Collection，所以也要指定泛型
+//3.mark3:别忘了压入stack
+/*170622*/
+public class Solution {
+    public boolean isValid(String s) {
+        //170622:mark2.Stack是Collection，所以也要指定泛型
+        //Wrong -> Stack stack = new Stack();
+        Stack<Character> stack = new Stack<>();
+        int n = s.length();
+        for(int i=0;i<=n-1;i++){
+            char c = s.charAt(i);
+            if(c == '}' || c == ')' || c == ']'){
+                if(!stack.empty()){
+                    if(stack.peek() == '(' && c == ')' || stack.peek() == '[' && c == ']' || stack.peek() == '{' && c == '}'){
+                        stack.pop();
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                //mark3:别忘了压入stack
+                stack.push(c);
+            }
+        }
+        //170622:mark1,case "}(){}[]",所以还要在判断下最后是否为空
+        return stack.empty()?true:false;
+    }
+}
+
 public class Solution {
     //Key:不难写，主要是corner case的判断
     //Corner case:"(("  需要单独判断一下最后是否为空
     public boolean isValid(String s) {
         if(s == null || s.length() == 0 || s.length()%2 == 1) return false;
+		//170622:Stack也是Collection，所以也要指定泛型
         Stack<Character> stack = new Stack<>();
         for(int i = 0;i<=s.length()-1;i++){
             if(s.charAt(i) == '}' || s.charAt(i) == ')' || s.charAt(i) == ']'){
@@ -4967,6 +5004,32 @@ public class Solution {
 }
 
 28. Implement strStr()
+//Star
+//core
+//1.找出needle首字符在haystack中位值，然后在判断substring(i,i+needle.length)是否和needle相等
+//1.1 mark2需要确保i+needle.length<=haystack
+//1.2 mark1,case："aaaa","a" ->注意，一旦相等就break.否则返回的是3而不是0
+//1.3 mark3:还有case"xxxxx","" 也是对的,return 0
+
+/*170622*/
+public class Solution {
+    public int strStr(String haystack, String needle) {
+        int res = -1,n = needle.length(),m = haystack.length();
+        //mark3
+        if(n == 0) return 0;
+        char c = needle.charAt(0);
+        for(int i = 0;i<=m-1;i++){
+            //mark2
+            if(haystack.charAt(i) == c && i+n <= m && haystack.substring(i,i+n).equals(needle)) {
+                res = i;
+                //mark1
+                break;
+            }
+        }
+        return res;
+    }
+}
+
 public class Solution {
     public int strStr(String haystack, String needle) {
         //Key:My wrong version
@@ -5129,6 +5192,15 @@ public class Solution {
  *     ListNode(int x) { val = x; }
  * }
  */
+ 
+//Star
+//core:T21基础上将merge 2变为了merge k。
+//Version 1
+//1.brute force:全部加入到ArrayList中，转为数组再sort。然后变为ListNode list返回。
+//2.mark1: list转array  Object[] objs = strList.toArray();;
+//Version 2
+
+/*170622 updated*/
 public class Solution {
     public ListNode mergeKLists(ListNode[] lists) {
         //Brute force： Time Limit Exceeded
@@ -5148,8 +5220,9 @@ public class Solution {
                 
             }
         }
-        Integer[] nums = new Integer[list.size()];
-        nums = list.toArray(nums);
+        //170622:mark1,这是Object[] objs = strList.toArray();的用法。因为Object是所有类的父类，不论是int,char...，封装它们的class都可以转为Object。所以为了规范统一处理，toArray()转为的是封装类
+        //wrong->int[] nums = (int[]) list.toArray(new int[0]);
+        Integer[] nums = (Integer[]) list.toArray(new Integer[0]);
         Arrays.sort(nums);
         for(int i:nums){
             item.next = new ListNode(i);
@@ -11224,5 +11297,224 @@ public class Solution {
         }
         left.next= left.next.next;
         return index.next;
+    }
+}
+
+21. Merge Two Sorted Lists
+//Star
+//core:双指针，类似于mergeSort中的merge
+//1.mark1:仍然是设置一个dummy node,然后返回dummy.next。会好处理的多
+//2.mark2,接上剩余的nodes即可
+/*170622*/
+public class Solution {
+    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        //170622,mark1:仍然是设置一个dummy node,然后返回dummy.next。会好处理的多
+        ListNode res = new ListNode(0),index = res;
+        while(l1 != null && l2 != null){
+            int a = l1.val,b = l2.val;
+            if(a<=b){
+                index.next = new ListNode(a);
+                l1 = l1.next;
+            } else {
+                index.next = new ListNode(b);
+                l2 = l2.next;
+            }
+            index = index.next;
+        }
+        //170622:mark2,接上剩余的nodes即可
+        if(l1 != null) index.next = l1;
+        if(l2 != null) index.next = l2;
+        return res.next;
+    }
+}
+
+public class Solution {
+    //下面这个写的有些乱，整理一下
+   /**
+   
+    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        //原list 是  sorted linked list
+        //必须加一个originNode,否则l1.next = l2;后，new LinkedList head is 旧的l1的最后一个节点
+        //3个Corner case都要考虑到
+        if(l1 == null && l2 == null) return null;
+        else if(l1== null && l2 != null) return l2;
+        else if(l2 == null&& l1 != null) return l1;
+        
+        ListNode temp;
+        if(l1.val > l2.val){
+                temp = l2;
+                l2 = l2.next;
+            } else {
+                temp = l1;
+                l1 = l1.next;
+            }
+        ListNode oriNode = temp;
+        //######这个next是可以指向null的，所以不用担心node.next中存储的是null时会报错
+        // corner casse : while(l1.next != null && l2.next != null){ 这个有些乱，如果l1和l2分别处在两个list最后，但是都还没处理，所以就跳过了。直接判断l1和l2
+        //底下这个循坏一定会有一个list中有元素剩下。注意先next还是先赋值！！！
+        while(l1!= null && l2 != null){
+            if(l1.val > l2.val){
+                temp.next = l2;
+                l2 = l2.next;
+            } else {
+                temp.next = l1;
+                l1 = l1.next;
+            }
+            temp = temp.next;
+        }
+        
+        if(l1== null && l2 != null){    
+            temp.next = l2;
+        } 
+        if(l2 == null && l1 != null){
+            temp.next = l1;
+        } 
+        
+        
+        
+        return oriNode;
+    }
+   ***/
+
+    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        //原list 是  sorted linked list
+        //必须加一个originNode,否则l1.next = l2;后，new LinkedList head is 旧的l1的最后一个节点
+        //3个Corner case都要考虑到
+        if(l1 == null){
+            if(l2 == null) return null;
+            else return l2;
+            //下边的貌似可以直接写成else if
+        } else {
+            if(l2 == null) return l1;
+        }
+        boolean flag = true;
+        ListNode temp;
+        ListNode oriNode;
+        while(l1!= null && l2 != null ){
+            if(l1.val > l2.val){
+                temp.next = l2;
+                l2 = l2.next;
+            } else {
+                temp.next = l1;
+                l1 = l1.next;
+            }
+            temp = temp.next;
+            //用个tag标记一下，省略了之前的第一个元素的选择
+            if(flag){
+                oriNode = temporiNode = temp；
+                flag = false;
+            }
+        }
+        
+        if(l1== null && l2 != null) temp.next = l2;
+        if(l2 == null && l1 != null) temp.next = l1;
+        return oriNode;
+    }
+    
+}
+
+22. Generate Parentheses
+//Star
+//core:
+//1.'('数量  ==  ')'数量。
+//2.mark1:合法的格式下，(的数量肯定小于)的数量，相对间的关系无所谓。一旦'('数量  <  ')'数量,就return。
+//left表(的数量，right表)数量
+/*170622*/
+public class Solution {
+    public List<String> generateParenthesis(int n) {
+        List<String> res = new ArrayList<>();
+        helper(res,n,0,0,"");
+        return res;
+    }
+    public void helper(List<String> list,int n,int left,int right,String s){
+        //170622:mark1，下面这句是关键，因为left<right，所以case: "))((" , ")(" 这种绝不会出现。因为当")"时就return了。
+        if(left<right) return;
+        if(s.length() == n*2){
+            if(left == right) list.add(s);
+        } else {
+            //
+            helper(list,n,left+1,right,s+"(");
+            helper(list,n,left,right+1,s+")");
+        }
+        
+    }
+}
+
+public class Solution {
+    public List<String> generateParenthesis(int n) {
+		List<String> ans = new ArrayList<String>();
+		helper(ans, n, 0, "");
+		return ans;
+
+	}
+
+	void helper(List<String> ans, int n, int limit, String s) {
+		if (s.length() == 2 * n) {
+			ans.add(s);
+			return;
+		}
+
+		if (limit > 0 && s.length() - limit < limit)
+			helper(ans, n, limit, s + ")");
+		if (limit < n)
+			helper(ans, n, limit + 1, s + "(");
+
+	}
+}
+
+//Star
+//core:mark1，这道题不仅仅是return 新长度，《更重要的是他还要把所有不同的值移到前端》。需要做一遍才能理解题意
+
+/*170622*/
+public class Solution {
+    //wrong 
+    /**
+        public int removeDuplicates(int[] nums) {
+            int res = 0;
+            int index = 0,n = nums.length;
+            for(int i = 0;i<=n-1;i++){
+                if(nums[index] == nums[i]){
+                    continue;
+                } else {
+                    res++;
+                    index = i;
+                }
+                
+            }
+            return res;
+        }
+    **/
+    public int removeDuplicates(int[] nums) {
+        //two pointers
+        int index =0;
+        int count=1;
+        for(int i=1;i<=nums.length-1;i++){
+            if(nums[i] != nums[index]){
+                //mark1，前count个组成的新的不重复数组
+                nums[++index] = nums[i];
+                count++;
+            }
+        }
+        return count;
+    }
+}
+
+27. Remove Element
+//Star
+//core:mark1:和T26一起看，做法类似。都是把所需的数字移到最前端。
+//T26是与nums[index]比较，而T27是与target val比较
+/*170622*/
+public class Solution {
+    public int removeElement(int[] nums, int val) {
+        int res = 0,n =nums.length;
+        int index = 0;
+        for(int i = 0;i<=n-1;i++){
+            if(nums[i] != val){
+				//mark1
+                nums[index++] = nums[i];
+                res++;
+            }
+        }
+        return res;
     }
 }
