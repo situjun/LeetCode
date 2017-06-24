@@ -2586,7 +2586,8 @@ public class Solution {
 //counter依旧是守门人，如果有重复的出现，则counter记为1。
 //与T76不同的是，这次counter允许通过的char是按照“队列”顺序进入的，所以counter也要按照队列顺序将之前的char删除，
 //直到那个重复的char数量 变为1
-
+//mark1
+//mark2
 /*170617*/
 public class Solution {
     public int lengthOfLongestSubstring(String s) {
@@ -2606,7 +2607,7 @@ public class Solution {
             }
             return res;
         **/
-        //Key170619:counter依旧是守门人，如果有重复的出现，则counter记为1。与T76不同的是，这次counter允许通过的char是按照“队列”顺序进入的，所以counter也要按照队列顺序将之前的char删除，直到那个重复的char数量 变为1
+        //Key170619:counter依旧是守门人，如果有重复的人进入，则counter++(应为底下的while(counter >0),所以counter最多也就可能加到1为止)。与T76不同的是，这次counter允许通过的char是按照“队列”顺序进入的，所以counter也要按照队列顺序将之前的char删除，直到那个重复的char数量 变为1
         if(s.equals("")) return 0;
         int res = Integer.MIN_VALUE,n = s.length(),begin = 0,end = 0,counter = 0;
         Map<Character,Integer> map = new HashMap<>();
@@ -2617,9 +2618,10 @@ public class Solution {
             end++;
             while(counter > 0){
                 c = s.charAt(begin);
+				//170624 mark1,counter需要先--，然后frequence再--。如果freq先--，那么get(c)>1就不满足了
                 if(map.get(c) > 1) counter--;
                 map.put(c,map.get(c)-1);
-                
+                //170624 mark2,前面的那个相同char删除
                 begin++;
             }
             res = Math.max(res,end-begin);
@@ -10274,6 +10276,133 @@ public class Solution {
     }
 }
 
+39. Combination Sum
+//Star
+//core:helper+过滤方法
+//0.mark1 sort
+//1.mark1
+//2.mark2 过滤条件
+//3.mark3 小优化,否则过不去
+/*170624*/
+public class Solution {
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        List<List<Integer>> res = new ArrayList<>();
+		//mark0:必须先排序，否则 candidates[i] < item.get(item.size()-1)无法使用
+        Arrays.sort(candidates);
+        int n = candidates.length;
+        helper(res,new ArrayList<>(),candidates,target,0);
+        return res;
+    }
+    public void helper(List<List<Integer>> list,List<Integer> item,int[] candidates,int target,int sum){
+        if(sum == target){
+            //mark1 new ArrayList<>(item)
+            list.add(new ArrayList<>(item));
+        } else {
+            for(int i = 0;i<=candidates.length-1;i++){
+                //mark2:case [2, 3, 6, 7],7 -> [2,3,2] 和[2,2,3] 算同一种结果。所以当nums[i] < item.get(size-1)时，continue
+                if(item.size() != 0 && candidates[i] < item.get(item.size()-1)) continue;
+                //mark3:这里做个小优化，否则的话这道题因为case太大过不去
+                if(sum+candidates[i]>target) break;
+                item.add(candidates[i]);
+                helper(list,item,candidates,target,sum+candidates[i]);
+                item.remove(item.size()-1);
+            }
+        }
+    }
+}
+
+public class Solution {
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        List<List<Integer>> list = new ArrayList<>();
+        List<Integer> item = new ArrayList<>();
+        //Key:排序关键
+        Arrays.sort(candidates);
+        helper(list,item,candidates,target,0);
+        return list;
+    }
+    public void helper(List<List<Integer>> list,List<Integer> item,int[] candidates,int target,int sum){
+        if(sum == target){
+            list.add(new ArrayList<>(item));
+        } else if(sum<target){
+            for(int i = 0;i<=candidates.length-1;i++){
+                //Key:也是只存在非递增顺序的list，
+                //即[[2,2,3],[2,3,2],[3,2,2],[7]] 是错误的.所以加一个下面的判断
+                //Key:这是通用方法，但是复杂度的确太高了.....
+                if(item.size() >0 && candidates[i] < item.get(item.size()-1)) continue;
+                //Key:如果用下面这个判断降复杂度，那么必须配合排序 Arrays.sort(candidates);
+                //否则处理：[6,7,2,3] 7 这种无序就会出错
+                if(sum+candidates[i]>target) break;
+                item.add(candidates[i]);
+                helper(list,item,candidates,target,sum+candidates[i]);
+                item.remove(item.size()-1);
+            }
+        }
+    }
+}
+
+40. Combination Sum II
+public class Solution {
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        //Key:懒方法，套模板，加个set筛选
+        Set<List<Integer>> list = new HashSet<>();
+        List<Integer> item = new ArrayList<>();
+        //Key:排序关键
+        Arrays.sort(candidates);
+        boolean[] used = new boolean[candidates.length];
+        helper(list,item,candidates,target,0,used,0);
+        List<List<Integer>> result = new ArrayList<>(list);
+        return result;
+    }
+    public void helper(Set<List<Integer>> list,List<Integer> item,int[] candidates,int target,int sum,boolean[] used,int start){
+        if(sum == target){
+            list.add(new ArrayList<>(item));
+        } else if(sum<target){
+            for(int i = start;i<=candidates.length-1;i++){
+                //Key:也是只存在非递增顺序的list，
+                //即[[2,2,3],[2,3,2],[3,2,2],[7]] 是错误的.所以加一个下面的判断
+                //Key:这是通用方法，但是复杂度的确太高了.....
+                
+                if(item.size() >0 && candidates[i] < item.get(item.size()-1) || used[i]) continue;
+                //Key:如果用下面这个判断降复杂度，那么必须配合排序 Arrays.sort(candidates);
+                //否则处理：[6,7,2,3] 7 这种无序就会出错
+                if(sum+candidates[i]>target) break;
+                item.add(candidates[i]);
+                used[i] = true;
+                helper(list,item,candidates,target,sum+candidates[i],used,i+1);
+                used[i] = false;
+                item.remove(item.size()-1);
+            }
+        }
+    }
+}
+
+216. Combination Sum III
+public class Solution {
+    //combinationSum3 指的是该题型第三道题.....
+    public List<List<Integer>> combinationSum3(int k, int n) {
+        //Key:similar to permutations
+        List<List<Integer>> list = new ArrayList<>();
+        List<Integer> item = new ArrayList<>();
+        helper(list,item,0,n,k);
+        return list;
+    }
+    public void helper(List<List<Integer>> list,List<Integer> item,int sum,int n,int k){
+        if(item.size() == k && sum == n){
+            list.add(new ArrayList<>(item));
+        } else {
+            int i = item.size() == 0?1:item.get(item.size()-1)+1;
+            for(;i<=9;i++){
+                //Key:判断条件要仔细想一下
+                if((sum+i) > n || item.size()>=k) break;
+                item.add(i);
+                helper(list,item,sum+i,n,k);
+                item.remove(item.size()-1);
+            }
+        }
+    }
+}
+
+
 377. Combination Sum IV
 public class Solution {
     public int combinationSum4(int[] nums, int target) {
@@ -11848,5 +11977,28 @@ public class Solution {
                 item.remove(item.size()-1);
             }
         }
+    }
+}
+
+41. First Missing Positive
+public class Solution {
+    //Key:cp,背
+    //https://discuss.leetcode.com/topic/10351/o-1-space-java-solution
+    public int firstMissingPositive(int[] A) {
+        int i = 0;
+        while(i < A.length){
+            if(A[i] == i+1 || A[i] <= 0 || A[i] > A.length) i++;
+            else if(A[A[i]-1] != A[i]) swap(A, i, A[i]-1);
+            else i++;
+        }
+        i = 0;
+        while(i < A.length && A[i] == i+1) i++;
+        return i+1;
+    }
+    
+    private void swap(int[] A, int i, int j){
+        int temp = A[i];
+        A[i] = A[j];
+        A[j] = temp;
     }
 }
