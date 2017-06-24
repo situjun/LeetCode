@@ -3290,6 +3290,38 @@ public class Solution {
 }
 
 33. Search in Rotated Sorted Array
+//Star
+//http://www.cnblogs.com/grandyang/p/4325648.html
+//core:找出有序的那部分，然后分别二叉搜索
+//1.mark1 nums[mid] >= nums[low] 或者nums[mid] <= nums[high]总有一边是有序成立的。
+//2.mark2,mark3 low<=high 
+
+/*170624*/
+public class Solution {
+    public int search(int[] nums, int target) {
+        int res = -1,n = nums.length;
+        if(n == 0) return -1;
+        return helper(0,n-1,nums,target);
+    }
+    public int helper(int low,int high,int[] nums,int target){
+        //mark2:low>high return -1;
+        if(low > high) return -1;
+        //mark3:因为有个 mid == low == high 的可能，所以low==high condition不能丢。而mergeSort，只有low < high(因为sort(mid+1,high,nums) 这一部分，有可能出现mid+1 == high,一旦判断low == high，可能无限循环)，没有low == high condition
+        int mid = (low+high)/2;
+        if(nums[mid] == target) return mid;
+        //170624:mark1 nums[mid] >= nums[low] 或者nums[mid] <= nums[high]总有一边是成立的。
+        if(nums[mid] >= nums[low]){
+            if(target >= nums[low] && target < nums[mid]) return helper(low,mid-1,nums,target);
+            else return helper(mid+1,high,nums,target);
+        }
+        if(nums[mid] <= nums[high]){
+            if(target <= nums[high] && target > nums[mid]) return helper(mid+1,high,nums,target);
+            else return helper(low,mid-1,nums,target);
+        }
+        return -1;
+    }
+}
+
 public class Solution {
     public int search(int[] nums, int target) {
         //Key:Loop version
@@ -3358,6 +3390,40 @@ public class Solution {
 }
 
 81. Search in Rotated Sorted Array II
+//Star
+//core:与I不同，case {2,2,1,2,2,2,2,2,2} -> nums[low] == nums[mid] = nums[high]
+//1.mark1:关键点，其他地方和Search in Rotated Sorted Array I 一样
+
+/*170624*/
+public class Solution {
+    public boolean search(int[] nums, int target) {
+        //Key:contains duplicates 
+        //Test case {2,2,1,2,2,2,2,2,2}  --->这时候无法仅通过nums[mid]>nums[low] 来判断了....
+        //Key:比较喜欢coder_gal25's sol, https://discuss.leetcode.com/topic/310/when-there-are-duplicates-the-worst-case-is-o-n-could-we-do-better/28   ---> 干扰项归根到底其实就是mid,high,low同时相等，只要把这种情况排除就好了!!!  Worst case：O(N)
+        if(nums.length == 0) return false;
+        return helper(0,nums.length-1,nums,target) == -1?false:true;
+    }
+    public int helper(int low,int high,int[] nums,int target){
+        int mid = (low+high)/2;
+        if(low<=high){
+            if(nums[mid] == target) return mid;
+            //Key:mark1,关键点，其他地方应该和Search in Rotated Sorted Array I 一样
+            if(nums[mid] == nums[low] && nums[mid] == nums[high]){
+                //low++;
+                //high--;
+                return helper(++low,--high,nums,target);
+            } else if(nums[mid]>=nums[low]){
+                if(target >= nums[low] && target < nums[mid]) return helper(low,mid-1,nums,target);
+                else return helper(mid+1,high,nums,target);
+            } else if(nums[mid] <= nums[high]){
+                if(target > nums[mid] && target <= nums[high]) return helper(mid+1,high,nums,target);
+                else return helper(low,mid-1,nums,target);
+            }
+        }
+        return -1;
+    }
+}
+
 public class Solution {
     public boolean search(int[] nums, int target) {
         //Key:contains duplicates 
@@ -4779,6 +4845,61 @@ public class Solution {
 }
 
 34. Search for a Range
+//Star
+//http://www.cnblogs.com/grandyang/p/6854825.html#undefined
+//core:分别找出第一个和最后一个
+//findFirst()表寻找第一个>=的数，所以也可用于T35. Search Insert Position
+/*
+    0.只是一个==的差距，搜索方向不同
+    1.mark1: ==时,high = mid-1.因此逐渐向前，找到第一个
+        if(nums[mid] < target) low = mid+1;  
+        else high = mid-1;
+    2.mark2:==时，low = mid+1。逐渐向后，找到最后一个
+        if(nums[mid] <= target) low = mid+1;
+        else high = mid-1;
+    3.mark3:if(nums[mid] == target) index = mid; 更新index
+    4.mark4:
+        low<=high一定要与low = mid+1,high = mid-1配套使用。如果用high = mid的话，边界非常不好掌握，导致死循环
+        low<high 才能与low = mid+1,high = mid配合使用
+*/
+           
+/*170624*/
+public class Solution {
+    public int[] searchRange(int[] nums, int target) {
+        int[] res = new int[2];
+        int n = nums.length;
+        res[0] = findFirst(0,n-1,nums,target);
+        res[1] = findLast(0,n-1,nums,target);
+        return res;
+    }
+    public int findFirst(int low,int high,int[] nums,int target){
+        int index = -1;
+        //mark4
+        while(low<=high){
+            int mid = (low+high)/2;
+            //mark1
+            if(nums[mid] < target) low = mid+1;
+            else high = mid-1; //nums[mid] >= target  {1th num,nums[mid]} 找第一个数，夹逼
+            //mark3
+            if(nums[mid] == target) index = mid;
+        }
+        return index;
+    }
+    public int findLast(int low,int high,int[] nums,int target){
+        int index = -1;
+        //mark4
+        while(low<=high){
+            int mid = (low+high)/2;
+            //mark2
+            if(nums[mid] <= target) low = mid+1;  //nums[mid] <= target  {nums[mid],nth num} 找最后一个数，夹逼
+            else high = mid-1; 
+            //mark3
+            if(nums[mid] == target) index = mid;
+        }
+        return index;
+    }
+}
+
 public class Solution {
     //Key:背 ---> 我觉得就是二叉搜索找找第一个和最后一个target的变种...
     
@@ -4837,6 +4958,61 @@ public class Solution {
 	}
     
     **/
+}
+
+35. Search Insert Position
+//Star
+//core
+//Version 1:
+//1.mark2 遍历，返回第一个target<=nums[i]的索引即可
+//2.mark1
+//Version 2
+//mark1
+
+/*170624*/
+public class Solution {
+    
+    //Version 1
+    /*
+        public int searchInsert(int[] nums, int target) {
+            int n = nums.length;
+            for(int i = 0;i<=n-1;i++){
+                //mark2:相同数字插入前边，case：[1,3,5,6],5  Expected:2
+                if(target <= nums[i]) return i;
+            }
+            //mark1:如果都小于target，插在最后，返回n
+            return n;
+        }
+    */
+    
+    //Version 2
+    public int searchInsert(int[] nums, int target) {
+        int res = 0,low = 0,high = nums.length-1,index = nums.length;
+        while(low <= high){
+            int mid = (low+high)/2;
+            //170624:mark1夹逼，如果末端数字大于target，那说明所求数字位于前半部分.
+            //170624:因为是向前搜索，所以target<=nums[mid]时改变的是high
+            if(nums[mid] >= target) high = mid-1;
+            
+            else low = mid+1;
+            if(nums[mid] >= target) index = mid;
+        }
+        return index;
+    }
+}
+
+public class Solution {
+    public int searchInsert(int[] nums, int target) {
+        int length = nums.length;
+        if(nums.length ==0 ) return 0;
+        if(target <= nums[0]) return 0;
+        for(int i =1;i<=length-1;i++){
+            if(target == nums[i]) return i;
+            else if(target >nums[i-1] && target <nums[i]) return i;
+        }
+        if(target > nums[length-1]) return length;
+        return 0;
+    }
 }
 
 190. Reverse Bits
@@ -11516,5 +11692,161 @@ public class Solution {
             }
         }
         return res;
+    }
+}
+
+46. Permutations
+//Star
+//core:backtracking,helper()
+//1.mark1:list.add(new ArrayList<>(item)).直接add(item)的话，list中所有的值都会相同
+//2.item也可以用contains来判断重复项
+
+/*170624*/
+public class Solution {
+    public List<List<Integer>> permute(int[] nums) {
+        List<List<Integer>> list = new ArrayList<>();
+        helper(list,new ArrayList<>(),nums);
+        return list;
+    }
+    public void helper(List<List<Integer>> list,List<Integer> item,int[] nums){
+        if(item.size() == nums.length){
+            //mark1
+            list.add(new ArrayList<>(item));
+        } else {
+            for(int i = 0;i<=nums.length-1;i++){
+                //mark2 list.contains()
+                if(item.contains(nums[i])) continue;
+                item.add(nums[i]);
+                helper(list,item,nums);
+                item.remove(item.size()-1);
+            }
+        }
+    }
+}
+
+47. Permutations II
+//Star
+//core:重复数字的过滤
+//1.mark1 过滤重复数字干扰，重复数字内部相对应的顺序不变。用case:[1,1,2]来记
+//2.mark2 
+//version 2:
+//1.set return new ArrayList<>(set);  但是这里用Set八成会TLE.....
+
+/*170624*/
+public class Solution {
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        int n = nums.length;
+        Arrays.sort(nums);
+        List<List<Integer>> res = new ArrayList<>();
+        boolean[] used = new boolean[n];
+        helper(res,new ArrayList<>(),nums,used);
+        return res;
+    }
+    public void helper(List<List<Integer>> res,List<Integer> item,int[] nums,boolean[] used){
+        if(item.size() == nums.length){
+            //mark2
+            res.add(new ArrayList<>(item));
+        } else {
+            for(int i = 0;i<=nums.length-1;i++){
+                //mark1:continue条件  case:[1,1,2] -> 1th 1不能和0th 1再组合了
+                if(used[i] || i >0 && nums[i] == nums[i-1] && !used[i-1]) continue;
+                item.add(nums[i]);
+                used[i] = true;
+                helper(res,item,nums,used);
+                used[i] = false;
+                item.remove(item.size()-1);
+            }
+        }
+    }
+}
+
+public class Solution {
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        List<List<Integer>> list = new ArrayList<>();
+        List<Integer> item = new ArrayList<>();
+        Arrays.sort(nums);
+        boolean[] used = new boolean[nums.length];
+        helper(list,item,nums,used);
+        return list;
+    }
+    public void helper(List<List<Integer>> list,List<Integer> item,int[] arr,boolean[] used){
+        if(item.size() == arr.length){
+            list.add(new ArrayList<>(item));
+        } else {
+            for(int i = 0;i<=arr.length-1;i++){
+                //continue 跳过此次循环，即此次loop中if后的都不执行
+                //Key point:
+                //很巧妙：arr[i-1] == arr[i]&&!used[i-1]  意味着将每组重复数字作为一个大整体。然后在数组中，就相当于这个大整体和其他不同数字的组合了，类似于List.contains()
+                //因为duplicates的麻烦就在于  112(a)2(b) 和 112(b)2(a).重复数字内部顺序的麻烦，如今把他们当做一个大整体，相当于内部顺序固定了，就可以忽略这个问题了
+                
+                //Key point:一定要记着Arrays.sort(nums)，这是关键！！！
+                if(used[i] || i>0 && arr[i] == arr[i-1] && !used[i-1]) continue;
+                item.add(arr[i]);
+                used[i] = true;
+                helper(list,item,arr,used);
+                used[i] = false;
+                item.remove(item.size()-1);
+            }
+        }
+    }
+}
+
+51. N-Queens
+
+public class Solution {
+    
+    //key point:虽然不算快，但因为模板化，记起来比较容易
+    public List<List<String>> solveNQueens(int n) {
+        List<List<String>> list = new ArrayList<>();
+        List<Integer> item = new ArrayList<>();
+        boolean[] used = new boolean[n];
+        helper(list,item,n,used);
+        //for(List<String> i:list) System.out.println(i);
+        return list;
+    }
+    public void helper(List<List<String>> list,List<Integer> item,int n,boolean[] used){
+        if(item.size() == n){
+            List<String> sol = new ArrayList<>();
+            for(Integer q:item){
+                char[] arr = new char[n];
+                Arrays.fill(arr,'.');
+                arr[q] = 'Q';
+                sol.add(new String(arr));
+            }
+            
+            /**
+            
+            for(Integer q:item){
+                String tmp = "";
+                for(int j = 0;j<=n-1;j++){
+                    if(q == j)tmp = tmp+"Q";
+                    else tmp = tmp+".";
+                }
+                sol.add(tmp);
+            }
+            
+            **/
+            
+            list.add(sol);
+        } else {
+            for(int i = 0;i<=n-1;i++){
+                int iSize = item.size();
+                //Key point: <= 1 包含位于正下方和对角线
+                //Important:Corner case:5  不仅是不能相邻位置出现在对角线上，隔着多行也不能出现在对角线上
+                //PS:对角线非常不好判断
+                //if(used[i] || iSize>=1 && Math.abs(item.get(iSize-1)-i) == 1) continue;
+                boolean tag = false;
+                if(used[i]) continue;
+                for(int j = 0;j<=iSize-1;j++){
+                    if(Math.abs(iSize-j) == Math.abs(i - item.get(j))) tag = true;
+                }
+                if(tag) continue;
+                item.add(i);
+                used[i] = true;
+                helper(list,item,n,used);
+                used[i] = false;
+                item.remove(item.size()-1);
+            }
+        }
     }
 }
