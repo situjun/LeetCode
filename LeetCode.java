@@ -3265,6 +3265,10 @@ public class Solution {
 }
 
 49. Group Anagrams
+//Star
+//http://www.cnblogs.com/grandyang/p/4385822.html
+//Core:这道题一开始理解错误了。["eat", "tea", "tan", "ate", "nat", "bat"] -> [["ate", "eat","tea"],["nat","tan"],["bat"]] 意思应该是拥有相同字符，但顺序不同的的字符串归为一起。我给理解成了可以首尾相衔的字符串归为一起...(错误理解 ate->eat->tea)
+//mark1  map.values转list
 public class Solution {
     public List<List<String>> groupAnagrams(String[] strs) {
         //Key:思路一开始不容易想，但解法较容易理解
@@ -3283,10 +3287,7 @@ public class Solution {
     			map.put(keyStr, new ArrayList<String>());
     		map.get(keyStr).add(s);
     	}
-    	
-    	for(String key: map.keySet()) {
-    		Collections.sort(map.get(key));
-    	}
+		//mark1  map.values转list
     	return new ArrayList<List<String>>(map.values());
     }
 }
@@ -3295,6 +3296,7 @@ public class Solution {
 //Star
 //http://www.cnblogs.com/grandyang/p/4325648.html
 //core:找出有序的那部分，然后分别二叉搜索
+//mark0  与binary search 不同处：二叉搜索对一边进行recursion，而这道题需要对两边recursion
 //1.mark1 nums[mid] >= nums[low] 或者nums[mid] <= nums[high]总有一边是有序成立的。
 //2.mark2,mark3 low<=high 
 
@@ -3305,6 +3307,7 @@ public class Solution {
         if(n == 0) return -1;
         return helper(0,n-1,nums,target);
     }
+	//170625:mark0,与binary search 不同处：二叉搜索对一边进行recursion，而这道题需要对两边recursion
     public int helper(int low,int high,int[] nums,int target){
         //mark2:low>high return -1;
         if(low > high) return -1;
@@ -3827,6 +3830,12 @@ public class Solution {
 //1.规定，num1.length<=nums2.length.较短序列所有元素都被抛弃，可直接返回较长序列的第k大元素，可以不用分情况讨论了。
 //不用再乱七八糟的讨论了。所需的(k-1)/2位置可能大于某个数组总长度，规定A短之后，只需要考虑超过A的长度，
 //不需要再分情况讨论了。
+//2.mark0 left和right的坐标确认
+//3.mark1
+//4.mark2
+//5.mark3
+//6.mark4
+//7.mark5
 /**
 1：
 此题关键，记住。这个思考起来很绕，但是结论肯定没错。用个特殊case来背 -> [1,2,3,4,5,6,7]  [11,12,13,14,15,16,17] ，所以是从[4,5,6,7,11,12,13,14]中找
@@ -3837,19 +3846,26 @@ public class Solution {
 /*170618*/
 public class Solution {
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+		//mark0:left = (n+m+1)/2,right = (n+m+2)/2。要记得+1,+2。可以用case:n=3,m=4,left == 4，right == 5来记
         int n = nums1.length,m = nums2.length,left = (n+m+1)/2,right = (n+m+2)/2,aStart = 0,bStart = 0;
         return (findKth(nums1,aStart,nums2,bStart,left)+findKth(nums1,aStart,nums2,bStart,right))/2.0;
     }
+	//找出第K个元素
     public int findKth(int[] nums1,int aStart,int[] nums2,int bStart,int k){
+		//mark1:aStart已经超过了nums1的最大坐标
         if(aStart>=nums1.length) return nums2[bStart+k-1];
         if(bStart>=nums2.length) return nums1[aStart+k-1];
+		//mark2:k==1，找出第一个元素，即最小的元素
         if(k == 1) return Math.min(nums1[aStart],nums2[bStart]);
         //Key170618:比如说在[0,1,2]中找k==2的数字，那么该数字index就是0+2-1
+		//mark3:确定现在的mid值，如果midInd 已经超出了，midVal赋值为max
         int aMidInd = (aStart+k/2-1),bMidInd = (bStart+k/2-1);
         int aMidVal = aMidInd<=nums1.length-1?nums1[aMidInd]:Integer.MAX_VALUE;
         int bMidVal = bMidInd<=nums2.length-1?nums2[bMidInd]:Integer.MAX_VALUE;
+		//mark4:
         if(aMidVal<bMidVal)
         //Key170618:这里aMidInd+1而不是直接aMid，应该是因为mid值已经被判断过了，所以不要了。而且如果直接aMidInd，那么答案是错的
+		//mark5:因为k/2是往小了算(如3/2 == 1，剩余部分为2)，所以剩余部分要用k-k/2
             return findKth(nums1,aMidInd+1,nums2,bStart,k-k/2);
         else 
             return findKth(nums1,aStart,nums2,bMidInd+1,k-k/2);
@@ -3858,9 +3874,9 @@ public class Solution {
 
 /*170616*/
 //Star
-//1.两个数组的元素总数量有可能是偶数，也有可能是奇数。所以要除以2.0 -> 当为奇数个时，则right,left指向的均是中间这个元素。为偶数时，举一反三
+//1.两个数组的元素总数量有可能是偶数，也有可能是奇数。所以要除以2.0 -> 当为奇数个时，则right,left指向的均是中间这个元素，除以2.0还是这个数。为偶数时，则正好是两数平均值
 //2.findKth（...,k）中的k是第k大元素(从1开始)，而不是index==k的元素(从0开始)。So,left = (m+n+1)/2,而不是(m-1+n-1+1)/2。right同理
-//Key170616:背，实际上这个func是用来查找第k大的元素
+//Key170616:背，实际上这个func是用来查找顺序第k个的元素
 //Step
 //1.不断地把两个原数组拆分成只有一般大小的两个新数组
 //2.如果其中一个数组已经无法拆分了/不可操作了，则另一个数组的第x大元素即为两个数组的第x大元素
@@ -5372,9 +5388,10 @@ public class Solution {
  */
  
 //Star
-//core:T21基础上将merge 2变为了merge k。
+//core:T21基础上将merge 2变为了merge k。  将Lists中所有"元素"重新排序。
+//core:
 //Version 1
-//1.brute force:全部加入到ArrayList中，转为数组再sort。然后变为ListNode list返回。
+//1.brute force:Lists所有值加入到一个ArrayList中，转为数组再将所有sort。然后返回一个排好序的listNode
 //2.mark1: list转array  Object[] objs = strList.toArray();;
 //Version 2
 
@@ -5717,6 +5734,10 @@ public class Solution {
 5. Longest Palindromic Substring
 
 //Star
+//core:需要把dp[i][i]和dp[i][i+1]，单独字符和两两比较的基础情况写出来，才能用dp
+//mark1
+//mark2
+//mark3
 //http://www.cnblogs.com/grandyang/p/4464476.html
 //Trans Func:dp[i][j] = s.charAt(i)==s.charAt(j) && dp[i+1][j-1],basic -> 奇数情况：dp[i][i] = true,偶数情况：dp[i][i+1] = charAt(i) == charA(i+1)
 //1.难点在于奇偶判断上  case:"abbab" 如果基础点是b,按照charAt(i-1)==charAt(i+1)判断,得到结果bab,会忽视abba.
@@ -5733,11 +5754,14 @@ public class Solution {
         if(n == 0) return res;
         boolean[][] dp = new boolean[n][n];
         for(int i = 0;i<=n-1;i++) {
+			//mark1:单独字符情况
             dp[i][i] = true;
         }
         for(int j = 0;j<=n-1;j++){
-            //Key170619:case -> "aaaa"  dp[0][3]是由dp[1][2]推出来的，可是此时dp[1][2]还没有算出来。无法用dp，因为s.charAt(i) == s.charAt(j)时，需要判断dp[i+1][j-1]，但此时并未计算出来。如果用dp[i][j-1]判断的话，则需要dp[i][j-1]为false加上其它条件才可判断出来dp[i][j]是否为true。思考起来比较麻烦
+            //wrong -> Key170619:case -> "aaaa"  dp[0][3]是由dp[1][2]推出来的，可是此时dp[1][2]还没有算出来。无法用dp，因为s.charAt(i) == s.charAt(j)时，需要判断dp[i+1][j-1]，但此时并未计算出来。如果用dp[i][j-1]判断的话，则需要dp[i][j-1]为false加上其它条件才可判断出来dp[i][j]是否为true。思考起来比较麻烦
             for(int i = j-1;i>=0;i--){
+				//mark2 两两比较的基础情况
+				//mark3 下面的if要写成并联结构，不能写成顺联情况。否则当dp[i][i+1]更新后，会覆盖掉dp[i][i+1]
                 if(j == i+1) dp[i][j] = s.charAt(i)==s.charAt(j);
                 else dp[i][j] = (s.charAt(i)==s.charAt(j)) && dp[i+1][j-1];
                 if(dp[i][j]) {
@@ -6046,8 +6070,21 @@ public class Solution {
 }
 
 10. Regular Expression Matching
-//Star  
-//170621-hard
+//Star -hard
+//http://www.cnblogs.com/grandyang/p/4461713.html
+//0.正则匹配很难懂
+/**
+ *  如果.后面跟着*,那么.*是当做整体看的
+    case:"ab",".*.." -> true 《.*是个整体》只有后面两个.是强制要求的，前面的.因为*的缘故，可以是0个字符匹配
+         "ab","..." -> false  因为没有*，所以相当于要有三个字符来匹配
+         "ab",".*..." -> false 同第一个case，只不过后面3个...是强制的
+         "ab",".." ->true
+         "ab",".*" -> true
+    如果.后面没有*,那就意味着是三个...匹配，但是如果第一个.后面加上了*,《第一个.和*适当做整体看的》，此时.*可以匹配一个都没有，或者n个a
+    
+**/
+
+//这道题中的*表示之前那个字符可以有0个，1个或是多个，就是说，字符串a*b，可以表示b或是aaab，即a的个数任意，
 //0.正则匹配规则很难理解
 //http://www.cnblogs.com/grandyang/p/4461713.html
 public class Solution {
@@ -6391,7 +6428,74 @@ public class Solution {
     }
 }
 
+//Star
+//core:mark1，这道题不仅仅是return 新长度，《更重要的是他还要把所有不同的值移到前端》。需要做一遍才能理解题意
+26. Remove Duplicates from Sorted Array
+
+/*170622*/
+public class Solution {
+    //wrong 
+    /**
+        public int removeDuplicates(int[] nums) {
+            int res = 0;
+            int index = 0,n = nums.length;
+            for(int i = 0;i<=n-1;i++){
+                if(nums[index] == nums[i]){
+                    continue;
+                } else {
+                    res++;
+                    index = i;
+                }
+                
+            }
+            return res;
+        }
+    **/
+    public int removeDuplicates(int[] nums) {
+        //two pointers
+        int index =0;
+        int count=1;
+        for(int i=1;i<=nums.length-1;i++){
+            if(nums[i] != nums[index]){
+                //mark1，前count个组成的新的不重复数组
+                nums[++index] = nums[i];
+                count++;
+            }
+        }
+        return count;
+    }
+}
+
+
 80. Remove Duplicates from Sorted Array II
+//Star
+//core:在T26的基础上加个counter表每个数字的频率，<=2时，放在前边，否则continue
+//mark0:用case:[1,1,1]来记for内部的顺序
+//mark1:counter 频率，所以应该置1
+//mark2:出现次数2次以上，continue
+//mark3
+//mark4
+
+/*170625*/
+public class Solution {
+    public int removeDuplicates(int[] nums) {
+        int index = 0,n = nums.length,res = 0,counter = 1;
+        if(n == 0) return 0;
+        for(int i = 1;i<=n-1;i++){
+            //mark0:先counter++，还是放在后面，最好用这个case:[1,1,1]来记
+            if(nums[i] == nums[i-1]) counter++;
+            //mark1: counter表该数字的频率，所以应该置1，而不是0。wrong -> else counter = 0;
+            else counter = 1;
+            //mark2
+            if(counter > 2) continue;
+            //mark3:因为index是从0开始的，所以要先++
+            nums[++index] = nums[i];
+        }
+        //mark4:index此时是坐标，所以返回第几个时应该+1
+        return index+1;
+    }
+}
+
 public class Solution {
     public int removeDuplicates(int[] nums) {
         //Key:cp,背    https://discuss.leetcode.com/topic/46519/short-and-simple-java-solution-easy-to-understand
@@ -11188,10 +11292,10 @@ public class Solution {
 6. ZigZag Conversion
 //Star
 //Thinking:按照题意code -- My version 
-//1.建个list，分别存储每行的字符串，然后合并。用个boolean表向上or向下遍历
-//2.注意，例如向下走，当counter == numRows时，counter需要-2，如果减1的话。重复计算了。
+//1.mark0,建个list，分别存储每行的字符串，然后合并。用个boolean表向上or向下遍历
+//2.mark3，例如向下走，当counter == numRows时，counter需要-2，如果减1的话。重复计算了。
 //还有往上走时，判断的是counter == -1，而不是counter == 0
-//3.注意*：如果numRows == 1时，那么counter-2不适用，要单独判断下==1的情况
+//3.mark1：如果numRows == 1时，那么counter-2不适用，要单独判断下==1的情况
 //另一种sol隔几个距离取一个char。https://discuss.leetcode.com/topic/3162/easy-to-understand-java-solution 
 
 
@@ -11199,10 +11303,11 @@ public class Solution {
 public class Solution {
     public String convert(String s, int numRows) {
         String res = "";
+		//mark0
         boolean down = true;
         int n = s.length(),counter = 0;
         if(n == 0 || numRows == 0) return "";
-        //Key170620:如果numRows == 1时，那么counter-2不适用，要单独判断下
+        //Key170620,mark1:如果numRows == 1时，那么counter-2不适用，要单独判断下
         if(numRows == 1) return s;
         List<String> list = new ArrayList<>();
         for(int i = 0;i<=numRows-1;i++) list.add("");
@@ -11212,7 +11317,7 @@ public class Solution {
             if(down) counter++;
             else counter --;
             if(counter == numRows){
-                //Key170620:case:"PAYPALISHIRING" couner == 3时,往回的话,counter需要置为1，即counter-2.如果只是--的话，counter==2的话，那么会重复加入一次
+                //Key170620,mark3:case:"PAYPALISHIRING" couner == 3时,往回的话,counter需要置为1，即counter-2.如果只是--的话，counter==2的话，那么会重复加入一次
                 counter -= 2;
                 down = false;
                 //Key170620:同理，只不过这减过头的话是-1，而不是0
@@ -11438,8 +11543,8 @@ public class Solution {
 //Star
 /**
 	https://www.zhihu.com/question/51632291?from=profile_question_card
-	0:case:-2147483648 -> !!!非常重要的一点  Math.abs(-2147483648) == -2147483648,具体解释看链接。因为这种坑爹的case，所以要先把x转为long -> mark2
-	1.Long.parseLong(String)  Math.abs(int)
+	0:mark2,case:-2147483648 -> !!!非常重要的一点  Intger i= -2147483648,Math.abs(i) == -2147483648,补码操作的原因。具体解释看上面的链接。因为这种坑爹的case，所以要先把x转为long -> mark2
+	1.Long.parseLong(String)  mark4
 	2.注意是StringBuilder().reverse() 而不是 s.reverse() 也不是String.reverse(s) -> mark3
 	3.记得返回时加上负号 mark1,neg?-tmp:tmp要用()括起来，因为(int)neg优先于neg?-tmp:tmp
 **/
@@ -11454,6 +11559,7 @@ public class Solution {
         String s = String.valueOf(Math.abs((long)x));
         //mark3
         s = new StringBuilder(s).reverse().toString();
+		//mark4
         long tmp = Long.parseLong(s);
         if(tmp > Integer.MAX_VALUE || (-tmp<Integer.MIN_VALUE && neg)) tmp = 0;
         //mark1 
@@ -11980,6 +12086,49 @@ public class Solution {
     }
 }
 
+52. N-Queens II
+//Star
+//core：T51的基础上，其实不用再把sol一一加进去了，只用计数器加1即可
+public class Solution {
+    int res = 0;
+    public int totalNQueens(int n) {
+        List<Integer> item = new ArrayList<>();
+        boolean[] used = new boolean[n];
+        helper(item,n,used);
+        //for(List<String> i:list) System.out.println(i);
+        //Key:偷个懒，直接转成Set Set<List<String>> set = new HashSet<>(list);
+        //注意转换方法
+        //Set<List<String>> set = new HashSet<>(list);
+        
+        return res;
+    }
+    public void helper(List<Integer> item,int n,boolean[] used){
+        if(item.size() == n){
+            //T51的基础上，其实不用再把sol一一加进去了，只用计数器加1即可
+            res++;
+        } else {
+            for(int i = 0;i<=n-1;i++){
+                int iSize = item.size();
+                //Key point: <= 1 包含位于正下方和对角线
+                //Important:Corner case:5  不仅是不能相邻位置出现在对角线上，隔着多行也不能出现在对角线上
+                //PS:对角线非常不好判断
+                //if(used[i] || iSize>=1 && Math.abs(item.get(iSize-1)-i) == 1) continue;
+                boolean tag = false;
+                if(used[i]) continue;
+                for(int j = 0;j<=iSize-1;j++){
+                    if(Math.abs(iSize-j) == Math.abs(i - item.get(j))) tag = true;
+                }
+                if(tag) continue;
+                item.add(i);
+                used[i] = true;
+                helper(item,n,used);
+                used[i] = false;
+                item.remove(item.size()-1);
+            }
+        }
+    }
+}
+
 41. First Missing Positive
 public class Solution {
     //Key:cp,背
@@ -12000,5 +12149,69 @@ public class Solution {
         int temp = A[i];
         A[i] = A[j];
         A[j] = temp;
+    }
+}
+
+48. Rotate Image
+public class Solution {
+    public void rotate(int[][] matrix) {
+        //Key:Just copy 找规律的题
+        int n=matrix.length;
+        for (int i=0; i<n/2; i++){
+            for (int j=i; j<n-i-1; j++) {
+                int tmp=matrix[i][j];
+                matrix[i][j]=matrix[n-j-1][i];
+                matrix[n-j-1][i]=matrix[n-i-1][n-j-1];
+                matrix[n-i-1][n-j-1]=matrix[j][n-i-1];
+                matrix[j][n-i-1]=tmp;
+            }
+        }
+    }
+}
+
+50. Pow(x, n)
+//http://www.cnblogs.com/grandyang/p/4383775.html
+public class Solution {
+    public double myPow(double x, int n) {
+        //Key:背，just cp https://discuss.leetcode.com/topic/66478/java-solution-beats-96
+        if(n == 0) { return 1.0; }
+        if(x == 0) { return 0.0; }
+        
+        if(n % 2 == 0) {
+            return myPow(x * x, n / 2);
+        } else {
+            return (n > 0 ? x : 1.0 / x ) * myPow(x * x, n / 2) ;
+        }
+    }
+}
+
+54. Spiral Matrix
+public class Solution {
+    public List<Integer> spiralOrder(int[][] matrix) {
+        List<Integer> list = new ArrayList<>();
+        if(matrix.length == 0) return list;
+        int x1 = 0,y1 = 0,x2 = matrix.length-1,y2 = matrix[0].length-1;
+        int index1 = 0,index2 = 0;
+        
+        //Key point:下面的判断错误
+        //Conrer case:[[2,3]] 如果是下面的判断就会出错
+        // while(list.size()< matrix[0].length*matrix.length){
+            
+            
+        //考虑成一个不断内部压缩的状态，然后每次都从左上角循环一遍
+        while(x1<=x2 && y1<=y2){    
+            for(int i = y1;i<=y2;i++) list.add(matrix[x1][i]);
+            x1++;
+            for(int i = x1;i<=x2;i++) list.add(matrix[i][y2]);
+            y2--;
+            //Key point:向左和向上都需要考虑下x1,x2关系和y1,y2关系
+            //防止奇数层matrix的影响
+            if(x1<=x2) for(int i = y2;i>=y1;i--) list.add(matrix[x2][i]);
+            x2--;
+            if(y1<=y2) for(int i = x2;i>=x1;i--) list.add(matrix[i][y1]);
+            y1++;
+        }
+        
+        return list;
     }
 }
