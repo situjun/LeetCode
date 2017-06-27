@@ -6939,14 +6939,47 @@ public class Solution {
 }
 
 92. Reverse Linked List II
-/**
- * Definition for singly-linked list.
- * public class ListNode {
- *     int val;
- *     ListNode next;
- *     ListNode(int x) { val = x; }
- * }
- */
+
+//Star
+//很好的图解  http://www.cnblogs.com/4everlove/p/3651002.html 很好的图解
+//core  cur,cur.next,cur.next.next  p1.next = cur后，cur,p1,p2都向后移。将m,n间的List逆序，最后cur指向的逆序中的第一个元素，p1指向的是逆序外的第一个元素，具体看上面的链接，pre指向的是逆序中的最后一个元素
+//mark0:确认prev的位置，即确定需要连接逆序后List的node。用case:[1,2]记忆
+//mark1.5:cur即prev的下一个node.即开始逆序的起始node.同时定义p1,p2
+//mark1.6:逆序所需list，还是以[1,2]来记
+//mark2 p1.next = cur 
+//mark3:cur,p1,p2全部往后移动一步
+public class Solution {
+    public ListNode reverseBetween(ListNode head, int m, int n) {
+        ListNode dummy = new ListNode(-1);
+        dummy.next = head;
+        ListNode prev = dummy,cur = null,p1 = null,p2 = null;
+        //mark0:确认prev的位置，即确定需要连接逆序后List的node。用case:[1,2]记忆
+        //mark0.1:其实不管怎么code,只要保证prev指向第m-1个元素，cur = prev.next即可
+        for(int i = 0;i<=m-2;i++){
+            prev = prev.next;
+        }
+        //mark1.5:cur即prev的下一个node.即开始逆序的其实node.定义p1,p2
+        cur = prev.next;
+        if(cur != null) p1 = cur.next;
+        if(p1 != null) p2 = p1.next;
+        //mark1.6:逆序所需list，还是以[1,2]来记
+        for(int i = m;i<=n-1;i++){
+            //mark2:从后往前连接 p1.next = cur
+            p1.next = cur;
+            //mark3:cur,p1,p2全部往后移动一步
+            cur = p1;
+            p1 = p2;
+            if(p2 != null) p2 = p2.next;
+        }
+        //mark4:最后cur指向的逆序中的起始元素，所有node是由cur next开始的。p1指向的是逆序list后的第一个元素
+        //mark4.1:即prev->nodeX<-nodeY<-nodeZ<-cur->p1   cur到nodeX即为逆序list
+        //mark4.2:末尾元素指向p1,prev.next 指向cur
+        prev.next.next = p1;
+        prev.next = cur;
+        return dummy.next;
+    }
+}
+
 public class Solution {
     public ListNode reverseBetween(ListNode head, int m, int n) {
         //Key:cp,背  https://discuss.leetcode.com/topic/24873/easy-understanding-java-solution/2
