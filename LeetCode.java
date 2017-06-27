@@ -3294,13 +3294,16 @@ public class Solution {
 
 33. Search in Rotated Sorted Array
 //Star
+//T33方法也可以应用在T153上，因为mark6和mark7处是串联结构，而不是else这种并联，所以如果两边都有序的话，这种写法更容易理解些
 //http://www.cnblogs.com/grandyang/p/4325648.html
 //core:找出有序的那部分，然后分别二叉搜索
 //mark0  与binary search 不同处：二叉搜索对一边进行recursion，而这道题需要对两边recursion
 //1.mark1 nums[mid] >= nums[low] 或者nums[mid] <= nums[high]总有一边是有序成立的。
 //2.mark2 小优化 low<=high 
 //3.mark3
-
+//4.mark4 《target只能在有序序列部分中进行判断》。
+//5.mark5
+//6.mark6，mark7 case [1,2],1 case[2,2]2 mid>=low
 /*170624*/
 public class Solution {
     public int search(int[] nums, int target) {
@@ -3316,10 +3319,23 @@ public class Solution {
         int mid = (low+high)/2;
         if(nums[mid] == target) return mid;
         //170624:mark1 nums[mid] >= nums[low] 或者nums[mid] <= nums[high]总有一边是成立的。
+		//170626:底下的外部两个if我总是觉得有点冗余 -> 这个想法是错误的
+		/*
+            //mark4:底下的两个外部if不是冗余的，因此不能省略，target只能在有序序列里比较。以case：[5,1,3],5为例，low =0,high =2,mid = 1。  5>=nums[low]但是5也>=nums[mid],不符合第一个if.如果写成下面的形式，就会在[1,3]中寻找，明显是错的
+			
+			if(target >= nums[low] && target <= nums[mid]) return helper(low,mid-1,nums,target);
+            else return helper(mid+1,high,nums,target);
+			
+            //mark5:且if(target > nums[low] && target < nums[mid]) 对应的 else 包括 target > nums[low] && target > nums[mid],target < nums[low] && target > nums[mid]和target < nums[low] && target < nums[mid]等多种情况，而不是target > nums[mid] && target < nums[high]
+            
+        */
+		//mark6:case:[2,2],2  low == (low+high)/2 == high,所以mid会在 if(nums[mid] == target)就return了
+		//而case：[1,2],2  low = 0,high = 1,mid = (low+high)/2 = 0.因此nums[mid] >= nums[low]中的==绝不能省略。
         if(nums[mid] >= nums[low]){
             if(target >= nums[low] && target < nums[mid]) return helper(low,mid-1,nums,target);
             else return helper(mid+1,high,nums,target);
         }
+		//mark7:但是nums[mid] <= nums[high]中的==是可以省略的。还是以case[1,2],1为例，mid==high的情况之有[2,2],2 这种low == high的情况才有，否则的话mid永远<high
         if(nums[mid] <= nums[high]){
             if(target <= nums[high] && target > nums[mid]) return helper(mid+1,high,nums,target);
             else return helper(low,mid-1,nums,target);
@@ -3481,6 +3497,29 @@ public class Solution {
 }
 
 153. Find Minimum in Rotated Sorted Array
+//Star
+//core:T33吃透了，T153就没问题了
+
+/*170626*/
+public class Solution {
+    public int findMin(int[] nums) {
+        int n = nums.length,low = 0,high = n-1,res = Integer.MAX_VALUE;
+        while(low<=high){
+            int mid = (low+high)/2;
+            if(nums[low] <= nums[mid]){
+                res = Math.min(nums[low],res);
+                low = mid+1;
+            } 
+            if(nums[mid] <= nums[high]){
+                res = Math.min(nums[mid],res);
+                high = mid-1;
+            }
+        }
+        return res;
+    }
+}
+
+
 public class Solution {
     public int findMin(int[] nums) {
         //Key:直接粘的 154 Find Minimum in Rotated Sorted Array II 的解法
@@ -4552,6 +4591,51 @@ public class Solution {
     }
 }
 
+151	Reverse Words in a String  
+public class Solution {
+    /**
+     * @param s : A string
+     * @return : A string
+     */
+    public String reverseWords(String s) {
+        // write your code
+        //Key point:
+        //这不就是考stack的用法吗
+        //Stack stack = new Stack();
+        //都不用stack，直接两个数组组合一下就成
+        String[] arr = s.split(" ");
+        String result = "";
+        for(int i=arr.length-1;i>=0;i--){
+            if(!arr[i].equals(" ")) result = result + arr[i] + " ";
+        }
+        return result;
+    }
+}
+
+public class Solution {
+    //reverse ===>  Stack
+    public String reverseWords(String s) {
+        Stack<String> stack = new Stack<String>();
+        String tokens[] = s.split(" ");
+        int length = tokens.length;
+        String reverseStr = "";
+        for(int i = 0 ; i < length; i ++){
+           if(tokens[i].equals(""))
+                continue;
+           // System.out.println(tokens[i] + "sssssssss");
+            stack.push(tokens[i]);
+        }
+        while(!stack.isEmpty()){
+            String temp = stack.pop();
+            reverseStr = reverseStr.concat(temp);
+            reverseStr = reverseStr.concat(" ");
+        }
+        return reverseStr.trim();
+    }
+}
+
+
+
 557. Reverse Words in a String III
 public class Solution {
     public String reverseWords(String s) {
@@ -4866,7 +4950,7 @@ public class Solution {
 34. Search for a Range
 //Star
 //http://www.cnblogs.com/grandyang/p/6854825.html#undefined
-//core:分别找出第一个和最后一个
+//core:分别找出第一个和最后一个，findFirst和findLast分开写。夹逼
 //findFirst()表寻找第一个>=的数，所以也可用于T35. Search Insert Position
 /*
     0.只是一个==的差距，搜索方向不同
@@ -4880,6 +4964,7 @@ public class Solution {
     4.mark4:
         low<=high一定要与low = mid+1,high = mid-1配套使用。如果用high = mid的话，边界非常不好掌握，导致死循环
         low<high 才能与low = mid+1,high = mid配合使用
+	5.mark5:实在不好理解，分开写更好
 */
            
 /*170624*/
@@ -4896,11 +4981,18 @@ public class Solution {
         //mark4
         while(low<=high){
             int mid = (low+high)/2;
+			//mark3
+            if(nums[mid] == target) index = mid;
             //mark1
+			//mark5:实在不好理解，分开写更好
+			/*
+				if(nums[mid] < target) low = mid+1
+				else if(nums[mid] == target) high = mid-1
+				else if(nums[mid] > target) high = mid-1
+			*/
             if(nums[mid] < target) low = mid+1;
             else high = mid-1; //nums[mid] >= target  {1th num,nums[mid]} 找第一个数，夹逼
-            //mark3
-            if(nums[mid] == target) index = mid;
+            
         }
         return index;
     }
@@ -4909,11 +5001,12 @@ public class Solution {
         //mark4
         while(low<=high){
             int mid = (low+high)/2;
+			//mark3
+            if(nums[mid] == target) index = mid;
             //mark2
             if(nums[mid] <= target) low = mid+1;  //nums[mid] <= target  {nums[mid],nth num} 找最后一个数，夹逼
             else high = mid-1; 
-            //mark3
-            if(nums[mid] == target) index = mid;
+            
         }
         return index;
     }
@@ -12171,16 +12264,24 @@ public class Solution {
 }
 
 50. Pow(x, n)
+//Star
+//core:binary search + corner case
+//mark1:case:x = 0
+//mark2:case:n = 0
+//mark3
 //http://www.cnblogs.com/grandyang/p/4383775.html
 public class Solution {
     public double myPow(double x, int n) {
         //Key:背，just cp https://discuss.leetcode.com/topic/66478/java-solution-beats-96
+		//mark2
         if(n == 0) { return 1.0; }
+		//mark1
         if(x == 0) { return 0.0; }
         
         if(n % 2 == 0) {
             return myPow(x * x, n / 2);
         } else {
+			//mark3
             return (n > 0 ? x : 1.0 / x ) * myPow(x * x, n / 2) ;
         }
     }
@@ -12214,5 +12315,189 @@ public class Solution {
         }
         
         return list;
+    }
+}
+
+162. Find Peak Element
+public class Solution {
+    public int findPeakElement(int[] nums) {
+        //Key:这道题是要用二分法的.....
+        for(int i = 0;i<=nums.length-1;i++){
+            if(i == 0){
+                if(nums.length == 1) return i;
+                else if(nums[i+1]<nums[i]) return i;
+            } else if(i == nums.length-1) {
+                if(nums[i]>nums[i-1]) return i;
+            } else if (nums[i] > nums[i-1] && nums[i] > nums[i+1]){
+                return i;
+            }
+        }
+        return -1;
+    }
+}
+
+55. Jump Game
+//Star
+//http://www.cnblogs.com/grandyang/p/4371526.html
+//core  题意容易误解，每个值代表最大可以走几步，因此不用每个坐标处的步数不用正好用完，只要能够到达即可
+//算出最远可到达位置，即是否可以到达每个坐标即可
+//mark1  mark1 在每个坐标处最远可到达位置
+
+/*170626*/
+public class Solution {
+    public boolean canJump(int[] nums) {
+        int max = nums[0];
+        for(int i = 1;i<= nums.length-1;i++){
+            if(i > max) return false;
+            //mark1 在每个坐标处最远可到达位置
+            max = Math.max(max,i+nums[i]);
+        }
+        return true;
+    }
+}
+
+66. Plus One
+//Star
+//Core:这道题给的case特别大，没法先转成数字再做
+//这道题不是那么简单的
+//1.mark1：corner
+public class Solution {
+    public int[] plusOne(int[] digits) {
+        //170626:mark1 corner case:[7,2,8,5,0,9,1,2,9,5,3,6,6,7,3,2,8,4,3,7,9,5,7,7,4,7,4,9,4,7,0,1,1,1,7,4,0,0,6]
+        /*
+            if(digits.length == 0) return new int[0];
+            String s = "";
+            for(int i:digits) s = s+i;
+            String tmp = String.valueOf(Long.parseLong(s)+1);
+            int[] res = new int[tmp.length()];
+            int counter = 0;
+            for(char c:tmp.toCharArray()) res[counter++] = c-'0';
+            return res;
+        */
+        //mark2:考虑进位的话，只需考虑最后一位是否是9即可
+        //wrong 
+        /*
+            int n = digits.length,size = digits[n-1] == 9?n+1:n,more = 0;
+            //mark3:别忘了 plus one
+            digits[n-1]++;
+            //mark4:小优化，如果数组长度不变，直接返回
+            if(size == n)return digits;
+            int[] res = new int[size];
+            for(int i = n-1;i>=0;i--){
+                int tmp = more+digits[i];
+                more = tmp/10;
+                res[--size] = tmp%10;
+            }
+            if(more == 1) res[0] = 1;
+            return res;
+        
+        */
+        
+        //cp
+        int carry = 1;
+        for (int i = digits.length-1; i>= 0; i--) {
+            digits[i] += carry;
+            if (digits[i] <= 9) // early return 
+                return digits;
+            digits[i] = 0;
+        }
+        int[] ret = new int[digits.length+1];
+        ret[0] = 1;
+        return ret;
+    }
+}
+
+
+public class Solution {
+    public int[] plusOne(int[] digits) {
+        //corner case :input 9 Expected: [1,0]
+        int length = digits.length;
+        int[] tmp = new int[length+1];
+        boolean flag = true;
+        for(int i=length-1;i>=0;i--){
+            if(flag){
+                if((digits[i]+1)==10){
+                    flag = true;
+                    digits[i]=0;
+                } else {
+                    flag = false;
+                    digits[i]++;
+                }
+            }
+            
+        }
+        if(digits[0]==0) {
+            tmp[0] = 1;
+            tmp[1] = 0;
+            for(int i=1;i<=length-1;i++){
+                tmp[i+1] = digits[i];
+            }
+        } else {
+            tmp = digits;
+        }
+        
+        return tmp;
+        
+    }
+}
+
+67. Add Binary
+public class Solution {
+    public String addBinary(String a, String b) {
+        //Plus One 很像
+        //Brute Force太麻烦
+        //Corner Case:"10",""  不过后面的两个单独的while 避免了这个麻烦
+        
+        int jinWei = 0;
+        int index1 = a.length()-1;
+        int index2 = b.length()-1;
+        int tmp = 0;
+        ArrayList<Integer> list = new ArrayList<Integer>();
+        while(index1 >= 0&&index2>=0){
+            tmp = a.charAt(index1)+b.charAt(index2)+jinWei-96;
+            if(tmp >=2){
+                jinWei =1;
+                if(tmp==3){
+                    
+                    list.add(1); 
+                } else {
+                    list.add(0);
+                }
+            } else {
+                jinWei = 0;
+                list.add(tmp);
+            }
+            index1--;
+            index2--;
+        }
+        while(index1>=0){
+            tmp = a.charAt(index1)+jinWei-48;
+            if(tmp == 2){
+                jinWei = 1;
+                list.add(0);
+            } else{
+                jinWei = 0;
+                list.add(tmp);
+            }
+            index1--;
+        }
+        while(index2>=0){
+            tmp = b.charAt(index2)+jinWei-48;
+            if(tmp == 2){
+                jinWei = 1;
+                list.add(0);
+            } else{
+                jinWei = 0;
+                list.add(tmp);
+            }
+            index2--;
+        }
+        if(jinWei == 1)list.add(1);
+        String result = "";
+        for(int i=list.size()-1;i>=0;i--){
+            result += list.get(i)+"";
+        }
+        
+        return result;
     }
 }
