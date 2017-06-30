@@ -7425,15 +7425,89 @@ public class Solution {
 }
 
 95. Unique Binary Search Trees II  //背
-/**
- * Definition for a binary tree node.
- * public class TreeNode {
- *     int val;
- *     TreeNode left;
- *     TreeNode right;
- *     TreeNode(int x) { val = x; }
- * }
- */
+
+//Star
+//Core:
+//Star
+//Core:left = start ~ i-1,root == i,right = i+1 ~ end
+/*170630*/
+ public class Solution {
+        public List<TreeNode> generateTrees(int n) {
+            //mark5:Corner：n == 0,因为1>0,所以会产生一个new ArrayList<>(null).这与题意不符合，n<=0时，应该是一个空list，所以需要特殊处理一下。
+            if(n <= 0) return new ArrayList<>();
+            return helper(1,n);
+            
+        }
+        public List<TreeNode> helper(int start,int end){
+            List<TreeNode> list = new ArrayList<>();
+            if(start>end) {
+                //mark4:与下面的mark4合起来看
+                list.add(null);
+                return list;
+            }
+            for(int i = start;i<=end;i++){
+                //mark0
+                List<TreeNode> leftSub = helper(start,i-1);
+                List<TreeNode> rightSub = helper(i+1,end);
+                //mark4:因为for遍历List<TreeNode>，如果值是返回一个空list，遍历就不会发生
+                for(TreeNode left:leftSub){
+                    for(TreeNode right:rightSub){
+                        TreeNode root = new TreeNode(i);
+                        root.left = left;
+                        root.right = right;
+                        list.add(root);
+                    }
+                }
+            }
+            return list;
+        }
+ }
+
+//170626 mark3:wrong->平常的那种helper是线性的， 2.left == 1,2.right == 3这种结果没法求出来
+
+//wrong 
+/*
+    public class Solution {
+        public List<TreeNode> generateTrees(int n) {
+            boolean[] used = new boolean[n];
+            List<TreeNode> res = new ArrayList<>();
+            for(int i = 1;i<=n;i++){
+                
+                //170627:mark1:这个res不能在这里加。因为root为1的话，有[1,null,2,null,3],[1,null,3,2]这两种情况，root都是1，但是第二个结果会覆盖第一个结果
+                //mark1.1:做个dummy吧  
+                TreeNode dummy = new TreeNode(-1);
+                //mark1.3:也不要在这里add(dummy.right) 因为这里的dummy.right保留的是最后一个结果中的right，result  [1,null,2,null,3],[1,null,3,2] 中的第二个1，第一个结果在recursion中背第二个覆盖了
+                helper(res,dummy,dummy,used,0);
+            }
+            return res;
+        }
+        //mark1.4:需要加root.right，所以把dummy也得传进去
+        public void helper(List<TreeNode> res,TreeNode root,TreeNode node,boolean[] used,int counter){
+            if(counter == used.length){
+                //mark1.2:类似于res.add(new ArrayList<>(item));  这里的add也不能直接加root，所以才做了个dummy。因为dummy.val == -1,i肯定>-1.所以把每次新生成的dummy.right加进去即可
+                res.add(root.right);
+            } else {
+                for(int i = 1;i<=used.length;i++){
+                    if(used[i-1]) continue;
+                    //170626 mark3:wrong->平常的那种helper是线性的， 2.left == 1,2.right == 3这种没法求出来
+                    if(i>node.val){
+                        node.right = new TreeNode(i);
+                        
+                        used[i-1] = true;
+                        helper(res,root,node.right,used,++counter);
+                        used[i-1] = false;
+                    } else {
+                        node.left = new TreeNode(i);
+                        used[i-1] = true;
+                        helper(res,root,node.left,used,++counter);
+                        used[i-1] = false;
+                    }
+                }
+            }
+        }
+        
+    }
+*/
 public class Solution {
     //Key:下边两个解法一样....
     //Key:another version --> divide and conquer cp,背 https://discuss.leetcode.com/topic/8410/divide-and-conquer-f-i-g-i-1-g-n-i
@@ -7465,30 +7539,34 @@ public class Solution {
     **/
     //Brute force
     //Key:https://discuss.leetcode.com/topic/3079/a-simple-recursive-solution/14
-    public List<TreeNode> generateTrees(int n) {
-        if(n<1) return new ArrayList<TreeNode>();
-        return genTreeList(1,n);
-    }
-    private List<TreeNode> genTreeList (int start, int end) {
-        List<TreeNode> list = new ArrayList<TreeNode>(); 
-        if (start > end) {
-            list.add(null);
-        }
-        for(int idx = start; idx <= end; idx++) {
-            //kEY:因为 是 1....n，所以左边的肯定都小于右边的
-            List<TreeNode> leftList = genTreeList(start, idx - 1);
-            List<TreeNode> rightList = genTreeList(idx + 1, end);
-            for (TreeNode left : leftList) {
-                for(TreeNode right: rightList) {
-                    TreeNode root = new TreeNode(idx);
-                    root.left = left;
-                    root.right = right;
-                    list.add(root);
-                }
-            }
-        }
-        return list;
-    }
+	public List<TreeNode> generateTrees(int n) {
+		if(n <= 0) return new ArrayList<TreeNode>();
+		return helper(1,n);
+	}
+	public List<TreeNode> helper(int start,int end){
+		List<TreeNode> list = new ArrayList<>();
+		if(start>end) {
+			//Key:因为底下的两个inner loop需要遍历list中的nodes，所以还是需要add一下null的，否则直接返回一个空的list也是不对的
+			//mark1:必须有下面这句list.add(null) 。如果直接返回一个空的new ArrayList<>().那么底下的for就不会便利这个“空arrylist”.所以最后会返回null
+			list.add(null);
+			return list;
+		}
+		//Key:遍历一遍所有节点，使它们都能作为root处理。
+		for(int i = start;i<=end;i++){
+			List<TreeNode> leftSubTrees = helper(start,i-1);
+			List<TreeNode> rightSubTrees = helper(i+1,end);
+			//Key:左右子树重新组合
+			for(TreeNode left:leftSubTrees){
+				for(TreeNode right:rightSubTrees){
+					TreeNode root = new TreeNode(i);
+					root.left = left;
+					root.right = right;
+					list.add(root);
+				}
+			}
+		}
+		return list;
+	}
 }
 
 //V2
@@ -12533,4 +12611,56 @@ public class Solution {
         
         return result;
     }
+}
+
+94. Binary Tree Inorder Traversal
+//Star
+//core:InOrder 是中序...
+/*170627*/
+public class Solution {
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> res = new ArrayList<>();
+        helper(res,root);
+        return res;
+    }
+    public void helper(List<Integer> res,TreeNode node){
+        if(node != null){
+            
+            helper(res,node.left);
+            res.add(node.val);
+            helper(res,node.right);
+        }
+    }
+}
+
+public class Solution {
+    //static List<Integer> list = new ArrayList<Integer>();  这个可以执行，但是此时list就全局唯一了。如果保留static的话，测试时，因为Test case2 输入的是[]，而因为static的原因，output是testcase1的结果{1,2,3}。所以错误了,如下
+    /***
+        Submission Result: Wrong Answer 
+        Input:
+        []
+        Output:
+        [1,3,2]
+        Expected:
+        []
+
+    **/
+    List<Integer> list = new ArrayList<Integer>();
+    public List<Integer> inorderTraversal(TreeNode root) {
+        //Key Point:
+        /**
+         以下结论是错误的！！！！
+         static只与全局唯一特性有关，只要在方法外声明的变量所有方法都可以用，只是static确保了全局唯一这一特性。
+         //static variable不仅代表全局共享这一个变量，还意味着inorderTraversal中调用recursion不需传递list。如果不声明为static，就需要传参list了，即使加上了下面变量生命也不可以。这与static 的该变量唯一特性无关.....
+        
+        **/
+        //List<Integer> list = new ArrayList<Integer>();
+        if(root != null){
+            inorderTraversal(root.left);
+            list.add(root.val);
+            inorderTraversal(root.right);
+        }
+        return list;
+    }
+    
 }
