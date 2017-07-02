@@ -7429,7 +7429,7 @@ public class Solution {
 //Star
 //Core:
 //Star
-//Core:left = start ~ i-1,root == i,right = i+1 ~ end
+//Core:leftSub = start ~ i-1,root == i,rightSub = i+1 ~ end
 /*170630*/
  public class Solution {
         public List<TreeNode> generateTrees(int n) {
