@@ -3806,16 +3806,33 @@ public class Solution {
 }
 
 98. Validate Binary Search Tree
-/**
- * Definition for a binary tree node.
- * public class TreeNode {
- *     int val;
- *     TreeNode left;
- *     TreeNode right;
- *     TreeNode(int x) { val = x; }
- * }
- */
 
+//Star
+//core:如果root的右子点的左子点小于root的左子点，下面这个wrong方法也能通过这种case，但很明显这种方法是错误的。
+//mark0:corner:[10,5,15,null,null,6,20]
+
+/*170703*/
+public class Solution {
+    /*
+        boolean res = true;
+        public boolean isValidBST(TreeNode root) {
+            helper(root);
+            return res;
+        }
+        public void helper(TreeNode node){
+            if(node != null){
+                if(node.left != null) {
+                    if(node.left.val >= node.val) res = false;
+                }
+                if(node.right != null) {
+                    if(node.right.val <= node.val) res = false;
+                }
+                helper(node.left);
+                helper(node.right);
+            }
+        }
+    */
+}
 
 public class Solution {
     //Key:my wrong version
@@ -3892,6 +3909,7 @@ public class Solution {
     }
 	//找出第K个元素
     public int findKth(int[] nums1,int aStart,int[] nums2,int bStart,int k){
+		//170703:mark8 为统一，index只与nums1.length比较  mark1,mark7
 		//mark1:aStart已经超过了nums1的最大坐标
         if(aStart>=nums1.length) return nums2[bStart+k-1];
         if(bStart>=nums2.length) return nums1[aStart+k-1];
@@ -3900,6 +3918,7 @@ public class Solution {
         //Key170618:比如说在[0,1,2]中找k==2的数字，那么该数字index就是0+2-1
 		//mark3:确定现在的mid值，如果midInd 已经超出了，midVal赋值为max
         int aMidInd = (aStart+k/2-1),bMidInd = (bStart+k/2-1);
+		//170703:背，mark7,为什么midIndex需要和length比一下？前面明明已经判断过了aStart和length。为什么mid>length，nums就设置成Max？需解决
         int aMidVal = aMidInd<=nums1.length-1?nums1[aMidInd]:Integer.MAX_VALUE;
         int bMidVal = bMidInd<=nums2.length-1?nums2[bMidInd]:Integer.MAX_VALUE;
 		//mark4:
