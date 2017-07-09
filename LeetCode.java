@@ -12688,3 +12688,41 @@ public class Solution {
     }
     
 }
+
+16. 3Sum Closest
+//Star
+//Core 170709
+//和T15一起记，2pointers 3sum>target,end--。且用一个diff记录下tmp的绝对值
+//mark0:sum initialization
+//mark1:夹逼
+public class Solution {
+    public int threeSumClosest(int[] nums, int target) {
+        //sort firstly!!!
+        Arrays.sort(nums);
+        int tmp=0;
+        if(nums.length<3){
+            
+            for(int i:nums){
+                tmp+=i;
+            }
+           
+        } else {
+			//mark0:tmp init
+            tmp=nums[0]+nums[1]+nums[2];
+            for(int i=0;i<=nums.length-3;i++){
+                int start = i+1,end=nums.length-1;
+                //错误！！！tmp在这里每次都会被重置
+                // tmp=nums[0]+nums[1]+nums[2];
+                while(start<end){
+                    int sum = nums[start]+nums[end]+nums[i];
+                    if(Math.abs(sum-target) < Math.abs(tmp-target)) tmp = sum;
+					//mark1:sum>target 说明数字大了，end-- 
+                    if(sum > target) end--;
+                    else start++;
+                }
+            }
+        }
+        return tmp;
+    }
+    
+}
