@@ -3883,6 +3883,7 @@ public class Solution {
 
 4. Median of Two Sorted Arrays
 //Star
+//170709:Core:mark1,3,4,7不好记忆，直接硬背
 //Star ~ code4.2 
 //1.规定，num1.length<=nums2.length.较短序列所有元素都被抛弃，可直接返回较长序列的第k大元素，可以不用分情况讨论了。
 //不用再乱七八糟的讨论了。所需的(k-1)/2位置可能大于某个数组总长度，规定A短之后，只需要考虑超过A的长度，
@@ -11862,6 +11863,10 @@ public class Solution {
 }
 
 15. 3Sum
+//Star
+//Core 1700709
+//2pointers,先《Sort》，求出剩余的两数sum，即sum减去第一个数的值。然后对后两个值进行夹逼处理   细节，处理不好写
+//可以在Two Sum上继续处理，不过用那个map的方法，进行inner loop时每次都要清一下map，反倒麻烦了
 public class Solution {
     public List<List<Integer>> threeSum(int[] nums) {
        //if(nums.length < 3) return null;  下面新建的ArrayList就是空的
