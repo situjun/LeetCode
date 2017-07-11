@@ -1,12 +1,33 @@
+import java.util.*;
 class Basic{
 	public static void main(String[] s){
-		new Basic().mergeSort();
+		//new Basic().mergeSort();
+		new Basic().binarySearch();
 	}
 	public void mergeSort(){
 		int[] nums = {3,1,4,5,5,2,5,6,66,33,22,1,21,13,14};
 		int[] tmp = new int[nums.length];
 		new MergeSort().sort(nums,tmp,0,nums.length-1);
 		for(int i:nums) System.out.print(i+",");
+	}
+	public void binarySearch(){
+		int[] nums = {4,2,5,2,5,2,2,1,88,4,22,45,23,121,9,65};
+		Arrays.sort(nums);
+		System.out.println(new BinarySearch().search(nums,45));
+	}
+}
+class BinarySearch{
+	public int search(int[] nums,int target){
+		return helper(nums,target,0,nums.length-1);
+	}
+	public int helper(int[] nums,int target,int low,int high){
+		if(low <= high){
+			int mid = (low+high)/2;
+			if(nums[mid] == target) return mid;
+			if(nums[mid] < target) return helper(nums,target,mid+1,high);
+			else return helper(nums,target,low,mid-1);
+		}
+		return -1;
 	}
 }
 /*170711*/
