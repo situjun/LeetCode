@@ -1411,11 +1411,16 @@ public class Solution {
 }
 
 36. Valid Sudoku
+//Star
+//Core
+//mark0:
+//mark1:
 public class Solution {
     public boolean isValidSudoku(char[][] board) {
         //Key:分别判断每一行，每一列，以及每一个块。写起来有些麻烦....
         //Key:Just copy
         for(int i = 0; i<9; i++){
+			//mark0:每次一个colSet,rowSet,gridSet判断是否符合
             //这总共创建了27次.....
             HashSet<Character> rows = new HashSet<Character>();
             HashSet<Character> columns = new HashSet<Character>();
@@ -1425,6 +1430,7 @@ public class Solution {
                     return false;
                 if(board[j][i]!='.' && !columns.add(board[j][i]))
                     return false;
+				//mark1:判断九宫格
                 int RowIndex = 3*(i/3);
                 int ColIndex = 3*(i%3);
                 if(board[RowIndex + j/3][ColIndex + j%3]!='.' && !cube.add(board[RowIndex + j/3][ColIndex + j%3]))
@@ -3294,9 +3300,10 @@ public class Solution {
 
 33. Search in Rotated Sorted Array
 //Star
-//T33方法也可以应用在T153上，因为mark6和mark7处是串联结构，而不是else这种并联，所以如果两边都有序的话，这种写法更容易理解些
+//T33方法也可以应用在T153上，因为mark6和mark7处是串联结构，而不是else这种并联，(170711,看似串联，实为并联,mark7)所以如果两边都有序的话，这种写法更容易理解些
 //http://www.cnblogs.com/grandyang/p/4325648.html
-//core:找出有序的那部分，然后分别二叉搜索
+//core:找出有序的那部分，然后分别二叉搜索 
+//core：哪边有序(outer if)？target在不在有序的那边（inner if），进而决定舍弃哪边？
 //mark0  与binary search 不同处：二叉搜索对一边进行recursion，而这道题需要对两边recursion
 //1.mark1 nums[mid] >= nums[low] 或者nums[mid] <= nums[high]总有一边是有序成立的。
 //2.mark2 小优化 low<=high 
@@ -3304,6 +3311,7 @@ public class Solution {
 //4.mark4 《target只能在有序序列部分中进行判断》。
 //5.mark5
 //6.mark6，mark7 case [1,2],1 case[2,2]2 mid>=low
+//mark8:因为要舍弃一边数组，所以才需要分别写一下if
 /*170624*/
 public class Solution {
     public int search(int[] nums, int target) {
@@ -3313,36 +3321,45 @@ public class Solution {
     }
 	//170625:mark0,与binary search 不同处：二叉搜索对一边进行recursion，而这道题需要对两边recursion
     public int helper(int low,int high,int[] nums,int target){
-        //mark2:low>high return -1;
-        if(low > high) return -1;
-        //mark3:因为有个 mid == low == high 的可能，所以low==high condition不能丢。而mergeSort，只有low < high(因为sort(mid+1,high,nums) 这一部分，有可能出现mid+1 == high,一旦判断low == high，可能无限循环)，没有low == high condition
-        int mid = (low+high)/2;
-        if(nums[mid] == target) return mid;
-        //170624:mark1 nums[mid] >= nums[low] 或者nums[mid] <= nums[high]总有一边是成立的。
-		//170626:底下的外部两个if我总是觉得有点冗余 -> 这个想法是错误的
-		/*
-            //mark4:底下的两个外部if不是冗余的，因此不能省略，target只能在有序序列里比较。以case：[5,1,3],5为例，low =0,high =2,mid = 1。  5>=nums[low]但是5也>=nums[mid],不符合第一个if.如果写成下面的形式，就会在[1,3]中寻找，明显是错的
-			
-			if(target >= nums[low] && target <= nums[mid]) return helper(low,mid-1,nums,target);
-            else return helper(mid+1,high,nums,target);
-			
-            //mark5:且if(target > nums[low] && target < nums[mid]) 对应的 else 包括 target > nums[low] && target > nums[mid],target < nums[low] && target > nums[mid]和target < nums[low] && target < nums[mid]等多种情况，而不是target > nums[mid] && target < nums[high]
-            
-        */
-		//mark6:case:[2,2],2  low == (low+high)/2 == high,所以mid会在 if(nums[mid] == target)就return了
-		//而case：[1,2],2  low = 0,high = 1,mid = (low+high)/2 = 0.因此nums[mid] >= nums[low]中的==绝不能省略。
-        if(nums[mid] >= nums[low]){
-            if(target >= nums[low] && target < nums[mid]) return helper(low,mid-1,nums,target);
-            else return helper(mid+1,high,nums,target);
-        }
-		//mark7:但是nums[mid] <= nums[high]中的==是可以省略的。还是以case[1,2],1为例，mid==high的情况之有[2,2],2 这种low == high的情况才有，否则的话mid永远<high
-        if(nums[mid] <= nums[high]){
-            if(target <= nums[high] && target > nums[mid]) return helper(mid+1,high,nums,target);
-            else return helper(low,mid-1,nums,target);
-        }
+        //mark2:退出条件，low>high return -1;
+		//mark2.1:我把if(low > high) return -1 改写成 if(low<=high){}，和平常写的binary search规范一下
+        //if(low > high) return -1;
+		if(low <= high){
+			//mark3:因为有个 mid == low == high 的可能，所以low==high condition不能丢。而mergeSort，只有low < high(因为sort(mid+1,high,nums) 这一部分，有可能出现mid+1 == high,一旦判断low == high，可能无限循环)，没有low == high condition
+			int mid = (low+high)/2;
+			if(nums[mid] == target) return mid;
+			//170624:mark1 nums[mid] >= nums[low] 或者nums[mid] <= nums[high]总有一边是成立的。
+			//170626:底下的外部两个if我总是觉得有点冗余 -> 这个想法是错误的
+			/*
+				//mark4:底下的两个外部if不是冗余的，因此不能省略，target只能在有序序列里比较。以case：[5,1,3],5为例，low =0,high =2,mid = 1。  5>=nums[low]但是5也>=nums[mid],不符合第一个if.如果写成下面的形式，就会在[1,3]中寻找，明显是错的
+				
+				if(target >= nums[low] && target <= nums[mid]) return helper(low,mid-1,nums,target);
+				else return helper(mid+1,high,nums,target);
+				
+				//mark5:且if(target > nums[low] && target < nums[mid]) 对应的 else 包括 target > nums[low] && target > nums[mid],target < nums[low] && target > nums[mid]和target < nums[low] && target < nums[mid]等多种情况，而不是target > nums[mid] && target < nums[high]
+				
+			*/
+			//mark6:case:[2,2],2  low == (low+high)/2 == high,所以mid会在 if(nums[mid] == target)就return了
+			//而case：[1,2],2  low = 0,high = 1,mid = (low+high)/2 = 0.因此nums[mid] >= nums[low]中的==绝不能省略。
+			//170711 mark7:看似串联，其实还是并联。因为只会有一边一直执行下去。而low>high即为退出条件  外层if只是判断哪边有序，inner if相同。outer if只是用来决定哪个helper放在有序段中，哪个helper放在乱序中
+			//可以用corner [1,2,3,4,5,6]来举例下
+			//mark8:两个if的不同的根本原因在于要舍弃一边，所以才要决定要根据哪边有序决定舍弃哪一边
+			if(nums[mid] >= nums[low]){
+				if(target >= nums[low] && target < nums[mid]) return helper(low,mid-1,nums,target);
+				else return helper(mid+1,high,nums,target);
+			}
+			//mark7:但是nums[mid] <= nums[high]中的==是可以省略的。还是以case[1,2],1为例，mid==high的情况之有[2,2],2 这种low == high的情况才有，否则的话mid永远<high
+			if(nums[mid] <= nums[high]){
+				if(target <= nums[high] && target > nums[mid]) return helper(mid+1,high,nums,target);
+				else return helper(low,mid-1,nums,target);
+			}
+		}
+        
+        
         return -1;
     }
 }
+
 
 public class Solution {
     public int search(int[] nums, int target) {
@@ -4985,6 +5002,7 @@ public class Solution {
         low<=high一定要与low = mid+1,high = mid-1配套使用。如果用high = mid的话，边界非常不好掌握，导致死循环
         low<high 才能与low = mid+1,high = mid配合使用
 	5.mark5:实在不好理解，分开写更好
+	//mark7
 */
            
 /*170624*/
@@ -5024,6 +5042,7 @@ public class Solution {
 			//mark3
             if(nums[mid] == target) index = mid;
             //mark2
+			//mark7:（mid必须+1，如果high = mid,那么 [1]这种单一数字会不断循环）
             if(nums[mid] <= target) low = mid+1;  //nums[mid] <= target  {nums[mid],nth num} 找最后一个数，夹逼
             else high = mid-1; 
             
@@ -6375,6 +6394,82 @@ public class Solution {
 }
 
 31. Next Permutation
+//Star
+//core：背，规律题，helper方法会TLE  --> 如果知道Permutation的规律，这道题会好做很多
+//1.首先把swap(),reverse()单独实现一下，否则会很麻烦
+//1.9如果整个数组完全逆序，那么这其实就是最后一个permutation.下一个就是完全正序的。
+//2 以case：[1,2,7,4,3,1] 为例。7,4,3,1降序，
+//2.1 找到第一个打破降序规律的数字index(即为2)
+//2.2 所以要将后面中的第一个大于2的数字和2交换(即为3)。
+//2.3 然后该index后面的序列要变成完全升序,即转置一下
+//mark4:corner case:[3,2,1]  只有最后一步转置数组，所以tmp须初始化为-1
+//mark6:实现reverse，swap方法
+//http://www.cnblogs.com/grandyang/p/4428207.html
+/**
+    这道题让我们求下一个排列顺序，有题目中给的例子可以看出来，如果给定数组是降序，则说明是全排列的最后一种情况，则下一个排列就是最初始情况，可以参见之前的博客 Permutations 全排列。我们再来看下面一个例子，有如下的一个数组
+    
+    1　　2　　7　　4　　3　　1
+    
+    下一个排列为：
+    
+    1　　3　　1　　2　　4　　7
+    
+    那么是如何得到的呢，我们通过观察原数组可以发现，如果从末尾往前看，数字逐渐变大，到了2时才减小的，然后我们再从后往前找第一个比2大的数字，是3，那么我们交换2和3，再把此时3后面的所有数字转置一下即可，步骤如下：
+    
+    1　　2　　7　　4　　3　　1
+    
+    1　　3　　7　　4　　2　　1
+    
+    1　　3　　1　　2　　4　　7
+**/
+//用case：[1,7,2]记忆
+/*170622 未解决,corner case:[3,2,1]*/ 
+/*170711*/ 已解决
+public class Solution {
+    public void nextPermutation(int[] nums) {
+        int n = nums.length;
+        //mark 4:corner [3,2,1] -> 相当于将整个数组转职了一下，即省略了mark2.1,2.2。而后面reverse时tmp被+了1，所以tmp需要初始化为-1
+        int tmp = -1;
+        //int tmp = 0;
+        for(int i = n-1;i>=1;i--){
+            if(nums[i]>nums[i-1]) {
+                tmp = i-1;
+                break;
+            }
+        }
+        //Log
+        //for(int i:nums)System.out.print(tmp+",");
+        if(tmp != -1){
+            for(int i = n-1;i>=0;i--){
+                if(nums[i]>nums[tmp]){
+                    swap(nums,tmp,i);
+                    break;
+                }
+            }
+        }
+        //Log
+        //for(int i:nums)System.out.print(i+",");
+        reverse(nums,tmp+1,n-1);
+        
+    }
+    //mark6:自己实现reverse和swap方法
+    public void reverse(int[] nums,int begin,int end){
+        //mark5:数组reverse函数写错了，应该是直接对称swap 23333 下面的写法错误
+        /*
+            for(int i = end;i>=begin+1;i--){
+                swap(nums,i-1,i);
+            }
+        */
+        while(begin < end) swap(nums,begin++,end--);
+    }
+    //mark6:自己实现reverse和swap方法
+    public void swap(int[] nums,int right,int left){
+        int tmp = nums[right];
+        nums[right] = nums[left];
+        nums[left] = tmp;
+    }
+}
+
 public class Solution {
    
     //Key:回溯方法TLE,cp,背  
@@ -6464,6 +6559,8 @@ public class Solution {
 
 
 41. First Missing Positive
+//ref -> http://www.cnblogs.com/grandyang/p/4395963.html
+
 public class Solution {
     //Key:cp,背
     //https://discuss.leetcode.com/topic/10351/o-1-space-java-solution
@@ -6968,6 +7065,7 @@ public class Solution {
 //mark1.6:逆序所需list，还是以[1,2]来记
 //mark2 p1.next = cur 
 //mark3:cur,p1,p2全部往后移动一步
+//mark4:loop退出条件
 public class Solution {
     public ListNode reverseBetween(ListNode head, int m, int n) {
         ListNode dummy = new ListNode(-1);
@@ -6983,6 +7081,7 @@ public class Solution {
         if(cur != null) p1 = cur.next;
         if(p1 != null) p2 = p1.next;
         //mark1.6:逆序所需list，还是以[1,2]来记
+		//mark4:loop退出条件
         for(int i = m;i<=n-1;i++){
             //mark2:从后往前连接 p1.next = cur
             p1.next = cur;
@@ -12358,29 +12457,6 @@ public class Solution {
     }
 }
 
-41. First Missing Positive
-public class Solution {
-    //Key:cp,背
-    //https://discuss.leetcode.com/topic/10351/o-1-space-java-solution
-    public int firstMissingPositive(int[] A) {
-        int i = 0;
-        while(i < A.length){
-            if(A[i] == i+1 || A[i] <= 0 || A[i] > A.length) i++;
-            else if(A[A[i]-1] != A[i]) swap(A, i, A[i]-1);
-            else i++;
-        }
-        i = 0;
-        while(i < A.length && A[i] == i+1) i++;
-        return i+1;
-    }
-    
-    private void swap(int[] A, int i, int j){
-        int temp = A[i];
-        A[i] = A[j];
-        A[j] = temp;
-    }
-}
-
 48. Rotate Image
 public class Solution {
     public void rotate(int[][] matrix) {
@@ -12725,4 +12801,118 @@ public class Solution {
         return tmp;
     }
     
+}
+
+24. Swap Nodes in Pairs
+
+//Star
+//Core:类似于T92，prev,cur,p1,p2节点调换。然后这四个指针往后移动。注意循环退出条件
+//mark1：循环退出条件
+public class Solution {
+    /*170711*/
+    public ListNode swapPairs(ListNode head) {    
+        ListNode dummy = new ListNode(-1);
+        dummy.next = head;
+        //makr0:因为cur,p1,p2后面都要颠倒，且一开始需要"初始化"，所以可以先设为null
+        ListNode prev = dummy,cur = null,p1 = null,p2 = null;
+        //mark0.09:nodes init
+        cur = head;
+        if(cur != null) p1 = cur.next;
+        if(p1 != null) p2 = p1.next;
+        //mark1:终止条件：1.cur == null自然不用管,直接退出。2.1，cur !=null,p1 == null也不用管，因为只剩下一个值cur,根本不用动。2.2：cur != null,p1 !=null 就是以下处理过程
+        while(cur != null && p1 != null){
+            //mark2:reverse process
+            p1.next = cur;
+            cur.next = p2;
+            
+            prev.next = p1;
+            //mark0.099:prev,cur,p1,p2整体往后移动
+            prev = cur;
+            //mark0.1:以下顺序和之前初始化顺序一致
+            cur = p2;
+            if(cur != null) p1 = p2.next;
+            if(p1 != null) p2 = p1.next;
+        }
+        return dummy.next;
+    }
+    
+    
+    
+    /*
+    /***
+    public ListNode swapPairs(ListNode head) {
+        //error  解法太复杂，而且做得不对
+        if(head == null || head.next == null) return head;
+        
+        
+        ListNode oriEnd = null;
+        ListNode tmp = null;
+        ListNode newEnd = null;
+        tmp = head.next;
+        tmp.next = head;
+        oriEnd = tmp;
+        while(oriEnd.next != null && oriEnd.next.next !=null){
+            newEnd = tmp.next;
+            tmp = oriEnd.next.next;
+            tmp.next = oriEnd.next;
+            
+            newEnd.next = tmp;
+            oriEnd = tmp;
+        }
+        return head.next;
+        ***/
+        
+        //change the adjacent listnode to a cycle linkedlist,then break the link relationship
+        
+        //下面的还是不对
+        // if(head == null || head.next == null) return head;
+        // ListNode retHead = head.next;
+        // ListNode newHead = head;
+        // ListNode tmp = null;
+        // while(newHead.next != null ){
+        //     if(newHead.next.next!=null){
+        //         tmp = newHead.next.next;
+        //         newHead.next.next = newHead;
+        //         newHead.next = tmp;
+        //         newHead = newHead.next;
+        //     } else {
+        //         newHead.next.next = newHead;
+        //         newHead.next = null;
+        //         //newHead = newHead.next;
+        //     }
+            
+        // }
+       
+        // //return head.next; head 没变，但是head.next 变了。所以最好还是另存一下新的头结点
+        // return retHead;
+        
+        //LinkedlLst 问题 检点 总是不对
+       
+        /*
+            if (head == null || head.next == null){
+                return head;
+            }
+
+            ListNode current = head;
+            ListNode next = head.next;
+            ListNode prev = null;
+            head = head.next;
+
+            while (current != null && next != null){
+                ListNode temp = next.next;
+                current.next = temp;
+                next.next = current;
+                if (next != head){
+                    prev.next = next;
+                }
+                prev = current;
+                current = temp;
+                if (current != null){
+                    next = current.next;
+                }
+            }
+            return head;
+             }
+        */
+
 }
