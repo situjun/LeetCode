@@ -3272,9 +3272,12 @@ public class Solution {
 
 49. Group Anagrams
 //Star
+//Core:map<key，String list>
 //http://www.cnblogs.com/grandyang/p/4385822.html
 //Core:这道题一开始理解错误了。["eat", "tea", "tan", "ate", "nat", "bat"] -> [["ate", "eat","tea"],["nat","tan"],["bat"]] 意思应该是拥有相同字符，但顺序不同的的字符串归为一起。我给理解成了可以首尾相衔的字符串归为一起...(错误理解 ate->eat->tea)
-//mark1  map.values转list
+/*170713*/ 
+//mark0.01,0.01,0.001  关键
+//mark1:map.values提取出map.entrySet<List<String>>中的值
 public class Solution {
     public List<List<String>> groupAnagrams(String[] strs) {
         //Key:思路一开始不容易想，但解法较容易理解
@@ -3283,17 +3286,21 @@ public class Solution {
         if(strs==null || strs.length == 0){
     		return new ArrayList<List<String>>();
     	}
+        //mark0:Map<String,List<String>> translate to List<List<String>>
     	HashMap<String, List<String>> map = new HashMap<String, List<String>>();
     	//Arrays.sort(strs);
     	for (String s:strs) {
+            //mark0.1:String转为chars，然后sort与Map中的key对应
     		char[] ca = s.toCharArray();
+            //mark0.01:
     		Arrays.sort(ca);
+            //mark0.001:重组为string
     		String keyStr = String.valueOf(ca);
     		if(!map.containsKey(keyStr))
     			map.put(keyStr, new ArrayList<String>());
     		map.get(keyStr).add(s);
     	}
-		//mark1  map.values转list
+    	//mark1:map.values 转为 list
     	return new ArrayList<List<String>>(map.values());
     }
 }
