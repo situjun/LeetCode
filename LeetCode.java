@@ -5207,30 +5207,155 @@ public class Solution {
  *     Interval(int s, int e) { start = s; end = e; }
  * }
  */
+//Star
+//Core:1.intervals先按照start大小排序。 2.再比较cur interval.end与后面的interval.start关系.if(cur.end>=i.start)  else
+//mark2:注意要有个cur interval指向
 public class Solution {
+    /*170713*/
     public List<Interval> merge(List<Interval> intervals) {
-        //Key:Just cp
-        //https://discuss.leetcode.com/topic/12788/a-clean-java-solution/2
-        //https://discuss.leetcode.com/topic/8571/fast-ana-simple-java-code
-        List<Interval> res = new LinkedList<Interval>();
-        if(intervals.size()<2) return intervals;
-        Collections.sort(intervals, new Comparator<Interval>() {
-        @Override
-            public int compare(Interval o1, Interval o2) {
-                return o1.start-o2.start;
+        
+        int n = intervals.size();
+        List<Interval> res = new ArrayList<>();
+        if(n <= 1) return intervals;
+        //mark1:/**
+ * Definition for an interval.
+ * public class Interval {
+ *     int start;
+ *     int end;
+ *     Interval() { start = 0; end = 0; }
+ *     Interval(int s, int e) { start = s; end = e; }
+ * }
+ */
+//Star
+//Core:1.intervals先按照start大小排序。 2.再比较cur interval.end与后面的interval.start关系.if(cur.end>=i.start)  else
+//mark2:注意要有个cur interval指向
+public class Solution {
+    /*170713*/
+    public List<Interval> merge(List<Interval> intervals) {
+        
+        int n = intervals.size();
+        List<Interval> res = new ArrayList<>();
+        if(n <= 1) return intervals;
+        //mark1:/**
+ * Definition for an interval.
+ * public class Interval {
+ *     int start;
+ *     int end;
+ *     Interval() { start = 0; end = 0; }
+ *     Interval(int s, int e) { start = s; end = e; }
+ * }
+ */
+//Star
+//Core:1.intervals先按照start大小排序。 2.再比较cur interval.end与后面的interval.start关系.if(cur.end>=i.start)  else
+//mark2:注意要有个cur interval指向
+public class Solution {
+    /*170713*/
+    public List<Interval> merge(List<Interval> intervals) {
+        
+        int n = intervals.size();
+        List<Interval> res = new ArrayList<>();
+        if(n <= 1) return intervals;
+        //mark1:Collections.sort(intervals,泛型Obj)
+        Collections.sort(intervals,new Comparator<Interval>(){
+            //mark1.1:return int表正负，代表大小关系
+            public int compare(Interval i1,Interval i2){
+                //mark1.5:sort -> ascending
+                return i1.start - i2.start;
             }
         });
-        Interval curr = intervals.get(0);
-        for(Interval iter: intervals) {
-            if(curr.end >= iter.start) {
-                curr.end = Math.max(curr.end,iter.end);
-            }else {
-                res.add(curr);
-                curr = iter;
+        //mark2:当前interval与后面的interval不断叠加重复部分，所以有个pointer要指向当前interval
+        Interval cur = intervals.get(0);
+        for(Interval i:intervals){
+            if(cur.end >= i.start){
+                cur.end = Math.max(cur.end,i.end);
+            } else {
+                res.add(cur);
+                cur = i;
             }
         }
-        res.add(curr);
+        //mark3:以case[(1,2),(3,4)] 为例，过完(3,4)后就跳出loop了，所以不能忘记加上res.add([3,4])
+        res.add(cur);
         return res;
+        //key170713:for写起来较麻烦
+        /*
+            for(int i = 1;i<=n-1;i++){
+                if(intervals.get(i-1).end>=intervals.get(i).start){
+                    Interval tmp = new Interval(intervals.get(i-1),Math.max(intervals.get(i-1).end,intervas.get(i).end));
+                    res.add(tmp);
+                } else {
+
+                }
+            }
+        */
+            
+    }
+}
+        Collections.sort(intervals,new Comparator<Interval>(){
+            //mark1.1:return int表正负，代表大小关系
+            public int compare(Interval i1,Interval i2){
+                //mark1.5:sort -> ascending
+                return i1.start - i2.start;
+            }
+        });
+        //mark2:当前interval与后面的interval不断叠加重复部分，所以有个pointer要指向当前interval
+        Interval cur = intervals.get(0);
+        for(Interval i:intervals){
+            if(cur.end >= i.start){
+                cur.end = Math.max(cur.end,i.end);
+            } else {
+                res.add(cur);
+                cur = i;
+            }
+        }
+        //mark3:以case[(1,2),(3,4)] 为例，过完(3,4)后就跳出loop了，所以不能忘记加上res.add([3,4])
+        res.add(cur);
+        return res;
+        //key170713:for写起来较麻烦
+        /*
+            for(int i = 1;i<=n-1;i++){
+                if(intervals.get(i-1).end>=intervals.get(i).start){
+                    Interval tmp = new Interval(intervals.get(i-1),Math.max(intervals.get(i-1).end,intervas.get(i).end));
+                    res.add(tmp);
+                } else {
+
+                }
+            }
+        */
+            
+    }
+}
+        Collections.sort(intervals,new Comparator<Interval>(){
+            //mark1.1:return int表正负，代表大小关系
+            public int compare(Interval i1,Interval i2){
+                //mark1.5:sort -> ascending
+                return i1.start - i2.start;
+            }
+        });
+        //mark2:当前interval与后面的interval不断叠加重复部分，所以有个pointer要指向当前interval
+        Interval cur = intervals.get(0);
+        for(Interval i:intervals){
+            if(cur.end >= i.start){
+                cur.end = Math.max(cur.end,i.end);
+            } else {
+                res.add(cur);
+                cur = i;
+            }
+        }
+        //mark3:以case[(1,2),(3,4)] 为例，过完(3,4)后就跳出loop了，所以不能忘记加上res.add([3,4])
+        res.add(cur);
+        return res;
+        //key170713:for写起来较麻烦
+        /*
+            for(int i = 1;i<=n-1;i++){
+                if(intervals.get(i-1).end>=intervals.get(i).start){
+                    Interval tmp = new Interval(intervals.get(i-1),Math.max(intervals.get(i-1).end,intervas.get(i).end));
+                    res.add(tmp);
+                } else {
+
+                }
+            }
+        */
+            
     }
 }
 
