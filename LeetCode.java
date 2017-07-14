@@ -2214,6 +2214,32 @@ public class Solution {
     }
 }
 
+113. Path Sum II
+
+public class Solution {
+    public List<List<Integer>> pathSum(TreeNode root, int sum) {
+        List<List<Integer>> list = new ArrayList<>();
+        helper(root,list,sum,0,"");
+        return list;
+    }
+    public void helper(TreeNode node,List<List<Integer>> list,int target,int sum,String s){
+        if(node != null){
+            if(node.left == null && node.right == null){
+                if(sum+node.val == target){
+                    s = s+node.val;
+                    String[] arr = s.split(",");
+                    List<Integer> item = new ArrayList<>();
+                    for(String num:arr) item.add(Integer.parseInt(num));
+                    list.add(new ArrayList<>(item));
+                }
+            } else {
+                helper(node.left,list,target,sum+node.val,s+node.val+",");
+                helper(node.right,list,target,sum+node.val,s+node.val+",");
+            }
+        }
+    }
+}
+
 437. Path Sum III
 /**
  * Definition for a binary tree node.
@@ -7431,6 +7457,10 @@ public class Solution {
 
 115. Distinct Subsequences
 public class Solution {
+    //Star
+    //如果是一个String，那么应该是区间dp。多个String比较的话，往往都是dp[i][j],i、j分别表String1的前i个字符和String2的前j个字符
+    //Core:S[i] == T[j],dp[i][j] = dp[i-1][j] + dp[i-1][j-1]   
+    //以case "bbb","bb" 为例。当S中2th b与T中1th相同时，dp[i][j] = S中前2个b与T中前2个b的dp值+S中前2个b与T中前1个b的dp值
     public int numDistinct(String S, String T) {
         //Key:cp,背  https://discuss.leetcode.com/topic/9488/easy-to-understand-dp-in-java/2
         // array creation
@@ -7456,6 +7486,7 @@ public class Solution {
         return mem[T.length()][S.length()];
     }
 }
+
 
 114. Flatten Binary Tree to Linked List
 /**
@@ -7493,10 +7524,13 @@ public class Solution {
  * }
  */
 public class Solution {
+    //Star
+    //Core
     //Key:cp,背  https://discuss.leetcode.com/topic/7798/the-bottom-up-o-n-solution-would-be-better
     //Key:另一个我觉得也挺不错的方法  https://discuss.leetcode.com/topic/10192/java-o-n-solution-based-on-maximum-depth-of-binary-tree
     public boolean isBalanced(TreeNode root) {
         if (root == null) return true;
+        //mark0:depth()计算出左右nodes的depth，然后再比较
         int left=depth(root.left);
         int right=depth(root.right);
         return Math.abs(left - right) <= 1 && isBalanced(root.left) && isBalanced(root.right);
@@ -7910,6 +7944,32 @@ public class Solution {
         return dp[n];
     }
 }
+
+108. Convert Sorted Array to Binary Search Tree
+//Star
+//Core:binary search方法，所以尽可能的减少了高度差
+
+public class Solution {
+    public TreeNode sortedArrayToBST(int[] nums) {
+        return recursion(nums,0,nums.length-1);
+    }
+    public TreeNode recursion(int[] arr,int low,int high){
+        //Key point:
+        //类比于mergeSort,因为要处理low == high时需要返回一个单独的节点，所以要用<=，而不是<
+        if(low<=high){
+            int mid = (low+high)/2;
+            TreeNode node = new TreeNode(arr[mid]);
+            //Key point:
+            //类比于mergeSort的Sorting(low,mid);Sorting(mid+1,high);
+            //因为需要返回值，所以要加上return;
+            node.left = recursion(arr,low,mid-1);
+            node.right = recursion(arr,mid+1,high);
+            return node;
+        }
+        return null;
+    }
+}
+
 
 109. Convert Sorted List to Binary Search Tree
 /**
@@ -11157,6 +11217,24 @@ public class Solution {
     
     **/
     
+	/*
+		public class Solution {
+			public boolean hasPathSum(TreeNode root, int sum) {
+				return helper(root,sum,0);
+			}
+			public boolean helper(TreeNode node,int target,int sum){
+				if(node!=null){
+					if(node.left == null && node.right == null){
+					   if(sum+node.val == target) return true;  
+					} else {
+						return helper(node.left,target,sum+node.val)||helper(node.right,target,sum+node.val)?true:false;
+					}
+				}
+				return false;
+			}
+		}
+	*/
+	
     //Key:第二个sol更好看些吧
     public boolean hasPathSum(TreeNode root, int sum) {
         return helper(root,sum,0);
@@ -13110,5 +13188,104 @@ public class Solution {
             helper(list,node.left,depth+1);
             helper(list,node.right,depth+1);
         }
+    }
+}
+
+107. Binary Tree Level Order Traversal II
+//Star
+//Core:T102基础上  mark1是关键：list.get(list.size()-1-depth)
+/*170714*/
+
+public class Solution {
+    public List<List<Integer>> levelOrderBottom(TreeNode root) {
+        List<List<Integer>> list = new ArrayList<>();
+        helper(list,root,0);
+        return list;
+    }
+    public void helper(List<List<Integer>> list,TreeNode node,int depth){
+        if(node != null){
+            //Key:list.add(0,new ArrayList<>());   add(0 是插入到头部
+			//mark0:
+            if(list.size() < depth+1) list.add(0,new ArrayList<>());
+            //Key:list.get(list.size()-1-depth).
+            //Key:list.get(0).add(node.val); 是错的!!!!!
+			//mark1:list.get(list.size()-1-depth)
+            list.get(list.size()-1-depth).add(node.val);
+            helper(list,node.left,depth+1);
+            helper(list,node.right,depth+1);
+        }
+    }
+}
+
+
+103. Binary Tree Zigzag Level Order Traversal
+//Star
+//Core:T102基础上，mark1小区别
+//mark0:list.add(0,element) 原有element不断往后移。即倒序存储
+/*170714*/
+public class Solution {
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        List<List<Integer>> res = new ArrayList<>();
+        helper(res,root,0);
+        return res;
+    }
+    public void helper(List<List<Integer>> res,TreeNode node,int lv){
+        if(node != null){
+            if(lv == res.size()) res.add(new ArrayList<>());
+            //mark1:与T102唯一区别：
+            if(lv % 2 == 0)res.get(lv).add(node.val);
+            //mark0:list.add(0,nums[i]);  表将nums[i]放置于0th pos,即将新加入元素不断的往后挤
+            else res.get(lv).add(0,node.val);
+            helper(res,node.left,lv+1);
+            helper(res,node.right,lv+1);
+        }
+    }
+}
+
+104. Maximum Depth of Binary Tree
+public class Solution {
+    public int maxDepth(TreeNode root) {
+        //Key Point:recursion临界条件比的是什么？比的就是传的参数吗？
+        //如这道题判断TreeNode root,MergeSort判断low和high
+        if(root == null) return 0;
+        return 1+Math.max(maxDepth(root.left),maxDepth(root.right));
+    }
+    
+}
+
+111. Minimum Depth of Binary Tree
+//Star
+//Core:和T104 maximum depth差别较大 
+//http://www.cnblogs.com/grandyang/p/4042168.html
+/*170714*/
+public class Solution {
+    public int minDepth(TreeNode root) {
+        //mark1:root == null 和 leaf node特殊处理一下
+        if(root == null) return 0;
+        if(root.left == null && root.right == null) return 1;
+        //mark0:因为之前排除过，所以这里的root.left意味着root.right != null
+        else if(root.left == null) return minDepth(root.right)+1;
+        else if(root.right == null) return minDepth(root.left)+1;
+        else return Math.min(minDepth(root.left),minDepth(root.right))+1;
+    }
+}
+
+public class Solution {
+    //Key:做麻烦了....
+    int result = Integer.MAX_VALUE;
+    public int minDepth(TreeNode root) {
+        if(root == null) return 0;
+        helper(root,1);
+        return result;
+    }
+    public void helper(TreeNode node,int min){
+        if(node == null) return;
+        if(node.left == null && node.right == null){
+            result = Math.min(result,min);
+        } else {
+            helper(node.left,min+1);
+            helper(node.right,min+1);
+        }
+        
     }
 }
