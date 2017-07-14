@@ -3998,8 +3998,11 @@ public class Solution {
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
         double res = 0.0;
         //Key170616:从左到右编译，所以先算出m，再算出n，此时m,n值已经存入stack，可直接使用
+		//mark-0.9:记住left,right分别奇偶数量时的中间index,所以一定要记得(n1+n2+1)除以2	
         int m = nums1.length,n = nums2.length,left = (m+n+1)/2,right = (m+n+2)/2;
         int aStart = 0,bStart = 0;
+		//case:[1,2][3,4] 除以2时，返回的是2.0,明显结果是不对的
+		//return (findKth(nums1,0,nums2,0,left)+findKth(nums1,0,nums2,0,right))/2;
         return (findKth(nums1,aStart,nums2,bStart,left)+findKth(nums1,aStart,nums2,bStart,right))/2.0;
     }
     public int findKth(int[] nums1,int aStart,int[] nums2,int bStart,int k){
