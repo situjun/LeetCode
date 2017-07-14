@@ -13076,3 +13076,39 @@ public class Solution {
         */
     }
 }
+
+101. Symmetric Tree
+public class Solution {
+    public boolean isSymmetric(TreeNode root) {
+        //Key:这道题思路和一般的tree思路不太一样。有些绕...
+        //这里如果判断current node本身的话，不太好判断。所以向上一层，判断他们的parent那层
+        //递归是按照层级判断的
+        if(root == null) return true;
+        return helper(root.left,root.right);
+    }
+    public boolean helper(TreeNode left,TreeNode right){
+        if(left == null && right == null) return true;
+        if(left == null || right == null) return false;
+        if(left.val != right.val) return false;
+        return helper(left.left,right.right) && helper(left.right,right.left);
+    }
+}
+
+102. Binary Tree Level Order Traversal
+public class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> list = new ArrayList<>();
+        //mark1:
+        helper(list,root,0);
+        return list;
+    }
+    public void helper(List<List<Integer>> list,TreeNode node,int depth){
+        if(node != null){
+            if(depth+1>list.size()) list.add(new ArrayList<>());
+            list.get(depth).add(node.val);
+            //mark2
+            helper(list,node.left,depth+1);
+            helper(list,node.right,depth+1);
+        }
+    }
+}
