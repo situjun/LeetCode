@@ -3907,7 +3907,7 @@ public class Solution {
 
 4. Median of Two Sorted Arrays
 //Star
-//170709:Core:mark1,3,4,7不好记忆，直接硬背
+//170709:Core:mark1,3,4,7不好记忆，直接硬背    只是判断是否为空数组，即start>?length.而不是判断start+k>?length --> 如果所求元素正好位于所求段，容易漏掉
 //Star ~ code4.2 
 //1.规定，num1.length<=nums2.length.较短序列所有元素都被抛弃，可直接返回较长序列的第k大元素，可以不用分情况讨论了。
 //不用再乱七八糟的讨论了。所需的(k-1)/2位置可能大于某个数组总长度，规定A短之后，只需要考虑超过A的长度，
@@ -3918,6 +3918,7 @@ public class Solution {
 //5.mark3
 //6.mark4
 //7.mark5
+//mark9:我们只关心第k小的元素是哪个，而不关心他前面的那些比他小的元素的具体排序是什么
 /**
 1：
 此题关键，记住。这个思考起来很绕，但是结论肯定没错。用个特殊case来背 -> [1,2,3,4,5,6,7]  [11,12,13,14,15,16,17] ，所以是从[4,5,6,7,11,12,13,14]中找
@@ -3932,7 +3933,8 @@ public class Solution {
         int n = nums1.length,m = nums2.length,left = (n+m+1)/2,right = (n+m+2)/2,aStart = 0,bStart = 0;
         return (findKth(nums1,aStart,nums2,bStart,left)+findKth(nums1,aStart,nums2,bStart,right))/2.0;
     }
-	//找出第K个元素
+	//找出《第K小的》元素
+	//mark9:我们只关心第k小的元素是哪个，而不关心他前面的那些比他小的元素的具体排序是什么
     public int findKth(int[] nums1,int aStart,int[] nums2,int bStart,int k){
 		//170703:mark8 为统一，index只与nums1.length比较  mark1,mark7
 		//mark1:aStart已经超过了nums1的最大坐标
@@ -3947,6 +3949,7 @@ public class Solution {
         int aMidVal = aMidInd<=nums1.length-1?nums1[aMidInd]:Integer.MAX_VALUE;
         int bMidVal = bMidInd<=nums2.length-1?nums2[bMidInd]:Integer.MAX_VALUE;
 		//mark4:
+		//mark8:aMidVal == bMidVal时，怎样都可以，所以归在那边都可以
         if(aMidVal<bMidVal)
         //Key170618:这里aMidInd+1而不是直接aMid，应该是因为mid值已经被判断过了，所以不要了。而且如果直接aMidInd，那么答案是错的
 		//mark5:因为k/2是往小了算(如3/2 == 1，剩余部分为2)，所以剩余部分要用k-k/2
@@ -13047,4 +13050,29 @@ public class Solution {
              }
         */
 
+}
+
+100. Same Tree
+public class Solution {
+    public boolean isSameTree(TreeNode p, TreeNode q) {
+        //Key Point:
+        //Recursion每一层递归执行，不会出现执行快慢的担忧。就是说他是严格按照每一层的顺序返回值。
+        if(p!=null && q != null && p.val == q.val){
+            return isSameTree(p.left,q.left) && isSameTree(p.right,q.right);
+        } else if(p == null && q== null){
+            return true;
+        } else {
+            return false;
+        }
+        /**
+        
+        别人的更清晰版本
+        
+            if(p == null && q == null) return true;
+            if(p == null || q == null) return false;
+            if(p.val == q.val)
+                return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+            return false;
+        */
+    }
 }
