@@ -4382,41 +4382,6 @@ public class Solution {
     }
 }
 
-188. Best Time to Buy and Sell Stock IV
-public class Solution {
-    //Key:Hard,just cp
-    //这两个解法比较容易理解
-	//http://blog.csdn.net/linhuanmars/article/details/23236995
-	//http://www.cnblogs.com/grandyang/p/4295761.html
-    //https://discuss.leetcode.com/topic/24079/easy-understanding-and-can-be-easily-modified-to-different-situations-java-solution/2
-    //https://discuss.leetcode.com/topic/29489/clean-java-dp-o-nk-solution-with-o-k-space
-    //hold[i][k]  ith day k transaction have stock and maximum profit
-    //unhold[i][k] ith day k transaction do not have stock at hand and maximum profit
-    public int maxProfit(int k, int[] prices) {
-        if(k>prices.length/2) return maxP(prices);
-        int[][] hold = new int[prices.length][k+1];
-        int[][] unhold = new int[prices.length][k+1];
-        hold[0][0] = -prices[0];
-        for(int i=1;i<prices.length;i++) hold[i][0] = Math.max(hold[i-1][0],-prices[i]);
-        for(int j=1;j<=k;j++) hold[0][j] = -prices[0];
-        for(int i=1;i<prices.length;i++){
-            for(int j=1;j<=k;j++){
-                hold[i][j] = Math.max(unhold[i-1][j]-prices[i],hold[i-1][j]);
-                unhold[i][j] = Math.max(hold[i-1][j-1]+prices[i],unhold[i-1][j]);
-            }
-        }
-        return Math.max(hold[prices.length-1][k],unhold[prices.length-1][k]);
-    }
-    public int maxP(int[] prices){
-        int res =0;
-        for(int i=0;i<prices.length;i++){
-            if(i>0 && prices[i] > prices[i-1]){
-                res += prices[i]-prices[i-1];
-            }
-        }
-        return res;
-    }
-}
 
 103. Binary Tree Zigzag Level Order Traversal
 /**
@@ -7384,14 +7349,19 @@ public class Solution {
 }
 
 117. Populating Next Right Pointers in Each Node II
-/**
- * Definition for binary tree with next pointer.
- * public class TreeLinkNode {
- *     int val;
- *     TreeLinkNode left, right, next;
- *     TreeLinkNode(int x) { val = x; }
- * }
- */
+//Star
+//Core:下面的方法不太好理解，背
+//mark0:
+/*
+    case:
+      2 -> 3 -> NULL
+     / \    \
+    4-> 5 -> 7 -> NULL
+    虽然3.left = null，但因此5要直接链接7.而不是因为3.left == null而直接把5.next这步给省略了
+*/
+/*170717*/
+//mark1.9:dummy指向每一层
+//Mark:方法好，但是非常不容易理解
 public class Solution {
     public void connect(TreeLinkNode root) {
         //Key:与 Populating Next Right Pointers in Each Node 比较，这道题中的binary tree非perfect。（即左右孩子有可能不存在）
@@ -7399,6 +7369,7 @@ public class Solution {
         TreeLinkNode dummyHead = new TreeLinkNode(0);
         TreeLinkNode pre = dummyHead;
         while (root != null) {
+			//mark1.8:每次只处理当前节点的左右节点。然后移至next，当next == null时，开始下一个level
     	    if (root.left != null) {
     		    pre.next = root.left;
     		    pre = pre.next;
@@ -7409,8 +7380,10 @@ public class Solution {
     	    }
     	    root = root.next;
     	    if (root == null) {
+                //mark2:下面三句背
     		    pre = dummyHead;
     		    root = dummyHead.next;
+                //mark3:下面这句不好理解，背
     		    dummyHead.next = null;
     	    }
         }
@@ -8800,98 +8773,6 @@ public class Solution {
             leaves = newLeaves;
         }
         return leaves;
-    }
-}
-
-309. Best Time to Buy and Sell Stock with Cooldown
-/*170609*/
-public class Solution {
-    public int maxProfit(int[] prices) {
-        int n = prices.length;
-        //Key:sell[i]第i天卖出状态时的收益,即手里没有stock的状态
-        if(n <= 1) return 0;
-        if(n == 2) return Math.max(0,prices[1]-prices[0]);
-        int[] sell = new int[n];
-        int[] buy = new int[n];
-        sell[0] = 0;
-        sell[1] = Math.max(prices[1] - prices[0],0);
-        buy[0] = -prices[0];
-        buy[1] = Math.max(-prices[1],-prices[0]);
-        for(int i = 2;i<=n-1;i++){
-            //Key:buy[i],sell[i] transition func的顺序千万不能错!!!
-            buy[i] = Math.max(buy[i-1],sell[i-2]-prices[i]);
-            sell[i] = Math.max(sell[i-1],buy[i-1]+prices[i]);
-        }
-        return sell[n-1];
-    }
-}
-
-public class Solution {
-    public int maxProfit(int[] prices) {
-        //Key:这道题可以和那个predict winner 一起看，都是状态机的样子
-        //Key:DP,cp,只能背  https://discuss.leetcode.com/topic/30421/share-my-thinking-process
-		//http://www.cnblogs.com/grandyang/p/4997417.html
-		//http://www.cnblogs.com/lasclocker/p/5003534.html
-		//http://blog.csdn.net/xyqzki/article/details/50262315
-        /**
-            For each of them we make an array, buy[n], sell[n] and rest[n].
-    
-            buy[i] means before day i what is the maxProfit for any sequence end with buy.
-            
-            sell[i] means before day i what is the maxProfit for any sequence end with sell.
-            
-            rest[i] means before day i what is the maxProfit for any sequence end with rest.
-            
-            Then we want to deduce the transition functions for buy sell and rest. By definition we have:
-            
-            buy[i]  = max(rest[i-1]-price, buy[i-1]) 
-            sell[i] = max(buy[i-1]+price, sell[i-1])
-            rest[i] = max(sell[i-1], buy[i-1], rest[i-1])
-            Where price is the price of day i. All of these are very straightforward. They simply represents :
-            
-            (1) We have to `rest` before we `buy` and 
-            (2) we have to `buy` before we `sell`
-                
-        **/
-
-
-        //Key:这个方法好是好，但是不是特别容易理解
-        /**
-        int sell = 0, prev_sell = 0, buy = Integer.MIN_VALUE, prev_buy = 0;
-        for (int price : prices) {
-            prev_buy = buy;
-            buy = Math.max(prev_sell - price, prev_buy);
-            prev_sell = sell;
-            sell = Math.max(prev_buy + price, prev_sell);
-        }
-        return sell;
-        **/
-        
-        
-        //Key：下边这个较容易理解
-        
-        if(prices == null || prices.length <= 1) {
-            return 0;
-        }
-        //Key:buy[]和sell[]均表示当第i天买或卖状态结束时手上钱的最大值。下边这行的理解应该更准确些
-		//即buy[i]表i天手上有股票时的最大值，sell[i]表第i天手上无股票时的最大值
-        int len = prices.length;
-        int[] buy = new int[len];
-        int[] sell = new int[len];
-        //Key:buy[0]本身是可以等于0的，即第0天不买，可是如果等于0的话，sell[i-1]就会出错。
-		//Key:但是如果buy[i]表最大收益，第一天和第二天buy[i]=0，即什么都不买不是更符合含义吗？？？
-		//Key:上面这行理解错误。准确的说，buy[i]表i天手上有股票时的最大值，sell[i]表第i天手上无股票时的最大值。所以前两天buy手上一定有股票
-        buy[0] = -prices[0];
-        buy[1] = Math.max(-prices[0], -prices[1]);
-        sell[0] = 0;
-        sell[1] = Math.max(0, prices[1]-prices[0]);
-        for(int i = 2; i < len; i++) {
-            //Key：不过一直有个困惑，他是如何保证sell时手上一定有股票的???
-            //Key: 因为buy[0] = -prices[0];buy[1]都设置的是-prices，所以buy[]手里一定有股票
-            buy[i] = Math.max(buy[i-1], sell[i-2]-prices[i]);
-            sell[i] = Math.max(sell[i-1], buy[i-1]+prices[i]);
-        }
-        return sell[len-1];
     }
 }
 
@@ -13290,5 +13171,297 @@ public class Solution {
             helper(node.right,min+1);
         }
         
+    }
+}
+
+118. Pascal's Triangle
+//Star
+//Core:
+//mark0:
+//mark1:
+/*170716*/
+public class Solution {
+    public List<List<Integer>> generate(int numRows) {
+        List<List<Integer>> res = new ArrayList<>();
+        if(numRows == 0) return res;
+        //mark0:第一行需要初始化一下 res.get(0).add(1);  因为mark1中有个res.get(i-1)，如果i从0开始，比较不好处理
+        res.add(new ArrayList<>());
+        res.get(0).add(1);
+        if(numRows == 1) return res;
+        for(int i = 1;i<=numRows-1;i++){
+            res.add(new ArrayList<>());
+            for(int j = 0;j<=i;j++){
+                //mark1:左上角为index为j-1,右上角则为j
+                int left = j-1<0?0:res.get(i-1).get(j-1);
+                int right = j>i-1?0:res.get(i-1).get(j);
+                res.get(i).add(left+right);
+            }
+        }
+        return res;
+    }
+}
+
+119. Pascal's Triangle II
+public class Solution {
+    public List<Integer> getRow(int rowIndex) {
+        rowIndex++;
+        int tmp =0;
+        
+        int[] arr = new int[rowIndex+1];
+        ArrayList<Integer> list = new ArrayList<Integer>();
+        for(int i=0;i<=rowIndex-1;i++){
+            list.add(1);
+            arr[i] = 1;
+        }
+        for(int i=2;i<=rowIndex-1;i++){
+            
+            for(int j=1;j<=i-1;j++){
+                arr[j] = list.get(j);
+                list.set(j,arr[j-1]+list.get(j));
+ 
+            }
+        }
+        return (List)list;
+    }
+}
+
+121. Best Time to Buy and Sell Stock
+public class Solution {
+    public int maxProfit(int[] prices) {
+        if(prices.length == 0 || prices == null) return 0;
+        int profit = 0;
+        int min = prices[0];
+        for(int i = 0;i<=prices.length-1;i++){
+            min = Math.min(min,prices[i]);
+            profit = Math.max(profit,prices[i]-min);
+        }
+        return profit;
+    }
+}
+
+122. Best Time to Buy and Sell Stock II
+public class Solution {
+    public int maxProfit(int[] prices) {
+        if(prices.length == 0||prices.length == 1 ||prices == null) return 0;
+        int length = prices.length;
+        int profit = 0;
+        int min = prices[0];
+        for(int i=1;i<=length -2;i++){
+            min = Math.min(min,prices[i]);
+            //[5,2,3,2,6,6,2,9,1,0,7,4,5,0]  注意 ==也可以
+            if(prices[i]>prices[i-1] && prices[i] >= prices[i+1]){
+                profit += (prices[i]-min);
+                min = prices[i+1];
+            }
+        }
+        
+        if(length == 2){
+            profit = Math.max(profit,prices[1]-prices[0]);
+        } else {
+            //length-1  ArrayIndexExpection
+            if(prices[length-1] > prices[length-2]) profit += (prices[length-1]-min);    
+        }
+        
+        return profit;
+    }
+}
+
+123. Best Time to Buy and Sell Stock III
+public class Solution {
+    public int maxProfit(int[] prices) {
+        //[1,2,4,2,5,7,2,4,9,0]  以下代码这个测试用例过不去
+        // if(prices.length == 0||prices.length == 1 ||prices == null) return 0;
+        // int length = prices.length;
+        // int profit = 0,max1 = 0,max2 = 0;
+        // int min = prices[0];
+        // for(int i=1;i<=length -2;i++){
+        //     min = Math.min(min,prices[i]);
+        //     //[5,2,3,2,6,6,2,9,1,0,7,4,5,0]  注意 ==也可以
+        //     if(prices[i]>prices[i-1] && prices[i] >= prices[i+1]){
+        //         profit = (prices[i]-min);
+        //         //[5,2,3,2,6,6,2,9,1,0,7,4,5,0]  注意 profit<=max1也可以
+        //         if(profit > max2 && profit <=max1) max2 = profit;
+        //         else if(profit >max2 && profit >=max1){
+        //             max2 = max1;
+        //             max1 = profit;
+        //         }
+        //         min = prices[i+1];
+        //     }
+        // }
+        
+        // if(length == 2){
+        //     profit = Math.max(profit,prices[1]-prices[0]);
+        // } else {
+        //     //length-1  ArrayIndexExpection
+        //     if(prices[length-1] > prices[length-2]){
+        //         profit = (prices[length-1]-min); 
+        //         if(profit > max2 && profit <=max1) max2 = profit;
+        //         else if(profit >max2 && profit >=max1){
+        //             max2 = max1;
+        //             max1 = profit;
+        //         }
+        //     }    
+        //     profit = max1 + max2;
+        // }
+        
+        // return profit;
+        if(prices.length == 0 || prices == null || prices.length ==1){
+            return 0;
+        }
+        int length = prices.length;
+        int[] F = new int[length];
+        int[] F2 = new int[length];
+        F[0]=F2[length-1]=0;
+        int min = prices[0];
+        int max = prices[length-1];
+        int maxProfit = 0;
+        int profit = 0;
+        
+        for(int i =1;i<=length-1;i++){
+            min = Math.min(min,prices[i]);
+            maxProfit = Math.max(prices[i]-min,maxProfit);
+            F[i] = maxProfit;
+           
+        }
+        maxProfit = 0;
+        for(int i = length-2;i>=0;i--){
+            max = Math.max(max,prices[i]);
+            maxProfit = Math.max(max-prices[i],maxProfit);
+            F2[i] = maxProfit;
+            
+        }
+        for(int i=0;i<=length-1;i++){
+            profit = Math.max(profit,F[i]+F2[i]);
+        }
+        return profit;
+    }
+}
+
+188. Best Time to Buy and Sell Stock IV
+public class Solution {
+    //Key:Hard,just cp
+    //这两个解法比较容易理解
+	//http://blog.csdn.net/linhuanmars/article/details/23236995
+	//http://www.cnblogs.com/grandyang/p/4295761.html
+    //https://discuss.leetcode.com/topic/24079/easy-understanding-and-can-be-easily-modified-to-different-situations-java-solution/2
+    //https://discuss.leetcode.com/topic/29489/clean-java-dp-o-nk-solution-with-o-k-space
+    //hold[i][k]  ith day k transaction have stock and maximum profit
+    //unhold[i][k] ith day k transaction do not have stock at hand and maximum profit
+    public int maxProfit(int k, int[] prices) {
+        if(k>prices.length/2) return maxP(prices);
+        int[][] hold = new int[prices.length][k+1];
+        int[][] unhold = new int[prices.length][k+1];
+        hold[0][0] = -prices[0];
+        for(int i=1;i<prices.length;i++) hold[i][0] = Math.max(hold[i-1][0],-prices[i]);
+        for(int j=1;j<=k;j++) hold[0][j] = -prices[0];
+        for(int i=1;i<prices.length;i++){
+            for(int j=1;j<=k;j++){
+                hold[i][j] = Math.max(unhold[i-1][j]-prices[i],hold[i-1][j]);
+                unhold[i][j] = Math.max(hold[i-1][j-1]+prices[i],unhold[i-1][j]);
+            }
+        }
+        return Math.max(hold[prices.length-1][k],unhold[prices.length-1][k]);
+    }
+    public int maxP(int[] prices){
+        int res =0;
+        for(int i=0;i<prices.length;i++){
+            if(i>0 && prices[i] > prices[i-1]){
+                res += prices[i]-prices[i-1];
+            }
+        }
+        return res;
+    }
+}
+
+
+309. Best Time to Buy and Sell Stock with Cooldown
+/*170609*/
+public class Solution {
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        //Key:sell[i]第i天卖出状态时的收益,即手里没有stock的状态
+        if(n <= 1) return 0;
+        if(n == 2) return Math.max(0,prices[1]-prices[0]);
+        int[] sell = new int[n];
+        int[] buy = new int[n];
+        sell[0] = 0;
+        sell[1] = Math.max(prices[1] - prices[0],0);
+        buy[0] = -prices[0];
+        buy[1] = Math.max(-prices[1],-prices[0]);
+        for(int i = 2;i<=n-1;i++){
+            //Key:buy[i],sell[i] transition func的顺序千万不能错!!!
+            buy[i] = Math.max(buy[i-1],sell[i-2]-prices[i]);
+            sell[i] = Math.max(sell[i-1],buy[i-1]+prices[i]);
+        }
+        return sell[n-1];
+    }
+}
+
+public class Solution {
+    public int maxProfit(int[] prices) {
+        //Key:这道题可以和那个predict winner 一起看，都是状态机的样子
+        //Key:DP,cp,只能背  https://discuss.leetcode.com/topic/30421/share-my-thinking-process
+		//http://www.cnblogs.com/grandyang/p/4997417.html
+		//http://www.cnblogs.com/lasclocker/p/5003534.html
+		//http://blog.csdn.net/xyqzki/article/details/50262315
+        /**
+            For each of them we make an array, buy[n], sell[n] and rest[n].
+    
+            buy[i] means before day i what is the maxProfit for any sequence end with buy.
+            
+            sell[i] means before day i what is the maxProfit for any sequence end with sell.
+            
+            rest[i] means before day i what is the maxProfit for any sequence end with rest.
+            
+            Then we want to deduce the transition functions for buy sell and rest. By definition we have:
+            
+            buy[i]  = max(rest[i-1]-price, buy[i-1]) 
+            sell[i] = max(buy[i-1]+price, sell[i-1])
+            rest[i] = max(sell[i-1], buy[i-1], rest[i-1])
+            Where price is the price of day i. All of these are very straightforward. They simply represents :
+            
+            (1) We have to `rest` before we `buy` and 
+            (2) we have to `buy` before we `sell`
+                
+        **/
+
+
+        //Key:这个方法好是好，但是不是特别容易理解
+        /**
+        int sell = 0, prev_sell = 0, buy = Integer.MIN_VALUE, prev_buy = 0;
+        for (int price : prices) {
+            prev_buy = buy;
+            buy = Math.max(prev_sell - price, prev_buy);
+            prev_sell = sell;
+            sell = Math.max(prev_buy + price, prev_sell);
+        }
+        return sell;
+        **/
+        
+        
+        //Key：下边这个较容易理解
+        
+        if(prices == null || prices.length <= 1) {
+            return 0;
+        }
+        //Key:buy[]和sell[]均表示当第i天买或卖状态结束时手上钱的最大值。下边这行的理解应该更准确些
+		//即buy[i]表i天手上有股票时的最大值，sell[i]表第i天手上无股票时的最大值
+        int len = prices.length;
+        int[] buy = new int[len];
+        int[] sell = new int[len];
+        //Key:buy[0]本身是可以等于0的，即第0天不买，可是如果等于0的话，sell[i-1]就会出错。
+		//Key:但是如果buy[i]表最大收益，第一天和第二天buy[i]=0，即什么都不买不是更符合含义吗？？？
+		//Key:上面这行理解错误。准确的说，buy[i]表i天手上有股票时的最大值，sell[i]表第i天手上无股票时的最大值。所以前两天buy手上一定有股票
+        buy[0] = -prices[0];
+        buy[1] = Math.max(-prices[0], -prices[1]);
+        sell[0] = 0;
+        sell[1] = Math.max(0, prices[1]-prices[0]);
+        for(int i = 2; i < len; i++) {
+            //Key：不过一直有个困惑，他是如何保证sell时手上一定有股票的???
+            //Key: 因为buy[0] = -prices[0];buy[1]都设置的是-prices，所以buy[]手里一定有股票
+            buy[i] = Math.max(buy[i-1], sell[i-2]-prices[i]);
+            sell[i] = Math.max(sell[i-1], buy[i-1]+prices[i]);
+        }
+        return sell[len-1];
     }
 }
