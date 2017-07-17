@@ -101,3 +101,79 @@ class MedianSearch{
 			return findKth(nums1,aStart,nums2,midIndB+1,k-k/2);
 	}
 }
+
+118. Pascal's Triangle
+//Star
+//Core:
+//mark0:
+//mark1:
+/*170716*/
+public class Solution {
+    public List<List<Integer>> generate(int numRows) {
+        List<List<Integer>> res = new ArrayList<>();
+        if(numRows == 0) return res;
+        //mark0:第一行需要初始化一下 res.get(0).add(1);  因为mark1中有个res.get(i-1)，如果i从0开始，比较不好处理
+        res.add(new ArrayList<>());
+        res.get(0).add(1);
+        if(numRows == 1) return res;
+        for(int i = 1;i<=numRows-1;i++){
+            res.add(new ArrayList<>());
+            for(int j = 0;j<=i;j++){
+                //mark1:左上角为index为j-1,右上角则为j
+                int left = j-1<0?0:res.get(i-1).get(j-1);
+                int right = j>i-1?0:res.get(i-1).get(j);
+                res.get(i).add(left+right);
+            }
+        }
+        return res;
+    }
+}
+
+public class Solution {
+    public List<List<Integer>> generate(int numRows) {
+        //Coner Case
+        if(numRows == 0) return null;
+        ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
+        for(int i=0;i<=numRows-1;i++){
+            list.add(new ArrayList<Integer>());
+        }
+        int index = 0;
+        //init list
+        for(int i=0;i<=numRows-1;i++){
+            for(int j=0;j<=i;j++){
+                list.get(i).add(1);
+            }
+            
+        }
+        for(int i=2;i<=numRows-1;i++){
+            for(int j=1;j<=i-1;j++){
+                list.get(i).set(j,list.get(i-1).get(j-1)+list.get(i-1).get(j));
+            }
+        }
+        return (List)list;
+    }
+}
+
+119. Pascal's Triangle II
+public class Solution {
+    public List<Integer> getRow(int rowIndex) {
+        rowIndex++;
+        int tmp =0;
+        
+        int[] arr = new int[rowIndex+1];
+        ArrayList<Integer> list = new ArrayList<Integer>();
+        for(int i=0;i<=rowIndex-1;i++){
+            list.add(1);
+            arr[i] = 1;        
+        }
+        for(int i=2;i<=rowIndex-1;i++){
+            
+            for(int j=1;j<=i-1;j++){
+                arr[j] = list.get(j);
+                list.set(j,arr[j-1]+list.get(j));
+ 
+            }
+        }
+        return (List)list;
+    }
+}
