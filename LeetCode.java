@@ -2079,6 +2079,31 @@ public class Solution {
 }
 
 134. Gas Station
+//Star
+//Core:
+//http://www.cnblogs.com/grandyang/p/4266812.html
+/*
+这道转圈加油问题不算很难，只要想通其中的原理就很简单。我们首先要知道能走完整个环的前提是gas的总量要大于cost的总量，这样才会有起点的存在。假设开始设置起点start = 0, 并从这里出发，如果当前的gas值大于cost值，就可以继续前进，此时到下一个站点，剩余的gas加上当前的gas再减去cost，看是否大于0，若大于0，则继续前进。当到达某一站点时，若这个值小于0了，则说明从起点到这个点中间的任何一个点都不能作为起点，则把起点设为下一个点，继续遍历。当遍历完整个环时，当前保存的起点即为所求。
+*/
+/*170719*/
+public class Solution {
+    public int canCompleteCircuit(int[] gas, int[] cost) {
+        int total = 0,tank = 0,begin = 0;
+        for(int i = 0;i<=gas.length-1;i++){
+            //mark1:tatal == 总的gas-总的cost，如果>=，说明可以走完。否则走不完
+            total += gas[i] - cost[i];
+            //mark2:tank表示走到i+1时油箱里剩余的油量
+            tank += gas[i] - cost[i];
+            if(tank < 0){
+                begin = i+1;
+                tank = 0;
+            }
+        }
+        if(total < 0) return -1;
+        else return begin;
+    }
+}
+
 public class Solution {
     public int canCompleteCircuit(int[] gas, int[] cost) {
         //Key:just cp
@@ -4582,9 +4607,11 @@ public class Codec {
 // codec.deserialize(codec.serialize(root));
 
 131. Palindrome Partitioning
+//Key:Hard,DFS,cp
+//https://discuss.leetcode.com/topic/33461/easiest-4ms-java-solution-95-99/2
+//Key:similar to Permutations ----> https://discuss.leetcode.com/topic/46162/a-general-approach-to-backtracking-questions-in-java-subsets-permutations-combination-sum-palindrome-partioning
+//aab   a,a,b->a,ab -> aa,b ->aab 
 public class Solution {
-    //Key:Hard,DFS,cp
-    //https://discuss.leetcode.com/topic/33461/easiest-4ms-java-solution-95-99/2
     public List<List<String>> partition(String s) {
         List<List<String>> res = new ArrayList<>();
         dfs(res, new ArrayList<String>(), s.toCharArray(), 0);
@@ -4609,6 +4636,9 @@ public class Solution {
 }
 
 132. Palindrome Partitioning II
+//Star
+//Core:Dp可以做，也可以在T131基础上用个min记录下最少递归次数
+
 public class Solution {
     public int minCut(String s) {
         //Key:Hard,DP,cp
