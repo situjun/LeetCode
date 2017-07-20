@@ -4368,6 +4368,28 @@ public class Solution {
 }
 
 135. Candy
+//Star
+//Core:从左到右过一遍，再反向过一遍
+/*170719*/
+public class Solution {
+    public int candy(int[] ratings) {
+        int res = 0;
+        int[] dp = new int[ratings.length];
+        Arrays.fill(dp,1);
+        for(int i = 1;i<=ratings.length-1;i++){
+            //mark1:dp[i] = dp[i-1]+1; 而不是 dp[i]++  corner:1,2,3,4,5  对应的dp[1,2,3....]
+            if(ratings[i] > ratings[i-1]) dp[i] = dp[i-1]+1;
+        }
+        for(int i = ratings.length-2;i>=0;i--){
+            //mark0:从右往左  必须是ratings[i] > ratings[i+1]，否则corner:[2,2] 
+            //mark0:且从右往左扫时，如果ratings左边大于右边，要保证dp左边大于右边
+            if(ratings[i] > ratings[i+1] && dp[i] <= dp[i+1]) dp[i] = dp[i+1]+1;
+        }
+        for(int i:dp) res+=i;
+        return res;
+    }
+}
+
 public class Solution {
     public int candy(int[] ratings) {
         //Key：Hard,Just cp
@@ -5614,14 +5636,59 @@ public class Solution {
 }
 
 138. Copy List with Random Pointer
-/**
- * Definition for singly-linked list with a random pointer.
- * class RandomListNode {
- *     int label;
- *     RandomListNode next, random;
- *     RandomListNode(int x) { this.label = x; }
- * };
- */
+public class Solution {
+    //Star:注意新node的randomNode分配是个问题
+    //Core:所以必须用Map存储新nodes和老nodes之间的关系.map<oldNode,newNode> 然后根据关系再分配next和random
+    //wrong:因为下面要分配随机node给每个新node，虽然知道head.random指向哪里，但是因为head和node并无关联，所以并不知道新node的random指向哪里
+    /*
+        public RandomListNode copyRandomList(RandomListNode head) {
+            RandomListNode dummy = new RandomListNode(head);
+            RandomListNode cur = new RandomListNode(head.label);
+            head = head.next;
+            while(head != null){
+                cur.next = new RandomListNode(head.label);
+                head = head.next;
+            }
+
+            while()
+        }
+    */
+    public RandomListNode copyRandomList(RandomListNode head) {
+        /*170720*/
+        Map<RandomListNode,RandomListNode> map = new HashMap<RandomListNode,RandomListNode>();
+        //Wrong
+        /*
+            RandomListNode dummy = new RandomListNode(-1);
+            dummy.next= head;
+            while(head != null){
+                map.put(head,head.random);
+                head = head.next;
+            }
+            head = dummy.next;
+            RandomListNode cur = dummy;
+            while(head != null){
+                cur.next = new RandomListNode(map.get(head).label);
+                cur.random = 
+            }
+        */
+        RandomListNode dummy = new RandomListNode(-1);
+        dummy.next = head;
+        //mark1:记录下新旧node对应
+        while(head != null){
+            map.put(head,new RandomListNode(head.label));
+            head = head.next;
+        }
+        head = dummy.next;
+        //mark2:重新分配新Node的next和random关系
+        while(head != null){
+            map.get(head).next = map.get(head.next);
+            map.get(head).random = map.get(head.random);
+            head = head.next;
+        }
+        return map.get(dummy.next);
+    }
+}
+
 public class Solution {
     public RandomListNode copyRandomList(RandomListNode head) {
         //Key:Just cp,背 https://discuss.leetcode.com/topic/18086/java-o-n-solution
