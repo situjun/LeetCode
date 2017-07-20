@@ -5715,6 +5715,252 @@ public class Solution {
     }
 }
 
+139. Word Break
+public class Solution {
+    public boolean wordBreak(String s, List<String> wordDict) {
+        //Key:DP Just cp
+        //https://discuss.leetcode.com/topic/6156/java-implementation-using-dp-in-two-ways
+        //https://discuss.leetcode.com/topic/18088/java-dp-solution
+        if (s == null || s.length() == 0) return false;
+        int n = s.length();
+        // dp[i] represents whether s[0...i] can be formed by dict
+        boolean[] dp = new boolean[n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j <= i; j++) {
+                String sub = s.substring(j, i + 1);
+                if (wordDict.contains(sub) && (j == 0 || dp[j - 1])) {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        
+        return dp[n - 1];
+    }
+}
+
+140. Word Break II
+//Star
+//Core:T139基础上，加个Map<int,List<String>> 来存储ith结尾的字符串
+/*170720*/
+public class Solution {
+    //WWrong
+    //mark0:思路对，但是在处理追加list element时很麻烦处理
+    /*
+        public List<String> wordBreak(String s, List<String> wordDict) {
+            Map<Integer,List<String>> map = new HashMap<>();
+            int n = s.length();
+            for(int i = 0;i<=n-1;i++){
+                for(int j = i;j>=0;j--){
+                    if(wordDict.contains(s.substring(j,i+1))){
+                        if(map.size() != 0 && !map.containsKey(j)) continue;
+                        String tmp = s.substring(j,i+1);
+                        if(map.size() == 0) {
+                            List<String> foo = new ArrayList<>();
+                            foo.add(tmp);
+                            map.put(i,foo);
+                            continue;
+                        }
+                        List<String> cur;
+                        if(map.containsKey(i)){
+                            cur = map.get(i);
+                        } else {
+                            cur = new ArrayList<>();
+                        }
+
+                        //List<String> list = map.get(j-1);
+                        for(String ss:map.get(j)) cur.add(ss+tmp);
+                        map.put(i,cur);
+                    }
+                }
+            }
+            return map.get(n-1);
+        }
+    */
+}
+
+141. Linked List Cycle
+public class Solution {
+    public boolean hasCycle(ListNode head) {
+        boolean tag = false;
+        if(head == null || head.next == null){
+            return tag;
+        }
+        ListNode node1 = head;
+        ListNode node2 = head;
+        int count = 0;
+        //必须要单个next，next的判断。加个标识符做判断吧......直接next.next会出现指针错误  Line 20: java.lang.NullPointerException
+        //改成while(node2.next!=null && node2.next.next!=null){   就没事了，
+        //貌似是因为&&的关系，node2.next==null时，就不会在判断后边的node2.next.next!=null了！！！！！！
+        
+        // while(node2.next.next != null){
+        // while(node2.next!=null){
+        //     node2 =node2.next;
+        //     count = 1-count;
+        //     if(count == 0) node1 = node1.next;
+        //     if(node1 == node2){
+        //         tag = true;
+        //         return tag;
+        //     }
+        // }
+        //上面那种写法说是超时了，但感觉没多大区别......
+        
+            //下面这种方法有问题，如果是[1,2]就会返回true.结果错误，所以改成
+        while(node2.next!=null && node2.next.next!=null){
+            node2 =node2.next.next;
+            node1 = node1.next;
+            if(node1 == node2){
+                tag = true;
+                return tag;
+            }
+        }
+        
+            //因为ListNode是自建类，所以比较node时即要比较val，也要比较它的next元素。下面那个我也不知为何通过不了检测
+            // if(node1 != node2){
+            //     node1 = node1.next;
+            //     node2 = node2.next.next;
+                
+            // } else {
+            //     tag = true;
+            //     return tag;
+            // }
+            //不是上述那个原因，应该因为一开始初始化Node1和node2都是head,所以直接进入else条件了，我忘记先分别移动了。改动一下就好了
+            
+            //下面这样写貌似没有必要
+            // if(node1.next == node2.next && node1.val == node2.val){
+            //     tag = true;
+            //     return tag;
+            // } else {
+            //     node1 = node1.next;
+            //     node2 = node2.next.next;
+            // }
+        
+        return tag;
+    }
+}
+
+142. Linked List Cycle II
+public class Solution {
+    public ListNode detectCycle(ListNode head) {
+        if(head == null || head.next == null) return null;
+        //下面两行代码错误，node1和node2应该是Null起步。一个1步，一个两步，所以应该分别初始化为head 和head.next;因为head.next 已经判断过，所以不用担心指针错误。
+        // ListNode node1 = head;
+        // ListNode node2 = head;
+        ListNode node1 = head;
+        ListNode node2 = head.next;
+        ListNode tmpNode = null;
+        //这道题理解上和题目不太一样。它说的循环开始的地方，（以{3,2,0,-4}为例，-4 connects to 2 which index is 1）我理解的是cycle begins from -4,而它则认为是从node 2开始，所以Index is 3.接发没错，只是理解上有些偏差。
+        //其实也简单，node1 == node2后，即相遇后，Node1再走一步即可。
+        
+        //虽然这道题不用另加判断，但最好还是想一下当只有两个node时{3,2}，会不会因为node2.next.next而出现错误！！！！！
+        
+        while(node2.next !=null &&node2.next.next !=null){
+            node1 = node1.next;
+            node2 = node2.next.next;
+            if(node1 == node2) break;
+        }
+        if(node2.next == null || node2.next.next==null) return null;
+        ListNode node3 = head;
+        if(node1.next.next == node1) return node3;
+        //如果只有两个node{2,3},node3永远不可能等于node1。追不上
+        while(node3!=node1){
+            node3=node3.next;
+            node1=node1.next;
+        }
+        
+        
+        return node3;
+    }
+}
+
+143. Reorder List
+/*170720*/
+//Star
+//Core:hard 但是思路是对的
+//1。Find the middle of the list
+//2.Reverse the half after middle  1->2->3->4->5->6 to 1->2->3->6->5->4
+//3.Start reorder one by one  1->2->3->6->5->4 to 1->6->2->5->3->4
+//wrong
+/*
+public class Solution {
+    public void reorderList(ListNode head) {
+        ListNode dummy = new ListNode(-1);
+        ListNode left = dummy,right = dummy,p1 = null,p2 = null;
+        dummy.next = head;
+        while(right != null && right.next != null){
+            left = left.next;
+            right = right.next.next;
+        }
+        
+        left = left.next;
+        if(left != null) p1 = left.next;
+        if(p1 != null) p2 = p1.next;
+        while(p2 != null){
+            p1.next= left;
+            left = p1;
+            p1 = p2;
+            if(p2 != null) p2 = p2.next;
+        }
+        while(dummy != null) {
+            System.out.println(dummy.val);
+            dummy = dummy.next;
+        }
+        ListNode p4 = null,p3 = null;
+        p4 = p1;
+        p1 = dummy.next;
+        p2 = null;
+        if(p4 != null) p3 = p4.next;
+        if(p1 != null) p2 = p1.next;
+        while(p1 != null && p4 != null && p2 != p3){
+            p1.next = p4;
+            p1 = p2;
+            p4.next = p1;
+            p4 = p3;
+            if(p4 != null) p3 = p4.next;
+            if(p1 != null) p2 = p1.next;
+        }
+        //return dummy.next;
+    }
+}
+*/
+
+
+public class Solution {
+    public void reorderList(ListNode head) {
+        //Key:cp,背  https://discuss.leetcode.com/topic/13869/java-solution-with-3-steps
+        if(head==null||head.next==null) return;
+        
+        //Find the middle of the list
+        ListNode p1=head;
+        ListNode p2=head;
+        while(p2.next!=null&&p2.next.next!=null){ 
+            p1=p1.next;
+            p2=p2.next.next;
+        }
+        
+        //Reverse the half after middle  1->2->3->4->5->6 to 1->2->3->6->5->4
+        ListNode preMiddle=p1;
+        ListNode preCurrent=p1.next;
+        while(preCurrent.next!=null){
+            ListNode current=preCurrent.next;
+            preCurrent.next=current.next;
+            current.next=preMiddle.next;
+            preMiddle.next=current;
+        }
+        
+        //Start reorder one by one  1->2->3->6->5->4 to 1->6->2->5->3->4
+        p1=head;
+        p2=preMiddle.next;
+        while(p1!=preMiddle){
+            preMiddle.next=p2.next;
+            p2.next=p1.next;
+            p1.next=p2;
+            p1=p2.next;
+            p2=preMiddle.next;
+        }
+    }
+}
+
 322. Coin Change
 public class Solution {
     public int coinChange(int[] coins, int amount) {
@@ -7740,50 +7986,7 @@ public class Solution {
     }
 }
 
-143. Reorder List
-/**
- * Definition for singly-linked list.
- * public class ListNode {
- *     int val;
- *     ListNode next;
- *     ListNode(int x) { val = x; }
- * }
- */
-public class Solution {
-    public void reorderList(ListNode head) {
-        //Key:cp,背  https://discuss.leetcode.com/topic/13869/java-solution-with-3-steps
-        if(head==null||head.next==null) return;
-        
-        //Find the middle of the list
-        ListNode p1=head;
-        ListNode p2=head;
-        while(p2.next!=null&&p2.next.next!=null){ 
-            p1=p1.next;
-            p2=p2.next.next;
-        }
-        
-        //Reverse the half after middle  1->2->3->4->5->6 to 1->2->3->6->5->4
-        ListNode preMiddle=p1;
-        ListNode preCurrent=p1.next;
-        while(preCurrent.next!=null){
-            ListNode current=preCurrent.next;
-            preCurrent.next=current.next;
-            current.next=preMiddle.next;
-            preMiddle.next=current;
-        }
-        
-        //Start reorder one by one  1->2->3->6->5->4 to 1->6->2->5->3->4
-        p1=head;
-        p2=preMiddle.next;
-        while(p1!=preMiddle){
-            preMiddle.next=p2.next;
-            p2.next=p1.next;
-            p1.next=p2;
-            p1=p2.next;
-            p2=preMiddle.next;
-        }
-    }
-}
+
 
 95. Unique Binary Search Trees II  //背
 
