@@ -5604,6 +5604,32 @@ Ubuntu Test
 ////////////////////////////////////////////////////////////////////////////////
 
 150. Evaluate Reverse Polish Notation
+//Star
+//Core:stack
+/**170720*/
+public class Solution {
+    public int evalRPN(String[] tokens) {
+        int res = 0;
+        Stack<Integer> stack = new Stack<>();
+        for(String s:tokens){
+            if(s.equals("+")){
+                //mark0:stack pop()弹出顶层
+                stack.push(stack.pop()+stack.pop());
+            } else if(s.equals("-")){
+                stack.push(-(stack.pop()-stack.pop()));
+            } else if(s.equals("*")){
+                stack.push(stack.pop()*stack.pop());
+            } else if(s.equals("/")){
+                int a = stack.pop(),b = stack.pop();
+                stack.push(b/a);
+            } else {
+                stack.push(Integer.parseInt(s));
+            }
+        }
+        //mark1:pop() return 弹出值
+        return stack.pop();
+    }
+}
 
 public class Solution {
     public int evalRPN(String[] a) {
@@ -6141,6 +6167,27 @@ public class Solution {
 }
 
 152. Maximum Product Subarray
+//Star
+//Core:状态机是两个dp数组的优化版本
+/*170720*/
+public class Solution {
+    public int maxProduct(int[] nums) {
+        int n = nums.length;
+        //mark0:maxs,mins分别记录下到ith为止的最大，最小值
+        int[] maxs = new int[n];
+        int[] mins = new int[n];
+        maxs[0] = nums[0];
+        mins[0] = nums[0];
+        for(int i = 1;i<=n-1;i++){
+            maxs[i] = Math.max(Math.max(maxs[i-1]*nums[i],mins[i-1]*nums[i]),nums[i]);
+            mins[i] = Math.min(Math.min(maxs[i-1]*nums[i],mins[i-1]*nums[i]),nums[i]);
+        }
+            int max = Integer.MIN_VALUE;
+        for(int i:maxs) max = Math.max(max,i);
+        return max;
+    }
+}
+
 /*170606*/
 //Key17060:状态机??
 public class Solution {
@@ -7911,14 +7958,7 @@ public class Solution {
 }
 
 147. Insertion Sort List
-/**
- * Definition for singly-linked list.
- * public class ListNode {
- *     int val;
- *     ListNode next;
- *     ListNode(int x) { val = x; }
- * }
- */
+
 public class Solution {
     public ListNode insertionSortList(ListNode head) {
         //Key:cp,背 https://discuss.leetcode.com/topic/18097/clean-java-solution-using-a-fake-head
@@ -7938,6 +7978,35 @@ public class Solution {
         }
         
         return l.next;
+    }
+}
+
+144. Binary Tree Preorder Traversal
+/*170720*/
+//Recursion version
+public List<Integer> preorderTraversal(TreeNode root) {
+	List<Integer> list = new ArrayList<>();
+	helper(list,root);
+	return list;
+}
+public void helper(List<Integer> list,TreeNode node){
+	if(node != null){
+		list.add(node.val);
+		helper(list,node.left);
+		helper(list,node.right);
+	}
+}
+
+public class Solution {
+    //Similar to inordertraversal
+    List<Integer> list = new ArrayList<Integer>();
+    public List<Integer> preorderTraversal(TreeNode root) {
+        if(root != null){
+            list.add(root.val);
+            preorderTraversal(root.left);
+            preorderTraversal(root.right);
+        }
+        return list;
     }
 }
 
@@ -7969,8 +8038,26 @@ public class Solution {
     
     **/
     
+	//Star
+    //Core:recursion方法和inOrder,preOrder一样。并没有特殊之处
+    //Traversal递归sol需要用到stack
+    /*170720*/
+    public List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> list = new ArrayList<>();
+        helper(list,root);
+        return list;
+    }
+    public void helper(List<Integer> list,TreeNode node){
+        if(node != null){
+            
+            helper(list,node.left);
+            helper(list,node.right);
+            list.add(node.val);
+        }
+    }
+	
+	//递归方法才需要用到Stack，recursion version并没有特殊之处
     //Key:cp,背 https://discuss.leetcode.com/topic/44231/preorder-inorder-and-postorder-traversal-iterative-java-solution
-    
     public List<Integer> postorderTraversal(TreeNode root) {
         List<Integer> list = new ArrayList<>();
         if(root == null) return list;
@@ -8382,6 +8469,42 @@ public class MinStack {
  * int param_3 = obj.top();
  * int param_4 = obj.getMin();
  */
+ 
+ 160. Intersection of Two Linked Lists
+ 
+ public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        //写的太乱
+        //two pointers
+        //{}
+        if(headA == null || headB == null){
+            return null;
+        }
+        
+        ListNode index1 = headA;
+        ListNode index2 = headB;
+        int m=0,n=0;
+        ListNode result = null;
+        while(index1.next != null){
+            index1 = index1.next;
+            m++;
+        }
+        while(index2.next != null){
+            index2 = index2.next;
+            n++;
+        }
+        //回到List头部
+        index1 = headA;
+        index2 = headB;
+        int distance = Math.abs(m-n);
+        for(int i=0;i<=distance-1;i++){
+            if(m>n) index1 = index1.next;
+            else index2 = index2.next;
+        }
+        while(index1.next != null && index2.next != null && index1.next!=index2.next ){
+            index1 = index1.next;
+            index2 = index2.next;
+        }
  
  164. Maximum Gap
  public class Solution {
