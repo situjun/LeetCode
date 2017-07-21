@@ -1,6 +1,1006 @@
 //Refrence:
 //http://www.cnblogs.com/grandyang
 
+1. Two Sum  
+//Key:
+//1:case [2,3,4],6 -> 注意如果先把3存进去，然后在读一遍3的话，会把之前存进去的3误算进去。
+//即不能先map.put(nums[i],i),再map.containskKey(target-nums[i])。这两者的顺序应该反过来才对
+/*170616*/
+public class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        int n = nums.length;
+        //if(n <= 1) return new int[2];
+        int[] res = new int[2];
+        Map<Integer,Integer> map = new HashMap<>();
+        for(int i = 0;i<=n-1;i++){
+            int tmp = target-nums[i];
+            if(map.containsKey(tmp)){
+                res[0] = map.get(tmp);
+                res[1] = i;
+            } else {
+                map.put(nums[i],i);
+            }
+        }
+        return res;
+    }
+}
+public class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        //HashMap solving method
+        //It maybe contains duplicate elements
+        if(nums.length < 2) return null;
+        HashMap<Integer,Integer> map = new HashMap<Integer,Integer>();
+        int[] result = new int[2];
+        int rest = 0;
+        for(int i = 0;i <= nums.length - 1;i++){
+            rest = target - nums[i];
+            
+            if(map.containsKey(rest)){
+            //It maybe contains duplicate elements
+            //we put map.put(nums[i],i); last line,so we needn't to consider duplicate problem
+                // if(map.get(rest) != i){
+                //     result[0] = map.get(rest);
+                //     result[1] = i;
+                // }
+                
+                
+                result[0] = map.get(rest);
+                result[1] = i;
+            }
+            map.put(nums[i],i);
+        }
+        return result;
+    }
+}
+
+//V2
+public class Solution {
+
+    public int[] twoSum(int[] numbers, int target) {
+        // write your code here
+        if(numbers.length == 0) return new int[2];
+        Map<Integer,Integer> map = new HashMap<>();
+        int[] res = new int[2];
+        for(int i = 0;i<=numbers.length-1;i++){
+            if(map.containsKey(target-numbers[i])){
+                res[0] = map.get(target-numbers[i]);
+                res[1] = i;
+            } else {
+                map.put(numbers[i],i);
+            }
+        }
+        return res;
+    }
+}
+
+2. Add Two Numbers  
+//Star:
+//1.注意在改变node值时，node是否为空。所以最好操作node.next，返回时返回head.next就可以解决这个问题。即head作为无意义node
+//2.case:[null,null]->因为返回的是ListNode，假如传进来的参数是两个null，那么while(l1 != null || l2 != null){}这个核心方法体就会被跳过。
+//但是返回null和返回一个new ListNode(0)因该说均符合这个答案要求。
+//所以不用担心当传入两个null时会造成错误,最后return res.next直接返回一个null也是符合题意的
+/*170616*/
+public class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        ListNode res = new ListNode(0);
+        //Key:返回一个null和new ListNode(0)本质上一样，所以不用加上下面这句
+        //res.next = new ListNode(0);
+        ListNode pointer = res;
+        int tmp = 0;
+        while(l1 != null || l2 != null){
+            int sum = tmp;
+            if(l1 != null){
+                sum+=l1.val;
+                l1 = l1.next;
+            }
+            if(l2 != null){
+                sum+=l2.val;
+                l2 = l2.next;
+            }
+            tmp = sum/10;
+            pointer.next= new ListNode(sum%10);
+            pointer = pointer.next;
+        }
+        if(tmp == 1) pointer.next = new ListNode(tmp);
+        return res.next;
+    }
+}
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+public class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+       //Key:写的还是有点乱
+       /**
+        //Key:这题给的example太不好了...正着来反着来都一样...
+        //Key:test case [2,4,3] [5,6,5] expect：[7,0,9]
+        int more = 0,cur = 0;
+        ListNode res = l1,prev = l1;
+        while(l1 != null && l2 != null){
+            
+            int tmp = l1.val +l2.val+more;
+            if(tmp>=10){
+                cur = tmp-10;
+                more = 1;
+            } else {
+                cur = tmp;
+                more = 0;
+            }
+            l1.val = cur;
+            prev = l1;
+            l1 = l1.next;
+            l2 = l2.next;
+        }
+        while(l1 != null){
+           
+            int tmp = l1.val + more;
+            if(tmp>=10){
+                cur = tmp-10;
+                more = 1;
+            } else {
+                cur = tmp;
+                more = 0;
+            }
+            l1.val = cur;
+            prev = l1;
+            l1 = l1.next;
+        }
+        while(l2 != null){
+            
+            int tmp = l2.val + more;
+            if(tmp>=10){
+                cur = tmp-10;
+                more = 1;
+            } else {
+                cur = tmp;
+                more = 0;
+            }
+            l1.next = new ListNode(cur);
+            prev = l1;
+            l1 = l1.next;
+        }
+        if(more == 1) prev.next = new ListNode(1);
+        return res;
+    }
+    
+       **/
+        //Key:cp,参考一下
+        //Key:如果不需要改node值，判断node == null就好了。但需要改变node值时，会因为node == null时，node.next会报错
+        //Key:因为这个要改变node的值，所以最好不要在当前node上改，因为会有node==null时的干扰。so最好是在next上改
+        //https://discuss.leetcode.com/topic/39130/4ms-11lines-java-solution
+        ListNode ln1 = l1, ln2 = l2, head = null, node = null;
+        int carry = 0, remainder = 0, sum = 0;
+        head = node = new ListNode(0);
+        
+        while(ln1 != null || ln2 != null || carry != 0) {
+            sum = (ln1 != null ? ln1.val : 0) + (ln2 != null ? ln2.val : 0) + carry;
+            carry = sum / 10;
+            remainder = sum % 10;
+            node = node.next = new ListNode(remainder);
+            ln1 = (ln1 != null ? ln1.next : null);
+            ln2 = (ln2 != null ? ln2.next : null);
+        }
+        return head.next;
+    }
+}
+
+public class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        
+        //Key:这个Corner case处理起来太麻烦了！！！
+        //V3
+        /*
+        ListNode res = new ListNode(0);
+        ListNode head = res;
+        int sum = 0,more = 0;
+        //Key:清晰点的思路：[1]先计算出每个点的值，【2】再赋值给node    
+        while(l1!= null || l2 != null){
+            //Key:1->和是三部分，不要忘记进位
+            //Key:2->注意判断l1,l1是否为null,如果是null则定为0
+            int a = (l1 == null)?0:l1.val;
+            int b = (l2 == null)?0:l2.val;
+            //System.out.println(a+","+b);
+            sum = a + b + more;
+            //System.out.println(more+"mm");
+            more = sum/10;
+            sum = sum%10;
+            //System.out.println(sum+"");
+            res.val = sum;
+            //System.out.println(res.val+"");
+            res.next = new ListNode(0);
+            res = res.next;
+            l1 = (l1 == null)?null:l1.next;
+            l2 = (l2 == null)?null:l2.next;
+        }
+        if(more == 1)res.val = 1;
+        else res = null;
+        return head;
+        **/
+        //Case problem
+        //V4
+        ListNode tmp = new ListNode(0);
+        ListNode res = tmp;
+        int sum = 0,more = 0;
+        while(l1 != null || l2 != null){
+            int a = l1==null?0:l1.val;
+            int b = l2==null?0:l2.val;
+            sum = a+b+more;
+            //Key:进位
+            more = sum/10;
+            //Key:当前位
+            sum = sum%10;
+            tmp.next = new ListNode(sum);
+            tmp = tmp.next;
+            //Key:关键点
+            l1 = l1 == null?null:l1.next;
+            l2 = l2 == null?null:l2.next;
+        }
+        if(more == 1) tmp.next = new ListNode(more);
+        //Key:因为当前节点赋值时会有点问题，所以不如用node.next来赋值比较好。
+        return res.next;
+    }
+}
+
+3. Longest Substring Without Repeating Characters
+//Star:
+//counter依旧是守门人，如果有重复的出现，则counter记为1。
+//与T76不同的是，这次counter允许通过的char是按照“队列”顺序进入的，所以counter也要按照队列顺序将之前的char删除，
+//直到那个重复的char数量 变为1
+//mark1
+//mark2
+/*170617*/
+public class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        //Key170619:wrong version  -> case:"abba"
+        /**
+            if(s.length() == 0) return 0;
+            int begin = 0,end = 0,n = s.length(),res = Integer.MIN_VALUE,counter = 0;
+            Map<Character,Integer> map = new HashMap<>();
+            while(end<=n-1){
+                char c = s.charAt(end);
+                if(map.containsKey(c)){
+                    begin = end;
+                } 
+                map.put(c,end);
+                res = Math.max(res,end-begin+1);
+                end++;
+            }
+            return res;
+        **/
+        //Key170619:counter依旧是守门人，如果有重复的人进入，则counter++(应为底下的while(counter >0),所以counter最多也就可能加到1为止)。与T76不同的是，这次counter允许通过的char是按照“队列”顺序进入的，所以counter也要按照队列顺序将之前的char删除，直到那个重复的char数量 变为1
+        if(s.equals("")) return 0;
+        int res = Integer.MIN_VALUE,n = s.length(),begin = 0,end = 0,counter = 0;
+        Map<Character,Integer> map = new HashMap<>();
+        while(end<=n-1){
+            char c = s.charAt(end);
+            map.put(c,map.getOrDefault(c,0)+1);
+            if(map.get(c) > 1) counter++;
+            end++;
+            while(counter > 0){
+                c = s.charAt(begin);
+				//170624 mark1,counter需要先--，然后frequence再--。如果freq先--，那么get(c)>1就不满足了
+                if(map.get(c) > 1) counter--;
+                map.put(c,map.get(c)-1);
+                //170624 mark2,前面的那个相同char删除
+                begin++;
+            }
+            res = Math.max(res,end-begin);
+        }
+        return res;
+    }
+}
+
+public class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        //Key:和这个模板不太像.....https://discuss.leetcode.com/topic/68976/sliding-window-algorithm-template-to-solve-all-the-leetcode-substring-search-problem
+        int repeat = 0,begin = 0,end = 0,res = 0;
+        Map<Character,Integer> map = new HashMap<>();
+        while(end<=s.length()-1){
+            char c = s.charAt(end);
+            map.put(c,map.getOrDefault(c,0)+1);
+            if(map.get(c) > 1) repeat++;
+            end++;
+            while(repeat>0){
+                char c2 = s.charAt(begin);
+                if(map.get(c2) > 1){
+                    repeat--;
+                    
+                }
+                map.put(c2,map.get(c2)-1);
+                begin++;
+            }
+            //Corner case:单字母"b"
+            res = Math.max(res,end-begin);
+        }
+        return res;
+    }
+}
+
+4. Median of Two Sorted Arrays
+//Star
+//170709:Core:mark1,3,4,7不好记忆，直接硬背    只是判断是否为空数组，即start>?length.而不是判断start+k>?length --> 如果所求元素正好位于所求段，容易漏掉
+//Star ~ code4.2 
+//1.规定，num1.length<=nums2.length.较短序列所有元素都被抛弃，可直接返回较长序列的第k大元素，可以不用分情况讨论了。
+//不用再乱七八糟的讨论了。所需的(k-1)/2位置可能大于某个数组总长度，规定A短之后，只需要考虑超过A的长度，
+//不需要再分情况讨论了。
+//2.mark0 left和right的坐标确认
+//3.mark1
+//4.mark2
+//5.mark3
+//6.mark4
+//7.mark5
+//mark9:我们只关心第k小的元素是哪个，而不关心他前面的那些比他小的元素的具体排序是什么
+/**
+1：
+此题关键，记住。这个思考起来很绕，但是结论肯定没错。用个特殊case来背 -> [1,2,3,4,5,6,7]  [11,12,13,14,15,16,17] ，所以是从[4,5,6,7,11,12,13,14]中找
+	if (aMid < bMid) Keep [aRight + bLeft]     
+	else Keep [bRight + aLeft]
+**/
+
+/*170618*/
+public class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+		//mark0:left = (n+m+1)/2,right = (n+m+2)/2。要记得+1,+2。可以用case:n=3,m=4,left == 4，right == 5来记
+        int n = nums1.length,m = nums2.length,left = (n+m+1)/2,right = (n+m+2)/2,aStart = 0,bStart = 0;
+        return (findKth(nums1,aStart,nums2,bStart,left)+findKth(nums1,aStart,nums2,bStart,right))/2.0;
+    }
+	//找出《第K小的》元素
+	//mark9:我们只关心第k小的元素是哪个，而不关心他前面的那些比他小的元素的具体排序是什么
+    public int findKth(int[] nums1,int aStart,int[] nums2,int bStart,int k){
+		//170703:mark8 为统一，index只与nums1.length比较  mark1,mark7
+		//mark1:aStart已经超过了nums1的最大坐标
+        if(aStart>=nums1.length) return nums2[bStart+k-1];
+        if(bStart>=nums2.length) return nums1[aStart+k-1];
+		//mark2:k==1，找出第一个元素，即最小的元素
+        if(k == 1) return Math.min(nums1[aStart],nums2[bStart]);
+        //Key170618:比如说在[0,1,2]中找k==2的数字，那么该数字index就是0+2-1
+		//mark3:确定现在的mid值，如果midInd 已经超出了，midVal赋值为max
+        int aMidInd = (aStart+k/2-1),bMidInd = (bStart+k/2-1);
+		//170703:背，mark7,为什么midIndex需要和length比一下？前面明明已经判断过了aStart和length。为什么mid>length，nums就设置成Max？需解决
+        int aMidVal = aMidInd<=nums1.length-1?nums1[aMidInd]:Integer.MAX_VALUE;
+        int bMidVal = bMidInd<=nums2.length-1?nums2[bMidInd]:Integer.MAX_VALUE;
+		//mark4:
+		//mark8:aMidVal == bMidVal时，怎样都可以，所以归在那边都可以
+        if(aMidVal<bMidVal)
+        //Key170618:这里aMidInd+1而不是直接aMid，应该是因为mid值已经被判断过了，所以不要了。而且如果直接aMidInd，那么答案是错的
+		//mark5:因为k/2是往小了算(如3/2 == 1，剩余部分为2)，所以剩余部分要用k-k/2
+            return findKth(nums1,aMidInd+1,nums2,bStart,k-k/2);
+        else 
+            return findKth(nums1,aStart,nums2,bMidInd+1,k-k/2);
+    }
+}
+
+/*170616*/
+//Star
+//1.两个数组的元素总数量有可能是偶数，也有可能是奇数。所以要除以2.0 -> 当为奇数个时，则right,left指向的均是中间这个元素，除以2.0还是这个数。为偶数时，则正好是两数平均值
+//2.findKth（...,k）中的k是第k大元素(从1开始)，而不是index==k的元素(从0开始)。So,left = (m+n+1)/2,而不是(m-1+n-1+1)/2。right同理
+//Key170616:背，实际上这个func是用来查找顺序第k个的元素
+//Step
+//1.不断地把两个原数组拆分成只有一般大小的两个新数组
+//2.如果其中一个数组已经无法拆分了/不可操作了，则另一个数组的第x大元素即为两个数组的第x大元素
+//如果两个数组均只剩一个元素了，则返回其中的最小值即可
+public class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        double res = 0.0;
+        //Key170616:从左到右编译，所以先算出m，再算出n，此时m,n值已经存入stack，可直接使用
+		//mark-0.9:记住left,right分别奇偶数量时的中间index,所以一定要记得(n1+n2+1)除以2	
+        int m = nums1.length,n = nums2.length,left = (m+n+1)/2,right = (m+n+2)/2;
+        int aStart = 0,bStart = 0;
+		//case:[1,2][3,4] 除以2时，返回的是2.0,明显结果是不对的
+		//return (findKth(nums1,0,nums2,0,left)+findKth(nums1,0,nums2,0,right))/2;
+        return (findKth(nums1,aStart,nums2,bStart,left)+findKth(nums1,aStart,nums2,bStart,right))/2.0;
+    }
+    public int findKth(int[] nums1,int aStart,int[] nums2,int bStart,int k){
+        if(aStart>=nums1.length) return nums2[bStart+k-1];
+        if(bStart>=nums2.length) return nums1[aStart+k-1];
+        if(k == 1) return Math.min(nums1[aStart],nums2[bStart]);
+        int aMidIdx = (aStart+k/2)-1,bMidIdx = (bStart+k/2)-1;
+        //Key170617:aMidVal和bMidVal必须要先赋值为max_value，为了比较
+        int aMidVal = Integer.MAX_VALUE,bMidVal = Integer.MAX_VALUE;
+        if(aMidIdx <= nums1.length-1) aMidVal = nums1[aMidIdx];
+        if(bMidIdx <= nums2.length-1) bMidVal = nums2[bMidIdx];
+        if(aMidVal<bMidVal)
+        
+        //Key170617:下面的是Wrong,
+        //return findKth(nums1,aMidIdx,nums2,bStart,k/2);
+        //Key170617:背，findKth()中的index参数和前面的aMidIdx不同。还有是k-k/2，而不是k/2!!!这部分非常绕
+            return findKth(nums1,aMidIdx+1,nums2,bStart,k-k/2);
+        else 
+            return findKth(nums1,aStart,nums2,bMidIdx+1,k-k/2);
+    }
+}
+
+public class Solution {
+    //My wrong version
+    /**
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        int start1=0,start2=0,end1=nums1.length-1,end2=nums2.length-1;
+        return findMedian(start1,end1,nums1,start2,end2,nums2);
+    }
+    public double findMedian(int start1,int end1,int[] nums1,int start2,int end2,int[] nums2){
+        int mid1 = (start1+end1)/2,mid2 = (start2+end2)/2;
+        if(end1==start1 && end2==start2) return (double)(nums1[start1]+nums2[start2])/2;
+        
+        if(nums1[mid1] < nums2[mid2]){
+            start1 = (mid1+end1)/2;
+            end2 = (start2+mid2)/2;
+
+        } else if(nums1[mid1] > nums2[mid2]){
+            start2 = (mid2+end2)/2;
+            end1 = (start1+mid1)/2;
+            
+        } else if(nums1[mid1] == nums2[mid2]){
+           end1 = end1+1;
+           end2 = end2-1;
+        }
+        return findMedian(start1,end1,nums1,start2,end2,nums2);
+    }
+    **/
+    //Just cp
+	//Key:思路一样，但他这种写法不是很容易理解。另一种较容易理解的写法是下面的code4.2
+    //https://discuss.leetcode.com/topic/28602/concise-java-solution-based-on-binary-search/2
+	//Key:下面参考里的方法里用到了Arrays.copyOfRange(nums2, j, n),其实等价于nums2从j位置到n位置，只不过他这里额外的新cp了一个数组。
+	//其实直接给个start和end范围，直接在原数组上操作就可
+	//http://www.cnblogs.com/grandyang/p/4465932.html
+	//https://segmentfault.com/a/1190000002988010
+	//http://www.cnblogs.com/ganganloveu/p/4180523.html
+	
+    public double findMedianSortedArrays(int[] A, int[] B) {
+    	    int m = A.length, n = B.length;
+    	    int l = (m + n + 1) / 2;
+    	    int r = (m + n + 2) / 2;
+    	    return (getkth(A, 0, B, 0, l) + getkth(A, 0, B, 0, r)) / 2.0;
+    	}
+    //A从aStart找到两个数组中第k大的元素
+    public double getkth(int[] A, int aStart, int[] B, int bStart, int k) {
+		/**
+		我们要判断小的数组是否为空，为空的话，直接在另一个数组找第K个即可。
+		还有一种情况是当K = 1时，表示我们要找第一个元素，只要比较两个数组的第一个元素，返回较小的那个即可。
+		*/
+		//范围为astart~A.length和bstart~B.length范围中的第k大元素
+		//aStart > A.length - 1,start位置大于A数组长度，意味着A中从start位置开始，不存在着这个两数组中第k大的元素，所以无需在A中找了。
+		//所以直接返回B中第k个元素
+		//Key:下面这两句是用来排除Test case的语句，非core思路内容
+		
+    	if (aStart > A.length - 1) return B[bStart + k - 1];            
+    	if (bStart > B.length - 1) return A[aStart + k - 1];                
+    	if (k == 1) return Math.min(A[aStart], B[bStart]);
+    	
+    	int aMid = Integer.MAX_VALUE, bMid = Integer.MAX_VALUE;
+		//Key:分别找出两个数组中的中间值
+    	if (aStart + k/2 - 1 < A.length) aMid = A[aStart + k/2 - 1]; 
+    	if (bStart + k/2 - 1 < B.length) bMid = B[bStart + k/2 - 1];        
+    	
+	
+    	if (aMid < bMid) 
+			//Key170617:因为要找的是从aStart开始的第k个元素，所以知道不知道尾部无影响。
+			//即使k超过了A.length,那么舍弃A即可
+    	    return getkth(A, aStart + k/2, B, bStart,k - k/2);// Check: aRight + bLeft 
+    	else 
+    	    return getkth(A, aStart,B,bStart + k/2, k - k/2);// Check: bRight + aLeft
+    }
+}
+//code4.2
+//Key:另一种较容易理解的写法
+public class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        int m = nums1.length, n = nums2.length, left = (m + n + 1) / 2, right = (m + n + 2) / 2;
+        return (findKth(nums1, nums2, left) + findKth(nums1, nums2, right)) / 2.0;
+    }
+	//Key170617:
+	/**
+	下面重点来看如何实现找到第K个元素，
+	首先我们需要让数组1的长度小于或等于数组2的长度，那么我们只需判断如果数组1的长度大于数组2的长度的话，交换两个数组即可，
+	然后我们要判断小的数组是否为空，为空的话，直接在另一个数组找第K个即可。 ??有没有可能两数组均为空??
+	还有一种情况是当K = 1时，表示我们要找第一个元素，只要比较两个数组的第一个元素，返回较小的那个即可。
+	**/
+    int findKth(int[] nums1, int[] nums2, int k) {
+        int m = nums1.length, n = nums2.length;
+		//Key170617:第一个数组长度必须小于第二个，因为当特殊情况下，
+		//较短序列所有元素都被抛弃，可以返回较长序列的第k个元素（在数组中下标是k-1）。不用再
+		//乱七八糟的讨论了。所需的(k-1)/2位置可能大于某个数组总长度，规定A短之后，只需要考虑超过A的长度，
+		//不需要再分情况讨论了。
+        if (m > n) return findKth(nums2, nums1, k);
+        if (m == 0) return nums2[k - 1];
+        if (k == 1) return Math.min(nums1[0], nums2[0]);
+		//Key170617:判断中间值的位置顺序是否在新数组长度内。比如说m==3,k/2==4这种情况，因此中值只能选择nums1[3]了
+        int i = Math.min(m, k / 2), j = Math.min(n, k / 2);
+        if (nums1[i - 1] > nums2[j - 1]) {
+            return findKth(nums1, Arrays.copyOfRange(nums2, j, n), k - j);
+        } else {
+            return findKth(Arrays.copyOfRange(nums1, i, m), nums2, k - i);
+        }
+    }
+}
+
+5. Longest Palindromic Substring
+
+//Star
+//core:需要把dp[i][i]和dp[i][i+1]，单独字符和两两比较的基础情况写出来，才能用dp
+//mark1
+//mark2
+//mark3
+//http://www.cnblogs.com/grandyang/p/4464476.html
+//Trans Func:dp[i][j] = s.charAt(i)==s.charAt(j) && dp[i+1][j-1],basic -> 奇数情况：dp[i][i] = true,偶数情况：dp[i][i+1] = charAt(i) == charA(i+1)
+//1.难点在于奇偶判断上  case:"abbab" 如果基础点是b,按照charAt(i-1)==charAt(i+1)判断,得到结果bab,会忽视abba.
+//如果按照bb判断，当case:"aabbbaa",很明显会忽视掉aabbbaa这种奇数情况
+//2.end = 0,而不是end = n-1 -> case:"abcde"时，inner for的dp[i][j]都是false，因为下面的初始是j == i+1。而dp[0][0]这种是在外面判断的，所以start和end没变过，也就是错的
+
+/*170620*/
+public class Solution {
+    public String longestPalindrome(String s) {
+        //Key170619:这道题用DP非常非常麻烦，所以不建议用dp
+            //Key170619:dp[i][j] = s.charAt(i)==s.charAt(j) && dp[i+1][j-1]
+        String res = "";
+        int n = s.length(),start = 0,end = 0,max = 0;
+        if(n == 0) return res;
+        boolean[][] dp = new boolean[n][n];
+        for(int i = 0;i<=n-1;i++) {
+			//mark1:单独字符情况
+            dp[i][i] = true;
+        }
+        for(int j = 0;j<=n-1;j++){
+            //wrong -> Key170619:case -> "aaaa"  dp[0][3]是由dp[1][2]推出来的，可是此时dp[1][2]还没有算出来。无法用dp，因为s.charAt(i) == s.charAt(j)时，需要判断dp[i+1][j-1]，但此时并未计算出来。如果用dp[i][j-1]判断的话，则需要dp[i][j-1]为false加上其它条件才可判断出来dp[i][j]是否为true。思考起来比较麻烦
+            for(int i = j-1;i>=0;i--){
+				//mark2 两两比较的基础情况
+				//mark3 下面的if要写成并联结构，不能写成顺联情况。否则当dp[i][i+1]更新后，会覆盖掉dp[i][i+1]
+                if(j == i+1) dp[i][j] = s.charAt(i)==s.charAt(j);
+                else dp[i][j] = (s.charAt(i)==s.charAt(j)) && dp[i+1][j-1];
+                if(dp[i][j]) {
+                    if(max<j-i+1){
+                        max = j-i+1;
+                        start = i;
+                        end = j;
+                    }
+                }
+            }
+        }
+        return s.substring(start,end+1);
+        
+    }
+}
+
+public class Solution {
+    //Key:Just cp,背，复用isPalindrome  https://discuss.leetcode.com/topic/21848/ac-relatively-short-and-very-clear-java-solution
+    //Key170619:实际上这就是brute force... #170620:wrong,这个不是brute force#
+    public String longestPalindrome(String s) {
+        String res = "";
+        int currLength = 0;
+        for(int i=0;i<s.length();i++){
+            if(isPalindrome(s,i-currLength-1,i)){
+                res = s.substring(i-currLength-1,i+1);
+                currLength = currLength+2;
+            }
+            else if(isPalindrome(s,i-currLength,i)){
+                res = s.substring(i-currLength,i+1);
+                currLength = currLength+1;
+            }
+        }
+        return res;
+    }
+    
+    public boolean isPalindrome(String s, int begin, int end){
+        if(begin<0) return false;
+        while(begin<end){
+        	if(s.charAt(begin++)!=s.charAt(end--)) return false;
+        }
+        return true;
+    }
+    
+}
+
+6. ZigZag Conversion
+//Star
+//Thinking:按照题意code -- My version 
+//1.mark0,建个list，分别存储每行的字符串，然后合并。用个boolean表向上or向下遍历
+//2.mark3，例如向下走，当counter == numRows时，counter需要-2，如果减1的话。重复计算了。
+//还有往上走时，判断的是counter == -1，而不是counter == 0
+//3.mark1：如果numRows == 1时，那么counter-2不适用，要单独判断下==1的情况
+//另一种sol隔几个距离取一个char。https://discuss.leetcode.com/topic/3162/easy-to-understand-java-solution 
+
+
+/*170620*/
+public class Solution {
+    public String convert(String s, int numRows) {
+        String res = "";
+		//mark0
+        boolean down = true;
+        int n = s.length(),counter = 0;
+        if(n == 0 || numRows == 0) return "";
+        //Key170620,mark1:如果numRows == 1时，那么counter-2不适用，要单独判断下
+        if(numRows == 1) return s;
+        List<String> list = new ArrayList<>();
+        for(int i = 0;i<=numRows-1;i++) list.add("");
+        for(int i = 0;i<=n-1;i++){
+            list.set(counter,list.get(counter)+s.charAt(i));
+            //down时，向下走
+            if(down) counter++;
+            else counter --;
+            if(counter == numRows){
+                //Key170620,mark3:case:"PAYPALISHIRING" couner == 3时,往回的话,counter需要置为1，即counter-2.如果只是--的话，counter==2的话，那么会重复加入一次
+                counter -= 2;
+                down = false;
+                //Key170620:同理，只不过这减过头的话是-1，而不是0
+            //Wrong: } else if (counter == 0){
+            } else if (counter == -1){
+                counter += 2;
+                down = true;
+            }
+        }
+        for(String tmp:list) res = res + tmp;
+        return res;
+    }
+}
+
+public class Solution {
+    public String convert(String s, int numRows) {
+        //我这个方法想起来太乱了，很麻烦
+        if(s.equals("") || numRows == 0) return "";
+        boolean flag = true;
+        ArrayList<ArrayList<Character>> list = new ArrayList<ArrayList<Character>>();
+        for(int i=0;i<=numRows-1;i++){
+            list.add(new ArrayList<Character>());
+        }
+        int index = 0;
+        int count = 0;
+        while(count != s.length()){
+            if(index == numRows) {
+                flag = false;
+                index = (numRows-2)>=0?(numRows-2):0;
+            }
+            if(index == -1){
+                flag = true;
+                index = numRows >=2?1:0;
+            } 
+            list.get(index).add(s.charAt(count));
+            if(flag){
+                index++;
+            } else {
+                index--;
+            }
+            count++;
+        }
+        StringBuffer sb = new StringBuffer();
+        index = 0;
+        while(index < numRows){
+            for(Character c:list.get(index)){
+                sb.append(c);
+            }
+            index++;
+        }
+        return sb.toString();
+    }
+}
+
+7. Reverse Integer
+//Star
+/**
+	https://www.zhihu.com/question/51632291?from=profile_question_card
+	0:mark2,case:-2147483648 -> !!!非常重要的一点  Intger i= -2147483648,Math.abs(i) == -2147483648,补码操作的原因。具体解释看上面的链接。因为这种坑爹的case，所以要先把x转为long -> mark2
+	1.Long.parseLong(String)  mark4
+	2.注意是StringBuilder().reverse() 而不是 s.reverse() 也不是String.reverse(s) -> mark3
+	3.记得返回时加上负号 mark1,neg?-tmp:tmp要用()括起来，因为(int)neg优先于neg?-tmp:tmp
+**/
+
+/*170620*/
+public class Solution {
+    public int reverse(int x) {
+        int res = 0;
+        boolean neg = x<0?true:false;
+        //mark2
+        //wrong -> String s = String.valueOf(Math.abs(x));
+        String s = String.valueOf(Math.abs((long)x));
+        //mark3
+        s = new StringBuilder(s).reverse().toString();
+		//mark4
+        long tmp = Long.parseLong(s);
+        if(tmp > Integer.MAX_VALUE || (-tmp<Integer.MIN_VALUE && neg)) tmp = 0;
+        //mark1 
+        return (int)(neg?-tmp:tmp);
+    }
+}
+
+public class Solution {
+    public int reverse(int x) {
+        //速度不知道为什么很慢，76ms.....
+        //可以用Stack处理或者StringBuffer 处理
+        //考虑Int范围
+        //Test Case：1534236469时返回0。说明越界int范围时，直接舍弃了
+        boolean flag = true;
+        //不要自己计算，直接用Integer.MAX_VALUE、MIN_VALUE就可以了...... 
+        //long high = (long)Math.pow(2,32);
+        long high = (long)Integer.MAX_VALUE;
+        long low = (long)Integer.MIN_VALUE; 
+        //long low = (long)(0-Math.pow(2,32));
+      
+        int result = 0;
+        if(x<0) flag = false;
+        //mark1 -> Math.abs(越界的int时，会从起始int的low范围开始返回)，所以要先把x转为long
+        //如果用下面注释掉的代码，Test Case：-2147483648时，会产生错误
+        //String s = Math.abs(x)+"";
+        String s = Math.abs((long)x)+"";
+        StringBuffer sb = new StringBuffer();
+        if(!flag) sb.append("-");
+        for(int i=s.length()-1;i>=0;i--){
+            sb.append(s.charAt(i));
+        }
+        s = sb.toString();
+        //Key Point
+        //Integer.parseInt() 把String转为int
+        //判断是否越界int范围
+        if(Long.parseLong(s)>= high || Long.parseLong(s) <=low){
+            //System.out.println(Long.parseLong(s)+"");
+            return 0;
+        } else{
+            result = Integer.parseInt(s)+0;
+        }
+        return result;
+    }
+}
+
+8. String to Integer (atoi)
+public class Solution {
+    public int myAtoi(String str) {
+        //Key:背   https://discuss.leetcode.com/topic/12473/java-solution-with-4-steps-explanations/6
+        
+        int i = 0;
+        str = str.trim();        
+        char[] c = str.toCharArray();
+        
+        int sign = 1;
+        if (i < c.length && (c[i] == '-' || c[i] == '+')) {
+            if (c[i] == '-') {
+                sign = -1;
+            }
+            i++;
+        }      
+        
+        int num = 0;
+        int bound = Integer.MAX_VALUE / 10;
+        while (i < c.length && c[i] >= '0' && c[i] <= '9') {
+            int digit = c[i] - '0';
+            if (num > bound || (num == bound && digit > 7)) {
+                return sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            }
+            num = num * 10 + digit;
+            i++;
+        }
+        return sign * num;
+    }
+}
+
+9. Palindrome Number
+
+//Star
+//1.int转为String，然后向内夹逼  
+//      String s = x+"";  or  String s = String.valueOf(x);
+//2.负数(-1,-2,etc)不算panlidrome number。但是我这个sol直接把负数干扰排掉了，因为"-123"中的"-"肯定无法匹配啊
+
+/*170620*/
+public class Solution {
+    public boolean isPalindrome(int x) {
+        boolean res = false;
+        String s = String.valueOf(x);
+        int begin = 0,end = s.length()-1;
+        while(begin <= end){
+            if(s.charAt(begin++) != s.charAt(end--)) return false;
+        }
+        return true;
+    }
+}
+
+public class Solution {
+    public boolean isPalindrome(int x) {
+        //KEY POINT
+        //String转int
+        //String s = (String)x; 是错的，转不了，直接n+""吧
+        //还有，这道题他给的答案里，-11,不算回文数
+        String s = x+"";
+        boolean flag = true;
+        int index1 = 0;
+
+        int index2 = s.length()-1;
+        while(index1<=index2 && flag){
+            if(s.charAt(index1) != s.charAt(index2)){
+                flag = false;
+            }
+            index1++;
+            index2--;
+        }
+        return flag;
+    }
+}
+
+10. Regular Expression Matching
+//Star -hard
+//http://www.cnblogs.com/grandyang/p/4461713.html
+//0.正则匹配很难懂
+/**
+ *  如果.后面跟着*,那么.*是当做整体看的
+    case:"ab",".*.." -> true 《.*是个整体》只有后面两个.是强制要求的，前面的.因为*的缘故，可以是0个字符匹配
+         "ab","..." -> false  因为没有*，所以相当于要有三个字符来匹配
+         "ab",".*..." -> false 同第一个case，只不过后面3个...是强制的
+         "ab",".." ->true
+         "ab",".*" -> true
+    如果.后面没有*,那就意味着是三个...匹配，但是如果第一个.后面加上了*,《第一个.和*适当做整体看的》，此时.*可以匹配一个都没有，或者n个a
+    
+**/
+
+//这道题中的*表示之前那个字符可以有0个，1个或是多个，就是说，字符串a*b，可以表示b或是aaab，即a的个数任意，
+//0.正则匹配规则很难理解
+//http://www.cnblogs.com/grandyang/p/4461713.html
+public class Solution {
+    public boolean isMatch(String s, String p) {
+        //Key:背
+        //Dp version  https://discuss.leetcode.com/topic/40371/easy-dp-java-solution-with-detailed-explanation
+        
+        if (s == null || p == null) {
+            return false;
+        }
+        boolean[][] dp = new boolean[s.length()+1][p.length()+1];
+        dp[0][0] = true;
+        for (int i = 0; i < p.length(); i++) {
+            if (p.charAt(i) == '*' && dp[0][i-1]) {
+                dp[0][i+1] = true;
+            }
+        }
+        for (int i = 0 ; i < s.length(); i++) {
+            for (int j = 0; j < p.length(); j++) {
+                if (p.charAt(j) == '.') {
+                    dp[i+1][j+1] = dp[i][j];
+                }
+                if (p.charAt(j) == s.charAt(i)) {
+                    dp[i+1][j+1] = dp[i][j];
+                }
+                if (p.charAt(j) == '*') {
+                    if (p.charAt(j-1) != s.charAt(i) && p.charAt(j-1) != '.') {
+                        dp[i+1][j+1] = dp[i+1][j-1];
+                    } else {
+                        dp[i+1][j+1] = (dp[i+1][j] || dp[i][j+1] || dp[i+1][j-1]);
+                    }
+                }
+            }
+        }
+        return dp[s.length()][p.length()];
+        
+        //Key:Recursion version 
+        //https://discuss.leetcode.com/topic/12289/clean-java-solution
+        //https://discuss.leetcode.com/topic/7437/share-a-short-java-solution
+        
+        
+    }
+}
+
+11. Container With Most Water
+//Star
+//core:因为height.length*min(height[0],height[height.length-1])《这个值肯定会被算到》，所以一开始从这个值为基准开始算起，此时width最大，等于length.然后逐渐想中间移动，更新max
+//Version 1:  -> TLE mark1
+//1.brute force->O(n*n)  i=0~n-1,j=0~i,找出max
+//Version 2 -> mark2
+//1.pointer1,pointer2分别指向两端，然后max=min(height[pointer1],height[pointer2])*height.length.
+//2.两个值中的最小值向中间移动一步(水桶的高度由最小值决定)，然后再取其中最小值*此时的间距，更新max.因为水桶的长度再一直变小，所以要想有更大的值，水桶边缘要更高
+//3.mark3注意高度比的是height[left]<=height[right]，不要错写成if(left<=right) left++;
+
+/*170621*/
+public class Solution {
+    //TLE mark1
+    /**
+        public int maxArea(int[] height) {
+            int res = 0,n = height.length;
+            for(int i = 1;i<=n-1;i++){
+                for(int j = 0;j<=i-1;j++){
+                    //System.out.println(i+"-"+j);
+                    res = Math.max(res,Math.min(height[i],height[j])*(i-j));
+                }
+            }
+            return res;
+        }
+    **/
+    public int maxArea(int[] height) {
+        //mark2
+        int res = 0,n = height.length;
+        int left = 0,right = n-1;
+        while(left<right){
+            res = Math.max(res,Math.min(height[left],height[right])*(right-left));
+            //170621,mark3:
+            //不要错写成if(left<=right) left++;
+            if(height[left]<=height[right]) left++;
+            else right--;
+        }
+        return res;
+    }
+}
+
+public class Solution {
+    public int maxArea(int[] height) {
+        //Key:just copy  这道题需要背，思路不好证明正确性
+        //这个解法的难点在于如何证明正确性!!!!  170621:证明：初始两个指针分别指向两端，这时长度最长，高度取min(height[0],height[n-1])。然后指针向中间移动，这时长度一定在减少，所以要找到两指针中最小的那个值*长度，再比较max
+        //拿个case举例说明，[99,1,2,3,4,200,100]   pointer i，j分别指向99和100
+        //这时max一开始等于min(99,100)*height.length，然后left++。容易担心的是99~200的影响，不过因为max受制于lower height，所以它永远是小于99*length的。然后剩下的可以想成一个递归的过程
+        
+        //Key:这个理解思路较容易理解
+        /**
+        Idea / Proof:
+        https://discuss.leetcode.com/topic/14940/simple-and-clear-proof-explanation/3
+        The widest container (using first and last line) is a good candidate, because of its width. Its water level is the height of the smaller one of first and last line.
+        All other containers are less wide and thus would need a higher water level in order to hold more water.
+        The smaller one of first and last line doesn't support a higher water level and can thus be safely removed from further consideration.
+        因为max一开始是由height[0]和height[n-1]中最小值和长度决定的，而要找一个更大的值，在width减小的情况下，height必须变大。所以i0和in中最小的那个就没必要考虑了
+        
+        ***/
+        int maxWater=0, left=0, right=height.length-1;
+        //Key:思路是length肯定在减小，所以就去寻找height最高
+		while(left<right) {
+			maxWater = Math.max(maxWater,(right-left)*Math.min(height[left], height[right]));
+			if(height[left]<height[right]) left++;
+			else right--;
+		}
+		return maxWater;
+    }
+}
+
+12. Integer to Roman
+//http://www.cnblogs.com/grandyang/p/4123374.html
+//Trick sol
+public class Solution {
+    public String intToRoman(int num) {
+        /**
+
+        I	1
+        V	5
+        X	10
+        L	50
+        C	100
+        D	500
+        M	1,000
+        
+        1954 as MCMLIV
+        1990 as MCMXC
+        2014 as MMXIV
+        
+        ***/
+    
+        String[] g = {"", "I","II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
+        String[] s = {"", "X","XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+        String[] b = {"", "C","CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
+        String[] q = {"", "M","MM", "MMM"};
+            
+        return q[num / 1000]+b[num / 100 % 10]+s[num / 10 % 10]+g[num % 10];
+    
+    
+    }   
+}
+
+13. Roman to Integer
+public class Solution {
+    public int romanToInt(String s) {
+        HashMap<Character,Integer> map = new HashMap<>();
+        map.put('Z',0);
+        map.put('I',1);
+        map.put('V',5);
+        map.put('X',10);
+        map.put('L',50);
+        map.put('C',100);
+        map.put('D',500);
+        map.put('M',1000);
+        int result = 0;
+        String n = s + "Z";
+            for(int i = n.length() ;i>1; i--){
+                 int cur = map.get(n.charAt(i-1));
+                 int pre = map.get(n.charAt(i-2));
+                 result = result + (cur<=pre ? pre : -pre);
+             }
+      return result;
+    }
+}
+
+
 516. Longest Palindromic Subsequence
 /*170527*/
 public class Solution {
@@ -1688,73 +2688,7 @@ public class Solution {
     }
 }
 
-11. Container With Most Water
-//Star
-//core:因为height.length*min(height[0],height[height.length-1])《这个值肯定会被算到》，所以一开始从这个值为基准开始算起，此时width最大，等于length.然后逐渐想中间移动，更新max
-//Version 1:  -> TLE mark1
-//1.brute force->O(n*n)  i=0~n-1,j=0~i,找出max
-//Version 2 -> mark2
-//1.pointer1,pointer2分别指向两端，然后max=min(height[pointer1],height[pointer2])*height.length.
-//2.两个值中的最小值向中间移动一步(水桶的高度由最小值决定)，然后再取其中最小值*此时的间距，更新max.因为水桶的长度再一直变小，所以要想有更大的值，水桶边缘要更高
-//3.mark3注意高度比的是height[left]<=height[right]，不要错写成if(left<=right) left++;
 
-/*170621*/
-public class Solution {
-    //TLE mark1
-    /**
-        public int maxArea(int[] height) {
-            int res = 0,n = height.length;
-            for(int i = 1;i<=n-1;i++){
-                for(int j = 0;j<=i-1;j++){
-                    //System.out.println(i+"-"+j);
-                    res = Math.max(res,Math.min(height[i],height[j])*(i-j));
-                }
-            }
-            return res;
-        }
-    **/
-    public int maxArea(int[] height) {
-        //mark2
-        int res = 0,n = height.length;
-        int left = 0,right = n-1;
-        while(left<right){
-            res = Math.max(res,Math.min(height[left],height[right])*(right-left));
-            //170621,mark3:
-            //不要错写成if(left<=right) left++;
-            if(height[left]<=height[right]) left++;
-            else right--;
-        }
-        return res;
-    }
-}
-
-public class Solution {
-    public int maxArea(int[] height) {
-        //Key:just copy  这道题需要背，思路不好证明正确性
-        //这个解法的难点在于如何证明正确性!!!!  170621:证明：初始两个指针分别指向两端，这时长度最长，高度取min(height[0],height[n-1])。然后指针向中间移动，这时长度一定在减少，所以要找到两指针中最小的那个值*长度，再比较max
-        //拿个case举例说明，[99,1,2,3,4,200,100]   pointer i，j分别指向99和100
-        //这时max一开始等于min(99,100)*height.length，然后left++。容易担心的是99~200的影响，不过因为max受制于lower height，所以它永远是小于99*length的。然后剩下的可以想成一个递归的过程
-        
-        //Key:这个理解思路较容易理解
-        /**
-        Idea / Proof:
-        https://discuss.leetcode.com/topic/14940/simple-and-clear-proof-explanation/3
-        The widest container (using first and last line) is a good candidate, because of its width. Its water level is the height of the smaller one of first and last line.
-        All other containers are less wide and thus would need a higher water level in order to hold more water.
-        The smaller one of first and last line doesn't support a higher water level and can thus be safely removed from further consideration.
-        因为max一开始是由height[0]和height[n-1]中最小值和长度决定的，而要找一个更大的值，在width减小的情况下，height必须变大。所以i0和in中最小的那个就没必要考虑了
-        
-        ***/
-        int maxWater=0, left=0, right=height.length-1;
-        //Key:思路是length肯定在减小，所以就去寻找height最高
-		while(left<right) {
-			maxWater = Math.max(maxWater,(right-left)*Math.min(height[left], height[right]));
-			if(height[left]<height[right]) left++;
-			else right--;
-		}
-		return maxWater;
-    }
-}
 
 454. 4Sum II
 public class Solution {
@@ -2638,80 +3572,7 @@ public class Solution {
     }
 }
 
-3. Longest Substring Without Repeating Characters
-//Star:
-//counter依旧是守门人，如果有重复的出现，则counter记为1。
-//与T76不同的是，这次counter允许通过的char是按照“队列”顺序进入的，所以counter也要按照队列顺序将之前的char删除，
-//直到那个重复的char数量 变为1
-//mark1
-//mark2
-/*170617*/
-public class Solution {
-    public int lengthOfLongestSubstring(String s) {
-        //Key170619:wrong version  -> case:"abba"
-        /**
-            if(s.length() == 0) return 0;
-            int begin = 0,end = 0,n = s.length(),res = Integer.MIN_VALUE,counter = 0;
-            Map<Character,Integer> map = new HashMap<>();
-            while(end<=n-1){
-                char c = s.charAt(end);
-                if(map.containsKey(c)){
-                    begin = end;
-                } 
-                map.put(c,end);
-                res = Math.max(res,end-begin+1);
-                end++;
-            }
-            return res;
-        **/
-        //Key170619:counter依旧是守门人，如果有重复的人进入，则counter++(应为底下的while(counter >0),所以counter最多也就可能加到1为止)。与T76不同的是，这次counter允许通过的char是按照“队列”顺序进入的，所以counter也要按照队列顺序将之前的char删除，直到那个重复的char数量 变为1
-        if(s.equals("")) return 0;
-        int res = Integer.MIN_VALUE,n = s.length(),begin = 0,end = 0,counter = 0;
-        Map<Character,Integer> map = new HashMap<>();
-        while(end<=n-1){
-            char c = s.charAt(end);
-            map.put(c,map.getOrDefault(c,0)+1);
-            if(map.get(c) > 1) counter++;
-            end++;
-            while(counter > 0){
-                c = s.charAt(begin);
-				//170624 mark1,counter需要先--，然后frequence再--。如果freq先--，那么get(c)>1就不满足了
-                if(map.get(c) > 1) counter--;
-                map.put(c,map.get(c)-1);
-                //170624 mark2,前面的那个相同char删除
-                begin++;
-            }
-            res = Math.max(res,end-begin);
-        }
-        return res;
-    }
-}
 
-public class Solution {
-    public int lengthOfLongestSubstring(String s) {
-        //Key:和这个模板不太像.....https://discuss.leetcode.com/topic/68976/sliding-window-algorithm-template-to-solve-all-the-leetcode-substring-search-problem
-        int repeat = 0,begin = 0,end = 0,res = 0;
-        Map<Character,Integer> map = new HashMap<>();
-        while(end<=s.length()-1){
-            char c = s.charAt(end);
-            map.put(c,map.getOrDefault(c,0)+1);
-            if(map.get(c) > 1) repeat++;
-            end++;
-            while(repeat>0){
-                char c2 = s.charAt(begin);
-                if(map.get(c2) > 1){
-                    repeat--;
-                    
-                }
-                map.put(c2,map.get(c2)-1);
-                begin++;
-            }
-            //Corner case:单字母"b"
-            res = Math.max(res,end-begin);
-        }
-        return res;
-    }
-}
 
 30. Substring with Concatenation of All Words
 //Star 太难，可以放弃
@@ -3956,203 +4817,7 @@ public class Solution {
     }
 }
 
-4. Median of Two Sorted Arrays
-//Star
-//170709:Core:mark1,3,4,7不好记忆，直接硬背    只是判断是否为空数组，即start>?length.而不是判断start+k>?length --> 如果所求元素正好位于所求段，容易漏掉
-//Star ~ code4.2 
-//1.规定，num1.length<=nums2.length.较短序列所有元素都被抛弃，可直接返回较长序列的第k大元素，可以不用分情况讨论了。
-//不用再乱七八糟的讨论了。所需的(k-1)/2位置可能大于某个数组总长度，规定A短之后，只需要考虑超过A的长度，
-//不需要再分情况讨论了。
-//2.mark0 left和right的坐标确认
-//3.mark1
-//4.mark2
-//5.mark3
-//6.mark4
-//7.mark5
-//mark9:我们只关心第k小的元素是哪个，而不关心他前面的那些比他小的元素的具体排序是什么
-/**
-1：
-此题关键，记住。这个思考起来很绕，但是结论肯定没错。用个特殊case来背 -> [1,2,3,4,5,6,7]  [11,12,13,14,15,16,17] ，所以是从[4,5,6,7,11,12,13,14]中找
-	if (aMid < bMid) Keep [aRight + bLeft]     
-	else Keep [bRight + aLeft]
-**/
 
-/*170618*/
-public class Solution {
-    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-		//mark0:left = (n+m+1)/2,right = (n+m+2)/2。要记得+1,+2。可以用case:n=3,m=4,left == 4，right == 5来记
-        int n = nums1.length,m = nums2.length,left = (n+m+1)/2,right = (n+m+2)/2,aStart = 0,bStart = 0;
-        return (findKth(nums1,aStart,nums2,bStart,left)+findKth(nums1,aStart,nums2,bStart,right))/2.0;
-    }
-	//找出《第K小的》元素
-	//mark9:我们只关心第k小的元素是哪个，而不关心他前面的那些比他小的元素的具体排序是什么
-    public int findKth(int[] nums1,int aStart,int[] nums2,int bStart,int k){
-		//170703:mark8 为统一，index只与nums1.length比较  mark1,mark7
-		//mark1:aStart已经超过了nums1的最大坐标
-        if(aStart>=nums1.length) return nums2[bStart+k-1];
-        if(bStart>=nums2.length) return nums1[aStart+k-1];
-		//mark2:k==1，找出第一个元素，即最小的元素
-        if(k == 1) return Math.min(nums1[aStart],nums2[bStart]);
-        //Key170618:比如说在[0,1,2]中找k==2的数字，那么该数字index就是0+2-1
-		//mark3:确定现在的mid值，如果midInd 已经超出了，midVal赋值为max
-        int aMidInd = (aStart+k/2-1),bMidInd = (bStart+k/2-1);
-		//170703:背，mark7,为什么midIndex需要和length比一下？前面明明已经判断过了aStart和length。为什么mid>length，nums就设置成Max？需解决
-        int aMidVal = aMidInd<=nums1.length-1?nums1[aMidInd]:Integer.MAX_VALUE;
-        int bMidVal = bMidInd<=nums2.length-1?nums2[bMidInd]:Integer.MAX_VALUE;
-		//mark4:
-		//mark8:aMidVal == bMidVal时，怎样都可以，所以归在那边都可以
-        if(aMidVal<bMidVal)
-        //Key170618:这里aMidInd+1而不是直接aMid，应该是因为mid值已经被判断过了，所以不要了。而且如果直接aMidInd，那么答案是错的
-		//mark5:因为k/2是往小了算(如3/2 == 1，剩余部分为2)，所以剩余部分要用k-k/2
-            return findKth(nums1,aMidInd+1,nums2,bStart,k-k/2);
-        else 
-            return findKth(nums1,aStart,nums2,bMidInd+1,k-k/2);
-    }
-}
-
-/*170616*/
-//Star
-//1.两个数组的元素总数量有可能是偶数，也有可能是奇数。所以要除以2.0 -> 当为奇数个时，则right,left指向的均是中间这个元素，除以2.0还是这个数。为偶数时，则正好是两数平均值
-//2.findKth（...,k）中的k是第k大元素(从1开始)，而不是index==k的元素(从0开始)。So,left = (m+n+1)/2,而不是(m-1+n-1+1)/2。right同理
-//Key170616:背，实际上这个func是用来查找顺序第k个的元素
-//Step
-//1.不断地把两个原数组拆分成只有一般大小的两个新数组
-//2.如果其中一个数组已经无法拆分了/不可操作了，则另一个数组的第x大元素即为两个数组的第x大元素
-//如果两个数组均只剩一个元素了，则返回其中的最小值即可
-public class Solution {
-    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-        double res = 0.0;
-        //Key170616:从左到右编译，所以先算出m，再算出n，此时m,n值已经存入stack，可直接使用
-		//mark-0.9:记住left,right分别奇偶数量时的中间index,所以一定要记得(n1+n2+1)除以2	
-        int m = nums1.length,n = nums2.length,left = (m+n+1)/2,right = (m+n+2)/2;
-        int aStart = 0,bStart = 0;
-		//case:[1,2][3,4] 除以2时，返回的是2.0,明显结果是不对的
-		//return (findKth(nums1,0,nums2,0,left)+findKth(nums1,0,nums2,0,right))/2;
-        return (findKth(nums1,aStart,nums2,bStart,left)+findKth(nums1,aStart,nums2,bStart,right))/2.0;
-    }
-    public int findKth(int[] nums1,int aStart,int[] nums2,int bStart,int k){
-        if(aStart>=nums1.length) return nums2[bStart+k-1];
-        if(bStart>=nums2.length) return nums1[aStart+k-1];
-        if(k == 1) return Math.min(nums1[aStart],nums2[bStart]);
-        int aMidIdx = (aStart+k/2)-1,bMidIdx = (bStart+k/2)-1;
-        //Key170617:aMidVal和bMidVal必须要先赋值为max_value，为了比较
-        int aMidVal = Integer.MAX_VALUE,bMidVal = Integer.MAX_VALUE;
-        if(aMidIdx <= nums1.length-1) aMidVal = nums1[aMidIdx];
-        if(bMidIdx <= nums2.length-1) bMidVal = nums2[bMidIdx];
-        if(aMidVal<bMidVal)
-        
-        //Key170617:下面的是Wrong,
-        //return findKth(nums1,aMidIdx,nums2,bStart,k/2);
-        //Key170617:背，findKth()中的index参数和前面的aMidIdx不同。还有是k-k/2，而不是k/2!!!这部分非常绕
-            return findKth(nums1,aMidIdx+1,nums2,bStart,k-k/2);
-        else 
-            return findKth(nums1,aStart,nums2,bMidIdx+1,k-k/2);
-    }
-}
-
-public class Solution {
-    //My wrong version
-    /**
-    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-        int start1=0,start2=0,end1=nums1.length-1,end2=nums2.length-1;
-        return findMedian(start1,end1,nums1,start2,end2,nums2);
-    }
-    public double findMedian(int start1,int end1,int[] nums1,int start2,int end2,int[] nums2){
-        int mid1 = (start1+end1)/2,mid2 = (start2+end2)/2;
-        if(end1==start1 && end2==start2) return (double)(nums1[start1]+nums2[start2])/2;
-        
-        if(nums1[mid1] < nums2[mid2]){
-            start1 = (mid1+end1)/2;
-            end2 = (start2+mid2)/2;
-
-        } else if(nums1[mid1] > nums2[mid2]){
-            start2 = (mid2+end2)/2;
-            end1 = (start1+mid1)/2;
-            
-        } else if(nums1[mid1] == nums2[mid2]){
-           end1 = end1+1;
-           end2 = end2-1;
-        }
-        return findMedian(start1,end1,nums1,start2,end2,nums2);
-    }
-    **/
-    //Just cp
-	//Key:思路一样，但他这种写法不是很容易理解。另一种较容易理解的写法是下面的code4.2
-    //https://discuss.leetcode.com/topic/28602/concise-java-solution-based-on-binary-search/2
-	//Key:下面参考里的方法里用到了Arrays.copyOfRange(nums2, j, n),其实等价于nums2从j位置到n位置，只不过他这里额外的新cp了一个数组。
-	//其实直接给个start和end范围，直接在原数组上操作就可
-	//http://www.cnblogs.com/grandyang/p/4465932.html
-	//https://segmentfault.com/a/1190000002988010
-	//http://www.cnblogs.com/ganganloveu/p/4180523.html
-	
-    public double findMedianSortedArrays(int[] A, int[] B) {
-    	    int m = A.length, n = B.length;
-    	    int l = (m + n + 1) / 2;
-    	    int r = (m + n + 2) / 2;
-    	    return (getkth(A, 0, B, 0, l) + getkth(A, 0, B, 0, r)) / 2.0;
-    	}
-    //A从aStart找到两个数组中第k大的元素
-    public double getkth(int[] A, int aStart, int[] B, int bStart, int k) {
-		/**
-		我们要判断小的数组是否为空，为空的话，直接在另一个数组找第K个即可。
-		还有一种情况是当K = 1时，表示我们要找第一个元素，只要比较两个数组的第一个元素，返回较小的那个即可。
-		*/
-		//范围为astart~A.length和bstart~B.length范围中的第k大元素
-		//aStart > A.length - 1,start位置大于A数组长度，意味着A中从start位置开始，不存在着这个两数组中第k大的元素，所以无需在A中找了。
-		//所以直接返回B中第k个元素
-		//Key:下面这两句是用来排除Test case的语句，非core思路内容
-		
-    	if (aStart > A.length - 1) return B[bStart + k - 1];            
-    	if (bStart > B.length - 1) return A[aStart + k - 1];                
-    	if (k == 1) return Math.min(A[aStart], B[bStart]);
-    	
-    	int aMid = Integer.MAX_VALUE, bMid = Integer.MAX_VALUE;
-		//Key:分别找出两个数组中的中间值
-    	if (aStart + k/2 - 1 < A.length) aMid = A[aStart + k/2 - 1]; 
-    	if (bStart + k/2 - 1 < B.length) bMid = B[bStart + k/2 - 1];        
-    	
-	
-    	if (aMid < bMid) 
-			//Key170617:因为要找的是从aStart开始的第k个元素，所以知道不知道尾部无影响。
-			//即使k超过了A.length,那么舍弃A即可
-    	    return getkth(A, aStart + k/2, B, bStart,k - k/2);// Check: aRight + bLeft 
-    	else 
-    	    return getkth(A, aStart,B,bStart + k/2, k - k/2);// Check: bRight + aLeft
-    }
-}
-//code4.2
-//Key:另一种较容易理解的写法
-public class Solution {
-    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-        int m = nums1.length, n = nums2.length, left = (m + n + 1) / 2, right = (m + n + 2) / 2;
-        return (findKth(nums1, nums2, left) + findKth(nums1, nums2, right)) / 2.0;
-    }
-	//Key170617:
-	/**
-	下面重点来看如何实现找到第K个元素，
-	首先我们需要让数组1的长度小于或等于数组2的长度，那么我们只需判断如果数组1的长度大于数组2的长度的话，交换两个数组即可，
-	然后我们要判断小的数组是否为空，为空的话，直接在另一个数组找第K个即可。 ??有没有可能两数组均为空??
-	还有一种情况是当K = 1时，表示我们要找第一个元素，只要比较两个数组的第一个元素，返回较小的那个即可。
-	**/
-    int findKth(int[] nums1, int[] nums2, int k) {
-        int m = nums1.length, n = nums2.length;
-		//Key170617:第一个数组长度必须小于第二个，因为当特殊情况下，
-		//较短序列所有元素都被抛弃，可以返回较长序列的第k个元素（在数组中下标是k-1）。不用再
-		//乱七八糟的讨论了。所需的(k-1)/2位置可能大于某个数组总长度，规定A短之后，只需要考虑超过A的长度，
-		//不需要再分情况讨论了。
-        if (m > n) return findKth(nums2, nums1, k);
-        if (m == 0) return nums2[k - 1];
-        if (k == 1) return Math.min(nums1[0], nums2[0]);
-		//Key170617:判断中间值的位置顺序是否在新数组长度内。比如说m==3,k/2==4这种情况，因此中值只能选择nums1[3]了
-        int i = Math.min(m, k / 2), j = Math.min(n, k / 2);
-        if (nums1[i - 1] > nums2[j - 1]) {
-            return findKth(nums1, Arrays.copyOfRange(nums2, j, n), k - j);
-        } else {
-            return findKth(Arrays.copyOfRange(nums1, i, m), nums2, k - i);
-        }
-    }
-}
 
 468. Validate IP Address
 public class Solution {
@@ -6383,81 +7048,7 @@ public class Solution {
     }
 }
 
-5. Longest Palindromic Substring
 
-//Star
-//core:需要把dp[i][i]和dp[i][i+1]，单独字符和两两比较的基础情况写出来，才能用dp
-//mark1
-//mark2
-//mark3
-//http://www.cnblogs.com/grandyang/p/4464476.html
-//Trans Func:dp[i][j] = s.charAt(i)==s.charAt(j) && dp[i+1][j-1],basic -> 奇数情况：dp[i][i] = true,偶数情况：dp[i][i+1] = charAt(i) == charA(i+1)
-//1.难点在于奇偶判断上  case:"abbab" 如果基础点是b,按照charAt(i-1)==charAt(i+1)判断,得到结果bab,会忽视abba.
-//如果按照bb判断，当case:"aabbbaa",很明显会忽视掉aabbbaa这种奇数情况
-//2.end = 0,而不是end = n-1 -> case:"abcde"时，inner for的dp[i][j]都是false，因为下面的初始是j == i+1。而dp[0][0]这种是在外面判断的，所以start和end没变过，也就是错的
-
-/*170620*/
-public class Solution {
-    public String longestPalindrome(String s) {
-        //Key170619:这道题用DP非常非常麻烦，所以不建议用dp
-            //Key170619:dp[i][j] = s.charAt(i)==s.charAt(j) && dp[i+1][j-1]
-        String res = "";
-        int n = s.length(),start = 0,end = 0,max = 0;
-        if(n == 0) return res;
-        boolean[][] dp = new boolean[n][n];
-        for(int i = 0;i<=n-1;i++) {
-			//mark1:单独字符情况
-            dp[i][i] = true;
-        }
-        for(int j = 0;j<=n-1;j++){
-            //wrong -> Key170619:case -> "aaaa"  dp[0][3]是由dp[1][2]推出来的，可是此时dp[1][2]还没有算出来。无法用dp，因为s.charAt(i) == s.charAt(j)时，需要判断dp[i+1][j-1]，但此时并未计算出来。如果用dp[i][j-1]判断的话，则需要dp[i][j-1]为false加上其它条件才可判断出来dp[i][j]是否为true。思考起来比较麻烦
-            for(int i = j-1;i>=0;i--){
-				//mark2 两两比较的基础情况
-				//mark3 下面的if要写成并联结构，不能写成顺联情况。否则当dp[i][i+1]更新后，会覆盖掉dp[i][i+1]
-                if(j == i+1) dp[i][j] = s.charAt(i)==s.charAt(j);
-                else dp[i][j] = (s.charAt(i)==s.charAt(j)) && dp[i+1][j-1];
-                if(dp[i][j]) {
-                    if(max<j-i+1){
-                        max = j-i+1;
-                        start = i;
-                        end = j;
-                    }
-                }
-            }
-        }
-        return s.substring(start,end+1);
-        
-    }
-}
-
-public class Solution {
-    //Key:Just cp,背，复用isPalindrome  https://discuss.leetcode.com/topic/21848/ac-relatively-short-and-very-clear-java-solution
-    //Key170619:实际上这就是brute force... #170620:wrong,这个不是brute force#
-    public String longestPalindrome(String s) {
-        String res = "";
-        int currLength = 0;
-        for(int i=0;i<s.length();i++){
-            if(isPalindrome(s,i-currLength-1,i)){
-                res = s.substring(i-currLength-1,i+1);
-                currLength = currLength+2;
-            }
-            else if(isPalindrome(s,i-currLength,i)){
-                res = s.substring(i-currLength,i+1);
-                currLength = currLength+1;
-            }
-        }
-        return res;
-    }
-    
-    public boolean isPalindrome(String s, int begin, int end){
-        if(begin<0) return false;
-        while(begin<end){
-        	if(s.charAt(begin++)!=s.charAt(end--)) return false;
-        }
-        return true;
-    }
-    
-}
 
 209. Minimum Size Subarray Sum
 public class Solution {
@@ -6667,6 +7258,97 @@ public class Solution {
     }
 }
 
+167. Two Sum II - Input array is sorted
+	//Star
+    //Core:2pointers,T1 map sol也可以
+    //mark0:记得加上break; 否则会因为tmp == target后一直循环
+    /*170721*/
+    public int[] twoSum(int[] numbers, int target) {
+        int index1 = 0,index2 = numbers.length-1;
+        int[] res = new int[2];
+        while(index1 < index2){
+            int tmp = numbers[index1] + numbers[index2];
+            if(tmp == target){
+                res[0] = index1+1;
+                res[1] = index2+1;
+                //mark0:记得加上break; 否则会因为tmp == target后一直循环
+                break;
+            } else if (tmp < target){
+                index1++;
+            } else {
+                index2--;
+            }
+        }
+        return res;
+    }
+
+
+public class Solution {
+    public int[] twoSum(int[] numbers, int target) {
+        //Two pointers 只需要O(n),从两边往中间夹。因为一开始只可能小于<=target。所以省略了一些麻烦的思考。
+        //这道题必须是两个不同的index.Test Case:[2,2,3] 6 不会返回两个2.
+        //这里我用hashMap来解决，也是O(n),开辟额外空间
+        //Corner Case:[0,0,3,4] 0
+        if(numbers.length==0) return null;
+        int[] result = new int[2];
+        // HashMap<Integer,Integer> map = new HashMap<Integer,Integer>();
+        // for(int i=0;i<=numbers.length-1;i++){
+        //     if(map.containsKey(target-numbers[i])){
+        //         result[0] = map.get(target-numbers[i])+1;
+        //         result[1] = i+1;
+        //     }
+        //     map.put(numbers[i],i);
+        // }
+        
+        //Two pointers version
+        int index1=0,index2 = numbers.length-1;
+        boolean flag = false;
+        while(index1<=index2 && !flag){
+            if(numbers[index1]+numbers[index2] < target){
+                index1++;
+            } else if(numbers[index1]+numbers[index2] > target){
+                index2--;
+            } else {
+                result[0] = index1+1;
+                result[1] = index2+1;
+                flag = true;
+            }
+        }
+        return result;
+    }
+}
+
+168. Excel Sheet Column Title
+public class Solution {
+    public String convertToTitle(int n) {
+        //Key Point
+        //类比10进制，这是26进制
+        //Test Case:
+        //More Details Input:26 Output: "A@" Expected:"Z"
+        //input ZZ
+        StringBuilder sb = new StringBuilder();
+        StringBuilder result = new StringBuilder();
+        //sb.append()加的是个逆序过程
+        //这个26进制考虑进位很麻烦
+        //Coner Case:676 (26*26) 正确输出应该是YZ  25*26+26
+        //Test Case:52  正确输出应为AZ
+        while(n !=0){
+            if(n%26 == 0){
+                sb.append((char)(26+64));
+                n -= 26;
+            } else {
+                sb.append((char)(n%26+64));
+            }
+            
+            n = n/26;
+        }
+        for(int i=sb.toString().length()-1;i>=0;i--){
+            result.append(sb.toString().charAt(i));
+        }
+        return result.toString();
+    }
+}
+
 29. Divide Two Integers
 public class Solution {
     public int divide(int dividend, int divisor) {
@@ -6690,96 +7372,9 @@ public class Solution {
        
 }
 
-8. String to Integer (atoi)
-public class Solution {
-    public int myAtoi(String str) {
-        //Key:背   https://discuss.leetcode.com/topic/12473/java-solution-with-4-steps-explanations/6
-        
-        int i = 0;
-        str = str.trim();        
-        char[] c = str.toCharArray();
-        
-        int sign = 1;
-        if (i < c.length && (c[i] == '-' || c[i] == '+')) {
-            if (c[i] == '-') {
-                sign = -1;
-            }
-            i++;
-        }      
-        
-        int num = 0;
-        int bound = Integer.MAX_VALUE / 10;
-        while (i < c.length && c[i] >= '0' && c[i] <= '9') {
-            int digit = c[i] - '0';
-            if (num > bound || (num == bound && digit > 7)) {
-                return sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-            }
-            num = num * 10 + digit;
-            i++;
-        }
-        return sign * num;
-    }
-}
 
-10. Regular Expression Matching
-//Star -hard
-//http://www.cnblogs.com/grandyang/p/4461713.html
-//0.正则匹配很难懂
-/**
- *  如果.后面跟着*,那么.*是当做整体看的
-    case:"ab",".*.." -> true 《.*是个整体》只有后面两个.是强制要求的，前面的.因为*的缘故，可以是0个字符匹配
-         "ab","..." -> false  因为没有*，所以相当于要有三个字符来匹配
-         "ab",".*..." -> false 同第一个case，只不过后面3个...是强制的
-         "ab",".." ->true
-         "ab",".*" -> true
-    如果.后面没有*,那就意味着是三个...匹配，但是如果第一个.后面加上了*,《第一个.和*适当做整体看的》，此时.*可以匹配一个都没有，或者n个a
-    
-**/
 
-//这道题中的*表示之前那个字符可以有0个，1个或是多个，就是说，字符串a*b，可以表示b或是aaab，即a的个数任意，
-//0.正则匹配规则很难理解
-//http://www.cnblogs.com/grandyang/p/4461713.html
-public class Solution {
-    public boolean isMatch(String s, String p) {
-        //Key:背
-        //Dp version  https://discuss.leetcode.com/topic/40371/easy-dp-java-solution-with-detailed-explanation
-        
-        if (s == null || p == null) {
-            return false;
-        }
-        boolean[][] dp = new boolean[s.length()+1][p.length()+1];
-        dp[0][0] = true;
-        for (int i = 0; i < p.length(); i++) {
-            if (p.charAt(i) == '*' && dp[0][i-1]) {
-                dp[0][i+1] = true;
-            }
-        }
-        for (int i = 0 ; i < s.length(); i++) {
-            for (int j = 0; j < p.length(); j++) {
-                if (p.charAt(j) == '.') {
-                    dp[i+1][j+1] = dp[i][j];
-                }
-                if (p.charAt(j) == s.charAt(i)) {
-                    dp[i+1][j+1] = dp[i][j];
-                }
-                if (p.charAt(j) == '*') {
-                    if (p.charAt(j-1) != s.charAt(i) && p.charAt(j-1) != '.') {
-                        dp[i+1][j+1] = dp[i+1][j-1];
-                    } else {
-                        dp[i+1][j+1] = (dp[i+1][j] || dp[i][j+1] || dp[i+1][j-1]);
-                    }
-                }
-            }
-        }
-        return dp[s.length()][p.length()];
-        
-        //Key:Recursion version 
-        //https://discuss.leetcode.com/topic/12289/clean-java-solution
-        //https://discuss.leetcode.com/topic/7437/share-a-short-java-solution
-        
-        
-    }
-}
+
 
 561. Array Partition I
 public class Solution {
@@ -8471,6 +9066,98 @@ public class MinStack {
  */
  
  160. Intersection of Two Linked Lists
+ //Star
+//Core:思路很简单，但是写起来非常麻烦
+//Version 0 一个非常漂亮的写法，index1 和index2走的路一样长
+//mark0:如果有一个是null，headA.next会不好处理，所以一开始献给派出了
+/*170721*/
+public class Solution {
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        //Version 0 Brilliant sol!!!
+        //mark0:如果有一个是null，headA.next会不好处理，所以一开始献给排除了
+        if(headA == null || headB == null) return null;
+        ListNode index1 = headA,index2 = headB;
+        //mark1:index1，index2走的路一样长
+        while(index1 != index2){
+            index1 = index1 == null?headB:index1.next;
+            index2 = index2 == null?headA:index2.next;
+        }
+        return index1;
+        //Little wrong
+        /*
+            int m = 0,n = 0;
+        
+            ListNode dummy1 = new ListNode(-1);
+            ListNode dummy2 = new ListNode(-1);
+            dummy1.next = headA;
+            dummy2.next = headB;
+            ListNode index1 = dummy1,index2 = dummy2;
+            while(index1 != null){
+                m++;
+                index1 = index1.next;
+            }
+            while(index2 != null){
+                n++;
+                index2 = index2.next;
+            }
+            int diff = Math.abs(m-n);
+            index1 = dummy1;
+            index2 = dummy2;
+            for(int i = 0;i<=diff-1;i++){
+                if(m>n) index2 = index2.next;
+                else index1 = index1.next;
+            }
+            while(index1 != null && index2 != null && index1 != index2){
+                index1 = index1.next;
+                index2 = index2.next;
+            }
+            return index1;
+        */
+        //wrong
+        /*
+            ListNode p1 = headA,p2 = headB;
+            int diff = 0;
+            while(p1 != null && p2 != null){
+                p1 = p1.next;
+                p2 = p2.next;
+            }
+            if(p1 == null){
+                p2 = headB;
+                while(p2 != null){
+                    p2 = p2.next;
+                    diff++;
+                }
+            }
+            if(p2 == null){
+                p1 = headA;
+                while(p1 != null){
+                    p1 = p1.next;
+                    diff++;
+                }
+            }
+            if(p1 == null){
+                p1 = headA;
+                for(int i = 0;i<=i-1;i++){
+                    p1 = p1.next;
+                }
+                while(p1 != null && p2 != null && p1 != p2) {
+                    p1 = p1.next;
+                    p2 = p2.next;
+                }
+            } else {
+                p2 = headB;
+                for(int i = 0;i<=i-1;i++){
+                    p2 = p2.next;
+                }
+                while(p1 != null && p2 != null && p1 != p2) {
+                    p1 = p1.next;
+                    p2 = p2.next;
+                }
+            }
+            return p1;
+        */
+    }
+}
  
  public class Solution {
     public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
@@ -8554,6 +9241,28 @@ public class MinStack {
          
         return max;
         
+    }
+}
+
+165. Compare Version Numbers
+public class Solution {
+    public int compareVersion(String version1, String version2) {
+        //Coner Case:考虑起来很麻烦
+        //直接粘来一个答案
+        String[] levels1 = version1.split("\\.");
+        String[] levels2 = version2.split("\\.");
+        
+        int length = Math.max(levels1.length, levels2.length);
+        for (int i=0; i<length; i++) {
+        	Integer v1 = i < levels1.length ? Integer.parseInt(levels1[i]) : 0;
+        	Integer v2 = i < levels2.length ? Integer.parseInt(levels2[i]) : 0;
+        	int compare = v1.compareTo(v2);
+        	if (compare != 0) {
+        		return compare;
+        	}
+        }
+        
+        return 0;
     }
 }
 
@@ -11429,77 +12138,6 @@ public class Solution {
     }
 }
 
-1. Two Sum  
-//Key:
-//1:case [2,3,4],6 -> 注意如果先把3存进去，然后在读一遍3的话，会把之前存进去的3误算进去。
-//即不能先map.put(nums[i],i),再map.containskKey(target-nums[i])。这两者的顺序应该反过来才对
-/*170616*/
-public class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        int n = nums.length;
-        //if(n <= 1) return new int[2];
-        int[] res = new int[2];
-        Map<Integer,Integer> map = new HashMap<>();
-        for(int i = 0;i<=n-1;i++){
-            int tmp = target-nums[i];
-            if(map.containsKey(tmp)){
-                res[0] = map.get(tmp);
-                res[1] = i;
-            } else {
-                map.put(nums[i],i);
-            }
-        }
-        return res;
-    }
-}
-public class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        //HashMap solving method
-        //It maybe contains duplicate elements
-        if(nums.length < 2) return null;
-        HashMap<Integer,Integer> map = new HashMap<Integer,Integer>();
-        int[] result = new int[2];
-        int rest = 0;
-        for(int i = 0;i <= nums.length - 1;i++){
-            rest = target - nums[i];
-            
-            if(map.containsKey(rest)){
-            //It maybe contains duplicate elements
-            //we put map.put(nums[i],i); last line,so we needn't to consider duplicate problem
-                // if(map.get(rest) != i){
-                //     result[0] = map.get(rest);
-                //     result[1] = i;
-                // }
-                
-                
-                result[0] = map.get(rest);
-                result[1] = i;
-            }
-            map.put(nums[i],i);
-        }
-        return result;
-    }
-}
-
-//V2
-public class Solution {
-
-    public int[] twoSum(int[] numbers, int target) {
-        // write your code here
-        if(numbers.length == 0) return new int[2];
-        Map<Integer,Integer> map = new HashMap<>();
-        int[] res = new int[2];
-        for(int i = 0;i<=numbers.length-1;i++){
-            if(map.containsKey(target-numbers[i])){
-                res[0] = map.get(target-numbers[i]);
-                res[1] = i;
-            } else {
-                map.put(numbers[i],i);
-            }
-        }
-        return res;
-    }
-}
 
 112. Path Sum
 public class Solution {
@@ -11571,178 +12209,7 @@ public class Solution {
     }
 }
 
-2. Add Two Numbers  
-//Star:
-//1.注意在改变node值时，node是否为空。所以最好操作node.next，返回时返回head.next就可以解决这个问题。即head作为无意义node
-//2.case:[null,null]->因为返回的是ListNode，假如传进来的参数是两个null，那么while(l1 != null || l2 != null){}这个核心方法体就会被跳过。
-//但是返回null和返回一个new ListNode(0)因该说均符合这个答案要求。
-//所以不用担心当传入两个null时会造成错误,最后return res.next直接返回一个null也是符合题意的
-/*170616*/
-public class Solution {
-    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-        ListNode res = new ListNode(0);
-        //Key:返回一个null和new ListNode(0)本质上一样，所以不用加上下面这句
-        //res.next = new ListNode(0);
-        ListNode pointer = res;
-        int tmp = 0;
-        while(l1 != null || l2 != null){
-            int sum = tmp;
-            if(l1 != null){
-                sum+=l1.val;
-                l1 = l1.next;
-            }
-            if(l2 != null){
-                sum+=l2.val;
-                l2 = l2.next;
-            }
-            tmp = sum/10;
-            pointer.next= new ListNode(sum%10);
-            pointer = pointer.next;
-        }
-        if(tmp == 1) pointer.next = new ListNode(tmp);
-        return res.next;
-    }
-}
-/**
- * Definition for singly-linked list.
- * public class ListNode {
- *     int val;
- *     ListNode next;
- *     ListNode(int x) { val = x; }
- * }
- */
-public class Solution {
-    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-       //Key:写的还是有点乱
-       /**
-        //Key:这题给的example太不好了...正着来反着来都一样...
-        //Key:test case [2,4,3] [5,6,5] expect：[7,0,9]
-        int more = 0,cur = 0;
-        ListNode res = l1,prev = l1;
-        while(l1 != null && l2 != null){
-            
-            int tmp = l1.val +l2.val+more;
-            if(tmp>=10){
-                cur = tmp-10;
-                more = 1;
-            } else {
-                cur = tmp;
-                more = 0;
-            }
-            l1.val = cur;
-            prev = l1;
-            l1 = l1.next;
-            l2 = l2.next;
-        }
-        while(l1 != null){
-           
-            int tmp = l1.val + more;
-            if(tmp>=10){
-                cur = tmp-10;
-                more = 1;
-            } else {
-                cur = tmp;
-                more = 0;
-            }
-            l1.val = cur;
-            prev = l1;
-            l1 = l1.next;
-        }
-        while(l2 != null){
-            
-            int tmp = l2.val + more;
-            if(tmp>=10){
-                cur = tmp-10;
-                more = 1;
-            } else {
-                cur = tmp;
-                more = 0;
-            }
-            l1.next = new ListNode(cur);
-            prev = l1;
-            l1 = l1.next;
-        }
-        if(more == 1) prev.next = new ListNode(1);
-        return res;
-    }
-    
-       **/
-        //Key:cp,参考一下
-        //Key:如果不需要改node值，判断node == null就好了。但需要改变node值时，会因为node == null时，node.next会报错
-        //Key:因为这个要改变node的值，所以最好不要在当前node上改，因为会有node==null时的干扰。so最好是在next上改
-        //https://discuss.leetcode.com/topic/39130/4ms-11lines-java-solution
-        ListNode ln1 = l1, ln2 = l2, head = null, node = null;
-        int carry = 0, remainder = 0, sum = 0;
-        head = node = new ListNode(0);
-        
-        while(ln1 != null || ln2 != null || carry != 0) {
-            sum = (ln1 != null ? ln1.val : 0) + (ln2 != null ? ln2.val : 0) + carry;
-            carry = sum / 10;
-            remainder = sum % 10;
-            node = node.next = new ListNode(remainder);
-            ln1 = (ln1 != null ? ln1.next : null);
-            ln2 = (ln2 != null ? ln2.next : null);
-        }
-        return head.next;
-    }
-}
 
-public class Solution {
-    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-        
-        //Key:这个Corner case处理起来太麻烦了！！！
-        //V3
-        /*
-        ListNode res = new ListNode(0);
-        ListNode head = res;
-        int sum = 0,more = 0;
-        //Key:清晰点的思路：[1]先计算出每个点的值，【2】再赋值给node    
-        while(l1!= null || l2 != null){
-            //Key:1->和是三部分，不要忘记进位
-            //Key:2->注意判断l1,l1是否为null,如果是null则定为0
-            int a = (l1 == null)?0:l1.val;
-            int b = (l2 == null)?0:l2.val;
-            //System.out.println(a+","+b);
-            sum = a + b + more;
-            //System.out.println(more+"mm");
-            more = sum/10;
-            sum = sum%10;
-            //System.out.println(sum+"");
-            res.val = sum;
-            //System.out.println(res.val+"");
-            res.next = new ListNode(0);
-            res = res.next;
-            l1 = (l1 == null)?null:l1.next;
-            l2 = (l2 == null)?null:l2.next;
-        }
-        if(more == 1)res.val = 1;
-        else res = null;
-        return head;
-        **/
-        //Case problem
-        //V4
-        ListNode tmp = new ListNode(0);
-        ListNode res = tmp;
-        int sum = 0,more = 0;
-        while(l1 != null || l2 != null){
-            int a = l1==null?0:l1.val;
-            int b = l2==null?0:l2.val;
-            sum = a+b+more;
-            //Key:进位
-            more = sum/10;
-            //Key:当前位
-            sum = sum%10;
-            tmp.next = new ListNode(sum);
-            tmp = tmp.next;
-            //Key:关键点
-            l1 = l1 == null?null:l1.next;
-            l2 = l2 == null?null:l2.next;
-        }
-        if(more == 1) tmp.next = new ListNode(more);
-        //Key:因为当前节点赋值时会有点问题，所以不如用node.next来赋值比较好。
-        return res.next;
-    }
-}
 
 70. Climbing Stairs  //if(n <= 1) return n;
 public class Solution {
@@ -12133,130 +12600,9 @@ public class Solution {
     }
 }
 
-6. ZigZag Conversion
-//Star
-//Thinking:按照题意code -- My version 
-//1.mark0,建个list，分别存储每行的字符串，然后合并。用个boolean表向上or向下遍历
-//2.mark3，例如向下走，当counter == numRows时，counter需要-2，如果减1的话。重复计算了。
-//还有往上走时，判断的是counter == -1，而不是counter == 0
-//3.mark1：如果numRows == 1时，那么counter-2不适用，要单独判断下==1的情况
-//另一种sol隔几个距离取一个char。https://discuss.leetcode.com/topic/3162/easy-to-understand-java-solution 
 
 
-/*170620*/
-public class Solution {
-    public String convert(String s, int numRows) {
-        String res = "";
-		//mark0
-        boolean down = true;
-        int n = s.length(),counter = 0;
-        if(n == 0 || numRows == 0) return "";
-        //Key170620,mark1:如果numRows == 1时，那么counter-2不适用，要单独判断下
-        if(numRows == 1) return s;
-        List<String> list = new ArrayList<>();
-        for(int i = 0;i<=numRows-1;i++) list.add("");
-        for(int i = 0;i<=n-1;i++){
-            list.set(counter,list.get(counter)+s.charAt(i));
-            //down时，向下走
-            if(down) counter++;
-            else counter --;
-            if(counter == numRows){
-                //Key170620,mark3:case:"PAYPALISHIRING" couner == 3时,往回的话,counter需要置为1，即counter-2.如果只是--的话，counter==2的话，那么会重复加入一次
-                counter -= 2;
-                down = false;
-                //Key170620:同理，只不过这减过头的话是-1，而不是0
-            //Wrong: } else if (counter == 0){
-            } else if (counter == -1){
-                counter += 2;
-                down = true;
-            }
-        }
-        for(String tmp:list) res = res + tmp;
-        return res;
-    }
-}
 
-public class Solution {
-    public String convert(String s, int numRows) {
-        //我这个方法想起来太乱了，很麻烦
-        if(s.equals("") || numRows == 0) return "";
-        boolean flag = true;
-        ArrayList<ArrayList<Character>> list = new ArrayList<ArrayList<Character>>();
-        for(int i=0;i<=numRows-1;i++){
-            list.add(new ArrayList<Character>());
-        }
-        int index = 0;
-        int count = 0;
-        while(count != s.length()){
-            if(index == numRows) {
-                flag = false;
-                index = (numRows-2)>=0?(numRows-2):0;
-            }
-            if(index == -1){
-                flag = true;
-                index = numRows >=2?1:0;
-            } 
-            list.get(index).add(s.charAt(count));
-            if(flag){
-                index++;
-            } else {
-                index--;
-            }
-            count++;
-        }
-        StringBuffer sb = new StringBuffer();
-        index = 0;
-        while(index < numRows){
-            for(Character c:list.get(index)){
-                sb.append(c);
-            }
-            index++;
-        }
-        return sb.toString();
-    }
-}
-
-9. Palindrome Number
-
-//Star
-//1.int转为String，然后向内夹逼  
-//      String s = x+"";  or  String s = String.valueOf(x);
-//2.负数(-1,-2,etc)不算panlidrome number。但是我这个sol直接把负数干扰排掉了，因为"-123"中的"-"肯定无法匹配啊
-
-/*170620*/
-public class Solution {
-    public boolean isPalindrome(int x) {
-        boolean res = false;
-        String s = String.valueOf(x);
-        int begin = 0,end = s.length()-1;
-        while(begin <= end){
-            if(s.charAt(begin++) != s.charAt(end--)) return false;
-        }
-        return true;
-    }
-}
-
-public class Solution {
-    public boolean isPalindrome(int x) {
-        //KEY POINT
-        //String转int
-        //String s = (String)x; 是错的，转不了，直接n+""吧
-        //还有，这道题他给的答案里，-11,不算回文数
-        String s = x+"";
-        boolean flag = true;
-        int index1 = 0;
-
-        int index2 = s.length()-1;
-        while(index1<=index2 && flag){
-            if(s.charAt(index1) != s.charAt(index2)){
-                flag = false;
-            }
-            index1++;
-            index2--;
-        }
-        return flag;
-    }
-}
 
 125. Valid Palindrome
 //Star
@@ -12383,103 +12729,8 @@ public class Solution {
     }
 }
 
-7. Reverse Integer
-//Star
-/**
-	https://www.zhihu.com/question/51632291?from=profile_question_card
-	0:mark2,case:-2147483648 -> !!!非常重要的一点  Intger i= -2147483648,Math.abs(i) == -2147483648,补码操作的原因。具体解释看上面的链接。因为这种坑爹的case，所以要先把x转为long -> mark2
-	1.Long.parseLong(String)  mark4
-	2.注意是StringBuilder().reverse() 而不是 s.reverse() 也不是String.reverse(s) -> mark3
-	3.记得返回时加上负号 mark1,neg?-tmp:tmp要用()括起来，因为(int)neg优先于neg?-tmp:tmp
-**/
 
-/*170620*/
-public class Solution {
-    public int reverse(int x) {
-        int res = 0;
-        boolean neg = x<0?true:false;
-        //mark2
-        //wrong -> String s = String.valueOf(Math.abs(x));
-        String s = String.valueOf(Math.abs((long)x));
-        //mark3
-        s = new StringBuilder(s).reverse().toString();
-		//mark4
-        long tmp = Long.parseLong(s);
-        if(tmp > Integer.MAX_VALUE || (-tmp<Integer.MIN_VALUE && neg)) tmp = 0;
-        //mark1 
-        return (int)(neg?-tmp:tmp);
-    }
-}
 
-public class Solution {
-    public int reverse(int x) {
-        //速度不知道为什么很慢，76ms.....
-        //可以用Stack处理或者StringBuffer 处理
-        //考虑Int范围
-        //Test Case：1534236469时返回0。说明越界int范围时，直接舍弃了
-        boolean flag = true;
-        //不要自己计算，直接用Integer.MAX_VALUE、MIN_VALUE就可以了...... 
-        //long high = (long)Math.pow(2,32);
-        long high = (long)Integer.MAX_VALUE;
-        long low = (long)Integer.MIN_VALUE; 
-        //long low = (long)(0-Math.pow(2,32));
-      
-        int result = 0;
-        if(x<0) flag = false;
-        //mark1 -> Math.abs(越界的int时，会从起始int的low范围开始返回)，所以要先把x转为long
-        //如果用下面注释掉的代码，Test Case：-2147483648时，会产生错误
-        //String s = Math.abs(x)+"";
-        String s = Math.abs((long)x)+"";
-        StringBuffer sb = new StringBuffer();
-        if(!flag) sb.append("-");
-        for(int i=s.length()-1;i>=0;i--){
-            sb.append(s.charAt(i));
-        }
-        s = sb.toString();
-        //Key Point
-        //Integer.parseInt() 把String转为int
-        //判断是否越界int范围
-        if(Long.parseLong(s)>= high || Long.parseLong(s) <=low){
-            //System.out.println(Long.parseLong(s)+"");
-            return 0;
-        } else{
-            result = Integer.parseInt(s)+0;
-        }
-        return result;
-    }
-}
-
-12. Integer to Roman
-//http://www.cnblogs.com/grandyang/p/4123374.html
-//Trick sol
-public class Solution {
-    public String intToRoman(int num) {
-        /**
-
-        I	1
-        V	5
-        X	10
-        L	50
-        C	100
-        D	500
-        M	1,000
-        
-        1954 as MCMLIV
-        1990 as MCMXC
-        2014 as MMXIV
-        
-        ***/
-    
-        String[] g = {"", "I","II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
-        String[] s = {"", "X","XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
-        String[] b = {"", "C","CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
-        String[] q = {"", "M","MM", "MMM"};
-            
-        return q[num / 1000]+b[num / 100 % 10]+s[num / 10 % 10]+g[num % 10];
-    
-    
-    }   
-}
 
 15. 3Sum
 //Star
@@ -13907,3 +14158,4 @@ public class Solution {
         }
     }
 }
+
