@@ -7319,6 +7319,36 @@ public class Solution {
 }
 
 168. Excel Sheet Column Title
+//Star
+//Core:
+//mark0
+/*170721*/
+public class Solution {
+    public String convertToTitle(int n) {
+        String res = "";
+        int remain = 0;
+        while(n != 0){
+            remain = n%26;
+            n = n/26;
+            //mark1:注意这个26进制A是从1开始的，不是0，所以和一般的十六进制(0~F)，8进制转换不一样.  corner:52 -> AZ
+            if(remain == 0){
+                res = "Z"+res;
+                n--;
+            } else {
+                //mark0:'0' 的 ASCII 不是 0,是48!!!
+                //所以('A'-'0'+1+remain) 是错的!!
+                res = (char)('A'-1+remain) + res;
+            }
+        }
+        return res;
+    }
+}
+
+//Star
+//Core:
+//mark0:注意这个26进制A是从1开始的，不是0，所以和一般的十六进制(0~F)，8进制转换不一样.
+//Coner Case:676 (26*26) 正确输出应该是YZ  25*26+26
+//Test Case:52  正确输出应为AZ
 public class Solution {
     public String convertToTitle(int n) {
         //Key Point
@@ -7346,6 +7376,31 @@ public class Solution {
             result.append(sb.toString().charAt(i));
         }
         return result.toString();
+    }
+}
+
+169. Majority Element
+//Star
+//Core
+/*170721*/
+public class Solution {
+    public int majorityElement(int[] nums) {
+        Arrays.sort(nums);
+        return nums[(nums.length-1)/2];
+    }
+}
+
+171. Excel Sheet Column Number
+//Star
+//Core:T168逆向
+public class Solution {
+    public int titleToNumber(String s) {
+        int n = 1,res = 0;
+        for(int i = s.length()-1;i>=0;i--){
+            res += n*(s.charAt(i)-'A'+1);
+            n *= 26;
+        }
+        return res;
     }
 }
 
