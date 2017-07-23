@@ -10789,29 +10789,6 @@ public class Solution {
 }
 
 
-190. Reverse Bits
-public class Solution {
-    // you need treat n as an unsigned value
-    public int reverseBits(int n) {
-        //Brute Force 用Stack存储n%2,再逆序相乘
-        //主要还是Bit 操作，看不懂答案
-        
-        //Key：直接调用function的解法
-        //return Integer.reverse(n);
-        
-        //https://discuss.leetcode.com/topic/42572/sharing-my-2ms-java-solution-with-explanation
-        if (n == 0) return 0;
-        int result = 0;
-        for (int i = 0; i < 32; i++) {
-            result <<= 1;
-            if ((n & 1) == 1) result++;
-            n >>= 1;
-        }
-        return result;
-        
-        
-    }
-}
 
 
 227. Basic Calculator II
@@ -11596,10 +11573,31 @@ public class Solution {
 }
 
 187. Repeated DNA Sequences
+//Star
+//Core:用set来排除重复项
+//mark0:用set来确认哪些重复了
+//mark0.1:去除结果中的重复项
+/*170723*/
+public class Solution {
+    public List<String> findRepeatedDnaSequences(String s) {
+        //mark0:用set来确认哪些重复了
+        Set<String> set = new HashSet<>();
+        List<String> res = new ArrayList<>();
+        //mark1:因为i的边界不好确定，所以干脆写成i+9<=s.length()-1
+        for(int i = 0;i+9 <= s.length()-1;i++){
+            String tmp = s.substring(i,i+10); 
+            //mark0.1:corner:"AAAAAAAAAAAAAAAA"  !set.add(tmp)确定哪些重复了,!res.contains(tmp)去除结果中的重复项
+            if(!set.add(tmp) && !res.contains(tmp)) res.add(tmp);
+        }
+        return res;
+    }
+}
+
 public class Solution {
     public List<String> findRepeatedDnaSequences(String s) {
         //Key:cp,背   https://discuss.leetcode.com/topic/27517/7-lines-simple-java-o-n
         //Key:补充解释 https://discuss.leetcode.com/topic/33745/easy-understand-and-straightforward-java-solution
+		
         Set seen = new HashSet(), repeated = new HashSet();
         for (int i = 0; i + 9 < s.length(); i++) {
             String ten = s.substring(i, i + 10);
@@ -11610,10 +11608,258 @@ public class Solution {
     }
 }
 
+188. Best Time to Buy and Sell Stock IV
+//Star
+//Core:状态机，hard
+public class Solution {
+    //Key:Hard,just cp
+    //这两个解法比较容易理解
+	//http://blog.csdn.net/linhuanmars/article/details/23236995
+	//http://www.cnblogs.com/grandyang/p/4295761.html
+    //https://discuss.leetcode.com/topic/24079/easy-understanding-and-can-be-easily-modified-to-different-situations-java-solution/2
+    //https://discuss.leetcode.com/topic/29489/clean-java-dp-o-nk-solution-with-o-k-space
+    //hold[i][k]  ith day k transaction have stock and maximum profit
+    //unhold[i][k] ith day k transaction do not have stock at hand and maximum profit
+    public int maxProfit(int k, int[] prices) {
+        if(k>prices.length/2) return maxP(prices);
+        int[][] hold = new int[prices.length][k+1];
+        int[][] unhold = new int[prices.length][k+1];
+        hold[0][0] = -prices[0];
+        for(int i=1;i<prices.length;i++) hold[i][0] = Math.max(hold[i-1][0],-prices[i]);
+        for(int j=1;j<=k;j++) hold[0][j] = -prices[0];
+        for(int i=1;i<prices.length;i++){
+            for(int j=1;j<=k;j++){
+                hold[i][j] = Math.max(unhold[i-1][j]-prices[i],hold[i-1][j]);
+                unhold[i][j] = Math.max(hold[i-1][j-1]+prices[i],unhold[i-1][j]);
+            }
+        }
+        return Math.max(hold[prices.length-1][k],unhold[prices.length-1][k]);
+    }
+    public int maxP(int[] prices){
+        int res =0;
+        for(int i=0;i<prices.length;i++){
+            if(i>0 && prices[i] > prices[i-1]){
+                res += prices[i]-prices[i-1];
+            }
+        }
+        return res;
+    }
+}
 
+189. Rotate Array
+public class Solution {
+	//Version 1:new array to store the new pos,then restore to nums
+    public void rotate(int[] nums, int k) {
+        //Test Case:[1,2,3,4],5
+        //k可以大于length-1。此题默认k是正数
+		//
+        int length = nums.length;
+        int[] arr = new int[length];
+        int tmp =0;
+        int index=0;
+        for(int i =0;i<=length-1;i++){
+            index = k+i>=length?(k+i)%length:k+i;
+            
+            arr[index] = nums[i];
+        }
+        for(int i =0;i<=length-1;i++){
+            nums[i] = arr[i];
+        }
+    }
+}
+
+190. Reverse Bits
+public class Solution {
+    // you need treat n as an unsigned value
+    public int reverseBits(int n) {
+        //Brute Force 用Stack存储n%2,再逆序相乘
+        //主要还是Bit 操作，看不懂答案
+        
+        //Key：直接调用function的解法
+        //return Integer.reverse(n);
+        
+        //https://discuss.leetcode.com/topic/42572/sharing-my-2ms-java-solution-with-explanation
+        if (n == 0) return 0;
+        int result = 0;
+        for (int i = 0; i < 32; i++) {
+            result <<= 1;
+            if ((n & 1) == 1) result++;
+            n >>= 1;
+        }
+        return result;
+        
+        
+    }
+}
+
+191. Number of 1 Bits
+public class Solution {
+    // you need to treat n as an unsigned value
+    //因为已经提到bits，所以应该是用bit相关操作比较简单，如位移操作等
+    public int hammingWeight(int n) {
+        
+        if(n==0) return 0;
+        int count = 0;
+         for(int i = 0; i < 32; i++){  
+            if ((n & 1) == 1) count++;
+            n >>= 1;
+        }
+        //count 最后多加一次，所以要减掉
+        return count;
+    }
+    /***
+     * //还有这种非算法解法
+    public class Solution {
+    // you need to treat n as an unsigned value
+    public int hammingWeight(int n) {
+        int sum=0;
+        String[] x=Integer.toBinaryString(n).split("");
+        for(int i =0 ;i< x.length;i++){
+            if(x[i].equals("1")) sum++;
+        }
+        return sum;
+    }
+    }
+    
+    **/
+}
  
- 205. Isomorphic Strings
- public class Solution {
+198. House Robber
+public class Solution {
+    public int rob(int[] nums) {
+        //typical DP,similar as package problem
+        if(nums == null || nums.length==0) return 0;
+        int length = nums.length;
+        int F[] = new int[length];
+        if(length ==1 ) return nums[0];
+        else if(length ==2) return Math.max(nums[1],nums[0]);
+        F[0] = nums[0];
+        F[1] = Math.max(nums[1],nums[0]);
+        for(int i=2;i<=length-1;i++){
+            F[i] = Math.max(F[i-1],F[i-2]+nums[i]);
+        }
+        return F[length-1];
+    }
+}
+
+public class Solution {
+    public int rob(int[] nums) {
+        int[] dp = new int[nums.length];
+        if(nums.length == 0) return 0;
+        dp[0] = nums[0];
+        if(nums.length == 1) return nums[0];
+        dp[1] = Math.max(nums[0],nums[1]);
+        for(int i = 2;i<=nums.length-1;i++){
+            //Key:因为隔天抢劫，dp[i-2]+nums[i]说明是两天前的状态，也就是说昨天没抢，今天抢没事。dp[i-1]意味着接着昨天的状态，不管他抢没抢，反正今天也不抢，也没事。
+            //Key:状态，和stock cooldown 一起看
+            dp[i] = Math.max(dp[i-2]+nums[i],dp[i-1]);
+        }
+        return dp[nums.length-1];
+    }
+}
+ 
+199. Binary Tree Right Side View
+//Star
+//Core:前序中左右给成中右左，然后加个depth标识一下就好了
+//mark0:
+public class Solution {
+    //Similar to  Binary Tree Inorder Traversal
+    List<Integer> list = new ArrayList<Integer>();
+    int depth = 0;
+    public List<Integer> rightSideView(TreeNode root) {
+        // if(root != null){
+        //     //这道题应该更像是那道求深度的题：Maximum Depth of Binary Tree  
+        //     /***
+        //      * 下面的是错误解法
+        //      * 
+        //      *  //思路也是错的
+        //         //把前序遍历改一下应该就可以了。改  中左右 -> 中右左,且只存“中”这个值，放弃左右child的值
+        //      * 过不了Test case:[1,2,3,4]
+        //      *               1
+        //      *       2               3
+        //      *    4   NIL       NIL    NIL
+        //      *
+        //     list.add(root.val);
+        //     if(root.right != null) rightSideView(root.right);
+        //     else rightSideView(root.left);
+        //     */
+        //     if(list.size() == depth){
+        //         list.add(root.val);
+               
+        //     }
+        //     depth++;
+        //     rightSideView(root.right);
+        //     rightSideView(root.left);
+            
+        // }
+        // return list;
+        rightSide(root,0);
+        return list;
+    }
+    
+    public void rightSide(TreeNode root,int depth) {
+        if(root != null){
+            if(list.size() == depth){
+                list.add(root.val);
+            }
+			//mark0:先right再left
+            rightSide(root.right,depth+1);
+            rightSide(root.left,depth+1);
+        }
+    }
+} 
+
+200. Number of Islands
+public class Solution {
+    //Key:Wrong
+    /**
+    public int numIslands(char[][] grid) {
+        if(grid.length == 0 || grid[0].length == 0) return 0;
+        int count = 0;
+        //Key:判断左上部分是否挨着0即可
+        for(int i = 0;i<=grid.length-1;i++){
+            for(int j = 0;j<=grid[0].length-1;j++){
+                if(grid[i][j] == '1'){
+                    //System.out.println("sdfsdf");
+                    //Key:难点在于这个判断不好写,下面的就是错误的
+                    //Corner  case:["111","010","111"] 工字型
+                    //if(i == 0 && j == 0 || i == 0 && grid[i][j-1] == '0' || j == 0 && grid[i-1][j] == '0' || i>0 && j>0 && grid[i-1][j] == '0'  grid[i][j-1] == '0') count++;
+                }
+            }
+        }
+        return count;
+    }
+    **/
+    
+    //Key:just copy
+    public int numIslands(char[][] grid) {
+        int count = 0;
+        
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[i].length; j++) {
+                if (grid[i][j] == '1') {
+                    count++;
+                    clearRestOfLand(grid, i, j);
+                }
+            }
+        }
+        return count;
+    }
+    
+    private void clearRestOfLand(char[][] grid, int i, int j) {
+        if (i < 0 || j < 0 || i >= grid.length || j >= grid[i].length || grid[i][j] == '0') return;
+        
+        grid[i][j] = '0';
+        clearRestOfLand(grid, i+1, j);
+        clearRestOfLand(grid, i-1, j);
+        clearRestOfLand(grid, i, j+1);
+        clearRestOfLand(grid, i, j-1);
+        return;
+    }
+}
+
+205. Isomorphic Strings
+public class Solution {
     public boolean isIsomorphic(String s1, String s2) {
         //Key:My wrong version
         /***
@@ -14262,22 +14508,7 @@ public class Solution {
     }
 }
 
-198. House Robber
-public class Solution {
-    public int rob(int[] nums) {
-        int[] dp = new int[nums.length];
-        if(nums.length == 0) return 0;
-        dp[0] = nums[0];
-        if(nums.length == 1) return nums[0];
-        dp[1] = Math.max(nums[0],nums[1]);
-        for(int i = 2;i<=nums.length-1;i++){
-            //Key:因为隔天抢劫，dp[i-2]+nums[i]说明是两天前的状态，也就是说昨天没抢，今天抢没事。dp[i-1]意味着接着昨天的状态，不管他抢没抢，反正今天也不抢，也没事。
-            //Key:状态，和stock cooldown 一起看
-            dp[i] = Math.max(dp[i-2]+nums[i],dp[i-1]);
-        }
-        return dp[nums.length-1];
-    }
-}
+
 
 //V2
 //Key:https://discuss.leetcode.com/topic/12024/java-dp-solution-o-n-runtime-and-o-1-space-with-inline-comment
@@ -14594,41 +14825,7 @@ public class Solution {
 
 
 
-188. Best Time to Buy and Sell Stock IV
-public class Solution {
-    //Key:Hard,just cp
-    //这两个解法比较容易理解
-	//http://blog.csdn.net/linhuanmars/article/details/23236995
-	//http://www.cnblogs.com/grandyang/p/4295761.html
-    //https://discuss.leetcode.com/topic/24079/easy-understanding-and-can-be-easily-modified-to-different-situations-java-solution/2
-    //https://discuss.leetcode.com/topic/29489/clean-java-dp-o-nk-solution-with-o-k-space
-    //hold[i][k]  ith day k transaction have stock and maximum profit
-    //unhold[i][k] ith day k transaction do not have stock at hand and maximum profit
-    public int maxProfit(int k, int[] prices) {
-        if(k>prices.length/2) return maxP(prices);
-        int[][] hold = new int[prices.length][k+1];
-        int[][] unhold = new int[prices.length][k+1];
-        hold[0][0] = -prices[0];
-        for(int i=1;i<prices.length;i++) hold[i][0] = Math.max(hold[i-1][0],-prices[i]);
-        for(int j=1;j<=k;j++) hold[0][j] = -prices[0];
-        for(int i=1;i<prices.length;i++){
-            for(int j=1;j<=k;j++){
-                hold[i][j] = Math.max(unhold[i-1][j]-prices[i],hold[i-1][j]);
-                unhold[i][j] = Math.max(hold[i-1][j-1]+prices[i],unhold[i-1][j]);
-            }
-        }
-        return Math.max(hold[prices.length-1][k],unhold[prices.length-1][k]);
-    }
-    public int maxP(int[] prices){
-        int res =0;
-        for(int i=0;i<prices.length;i++){
-            if(i>0 && prices[i] > prices[i-1]){
-                res += prices[i]-prices[i-1];
-            }
-        }
-        return res;
-    }
-}
+
 
 
 309. Best Time to Buy and Sell Stock with Cooldown
