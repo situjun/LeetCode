@@ -8328,6 +8328,87 @@ public class Solution {
     }
 }
 
+203. Remove Linked List Elements
+//Star
+//Core:dummy,2pointers
+/*170723*/
+public class Solution {
+    public ListNode removeElements(ListNode head, int val) {
+        ListNode dummy = new ListNode(-1);
+        dummy.next= head;
+        ListNode left = dummy,right = left.next;
+        while(right != null){
+            //mark0:== val,left不变，right = right.next;
+            if(right.val == val){
+                left.next = right.next;
+                right = left.next;
+            } else {
+                left = right;
+                right = right.next;
+            }
+        }
+        return dummy.next;
+    }
+}
+
+public class Solution {
+    public ListNode removeElements(ListNode head, int val) {
+        //two pointers
+        //KEY POINT
+        //需要考虑的Coner Case 很多:[]/[1],1/[1],3/[1,3,2,5,6,4,3,2,5,3],3(最后一个3) 
+        //太麻烦
+        if(head == null){
+            return null;
+        }
+        ListNode pointer = head;
+        ListNode noVal = null;
+        ListNode result = null;
+        boolean flag = false;
+        while(pointer != null){
+            if(pointer.val != val) {
+                if(!flag){
+                    noVal = pointer;
+                    result = noVal;
+                    flag = true;
+                } else {
+                    //KEY POINT
+                    //记的noVal最后要移动到下一个位置：noVal = noVal.next;
+                    noVal.next = pointer;
+                    noVal = noVal.next;
+                }
+            } else {
+                //Corner Case:[1,3,2,5,6,4,3,2,5,3],3
+                //要记得处理最后一个3
+                if(pointer.next == null && noVal != null) noVal.next = null;
+            }
+            pointer = pointer.next;
+            
+        }
+        return result;
+    }
+}
+
+204. Count Primes
+//Star
+//Core:prime numbers->质数(Prime numbers can only be divided by one or itself.)
+/*170723*/
+public class Solution {
+    public int countPrimes(int n) {
+        //埃拉托斯特尼筛法 ，简称埃氏筛，是一种简单且年代久远的算法，用来找出一定范围内所有的素数。
+        int count = 0;
+		boolean[] f = new boolean[n];
+		for (int i = 2; i < n; i++) {
+			if(!f[i]){
+				for (int j = 2; j*i < n; j++) {
+					f[j*i] = true;
+				}
+				count++;
+			}
+		}
+		return count;
+    }
+}
+
 205. Isomorphic Strings
 public class Solution {
     public boolean isIsomorphic(String s1, String s2) {
