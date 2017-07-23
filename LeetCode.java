@@ -9943,19 +9943,7 @@ public class Solution {
     }
 }
 
-172. Factorial Trailing Zeroes
-public class Solution {
-    public int trailingZeroes(int n) {
-        //Key:背 Just cp
-        //https://discuss.leetcode.com/topic/6848/my-explanation-of-the-log-n-solution/4
-        int cnt = 0;
-        while(n>0){
-            cnt += n/5;
-            n/=5;
-        }
-        return cnt;
-    }
-}
+
 
 315. Count of Smaller Numbers After Self
 public class Solution {
@@ -11325,6 +11313,24 @@ public class Solution {
             n *= 26;
         }
         return res;
+    }
+}
+
+172. Factorial Trailing Zeroes
+//Star
+//Core:有几个0由5的数量决定
+//mark0:有几个0由5的数量决定
+public class Solution {
+    public int trailingZeroes(int n) {
+        //Key:背 Just cp
+        //https://discuss.leetcode.com/topic/6848/my-explanation-of-the-log-n-solution/4
+        int cnt = 0;
+        while(n>0){
+            //mark0:有几个0由5的数量决定
+            cnt += n/5;
+            n/=5;
+        }
+        return cnt;
     }
 }
 
