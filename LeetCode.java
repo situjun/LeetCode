@@ -7569,6 +7569,739 @@ public class Solution {
 
 163. Missing Ranges - Lock
 
+164. Maximum Gap
+ public class Solution {
+    public int maximumGap(int[] nums) {
+        //Key:cp.背  https://discuss.leetcode.com/topic/22221/radix-sort-solution-in-java-with-explanation/2
+        
+        if (nums == null || nums.length < 2) {
+            return 0;
+        }
+        
+        // m is the maximal number in nums
+        int m = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            m = Math.max(m, nums[i]);
+        }
+        
+        int exp = 1; // 1, 10, 100, 1000 ...
+        int R = 10; // 10 digits
+    
+        int[] aux = new int[nums.length];
+        
+        while (m / exp > 0) { // Go through all digits from LSB to MSB
+            int[] count = new int[R];
+            
+            for (int i = 0; i < nums.length; i++) {
+                count[(nums[i] / exp) % 10]++;
+            }
+            
+            for (int i = 1; i < count.length; i++) {
+                count[i] += count[i - 1];
+            }
+            
+            for (int i = nums.length - 1; i >= 0; i--) {
+                aux[--count[(nums[i] / exp) % 10]] = nums[i];
+            }
+            
+            for (int i = 0; i < nums.length; i++) {
+                nums[i] = aux[i];
+            }
+            exp *= 10;
+        }
+        
+        int max = 0;
+        for (int i = 1; i < aux.length; i++) {
+            max = Math.max(max, aux[i] - aux[i - 1]);
+        }
+         
+        return max;
+        
+    }
+}
+
+165. Compare Version Numbers
+public class Solution {
+    public int compareVersion(String version1, String version2) {
+        //Coner Case:考虑起来很麻烦
+        //直接粘来一个答案
+        String[] levels1 = version1.split("\\.");
+        String[] levels2 = version2.split("\\.");
+        
+        int length = Math.max(levels1.length, levels2.length);
+        for (int i=0; i<length; i++) {
+        	Integer v1 = i < levels1.length ? Integer.parseInt(levels1[i]) : 0;
+        	Integer v2 = i < levels2.length ? Integer.parseInt(levels2[i]) : 0;
+        	int compare = v1.compareTo(v2);
+        	if (compare != 0) {
+        		return compare;
+        	}
+        }
+        
+        return 0;
+    }
+}
+
+166. Fraction to Recurring Decimal
+public class Solution {
+    public String fractionToDecimal(int numerator, int denominator) {
+        //Key:Hard,just cp,背 https://discuss.leetcode.com/topic/7876/my-clean-java-solution
+        
+        if (numerator == 0) {
+            return "0";
+        }
+        StringBuilder res = new StringBuilder();
+        // "+" or "-"
+        res.append(((numerator > 0) ^ (denominator > 0)) ? "-" : "");
+        long num = Math.abs((long)numerator);
+        long den = Math.abs((long)denominator);
+        
+        // integral part
+        res.append(num / den);
+        num %= den;
+        if (num == 0) {
+            return res.toString();
+        }
+        
+        // fractional part
+        res.append(".");
+        HashMap<Long, Integer> map = new HashMap<Long, Integer>();
+        map.put(num, res.length());
+        while (num != 0) {
+            num *= 10;
+            res.append(num / den);
+            num %= den;
+            if (map.containsKey(num)) {
+                int index = map.get(num);
+                res.insert(index, "(");
+                res.append(")");
+                break;
+            }
+            else {
+                map.put(num, res.length());
+            }
+        }
+        return res.toString();
+    }
+}
+
+167. Two Sum II - Input array is sorted
+	//Star
+    //Core:2pointers,T1 map sol也可以
+    //mark0:记得加上break; 否则会因为tmp == target后一直循环
+    /*170721*/
+    public int[] twoSum(int[] numbers, int target) {
+        int index1 = 0,index2 = numbers.length-1;
+        int[] res = new int[2];
+        while(index1 < index2){
+            int tmp = numbers[index1] + numbers[index2];
+            if(tmp == target){
+                res[0] = index1+1;
+                res[1] = index2+1;
+                //mark0:记得加上break; 否则会因为tmp == target后一直循环
+                break;
+            } else if (tmp < target){
+                index1++;
+            } else {
+                index2--;
+            }
+        }
+        return res;
+    }
+
+
+public class Solution {
+    public int[] twoSum(int[] numbers, int target) {
+        //Two pointers 只需要O(n),从两边往中间夹。因为一开始只可能小于<=target。所以省略了一些麻烦的思考。
+        //这道题必须是两个不同的index.Test Case:[2,2,3] 6 不会返回两个2.
+        //这里我用hashMap来解决，也是O(n),开辟额外空间
+        //Corner Case:[0,0,3,4] 0
+        if(numbers.length==0) return null;
+        int[] result = new int[2];
+        // HashMap<Integer,Integer> map = new HashMap<Integer,Integer>();
+        // for(int i=0;i<=numbers.length-1;i++){
+        //     if(map.containsKey(target-numbers[i])){
+        //         result[0] = map.get(target-numbers[i])+1;
+        //         result[1] = i+1;
+        //     }
+        //     map.put(numbers[i],i);
+        // }
+        
+        //Two pointers version
+        int index1=0,index2 = numbers.length-1;
+        boolean flag = false;
+        while(index1<=index2 && !flag){
+            if(numbers[index1]+numbers[index2] < target){
+                index1++;
+            } else if(numbers[index1]+numbers[index2] > target){
+                index2--;
+            } else {
+                result[0] = index1+1;
+                result[1] = index2+1;
+                flag = true;
+            }
+        }
+        return result;
+    }
+}
+
+168. Excel Sheet Column Title
+//Star
+//Core:
+//mark0
+/*170721*/
+public class Solution {
+    public String convertToTitle(int n) {
+        String res = "";
+        int remain = 0;
+        while(n != 0){
+            remain = n%26;
+            n = n/26;
+            //mark1:注意这个26进制A是从1开始的，不是0，所以和一般的十六进制(0~F)，8进制转换不一样.  corner:52 -> AZ
+            if(remain == 0){
+                res = "Z"+res;
+                n--;
+            } else {
+                //mark0:'0' 的 ASCII 不是 0,是48!!!
+                //所以('A'-'0'+1+remain) 是错的!!
+                res = (char)('A'-1+remain) + res;
+            }
+        }
+        return res;
+    }
+}
+
+//Star
+//Core:
+//mark0:注意这个26进制A是从1开始的，不是0，所以和一般的十六进制(0~F)，8进制转换不一样.
+//Coner Case:676 (26*26) 正确输出应该是YZ  25*26+26
+//Test Case:52  正确输出应为AZ
+public class Solution {
+    public String convertToTitle(int n) {
+        //Key Point
+        //类比10进制，这是26进制
+        //Test Case:
+        //More Details Input:26 Output: "A@" Expected:"Z"
+        //input ZZ
+        StringBuilder sb = new StringBuilder();
+        StringBuilder result = new StringBuilder();
+        //sb.append()加的是个逆序过程
+        //这个26进制考虑进位很麻烦
+        //Coner Case:676 (26*26) 正确输出应该是YZ  25*26+26
+        //Test Case:52  正确输出应为AZ
+        while(n !=0){
+            if(n%26 == 0){
+                sb.append((char)(26+64));
+                n -= 26;
+            } else {
+                sb.append((char)(n%26+64));
+            }
+            
+            n = n/26;
+        }
+        for(int i=sb.toString().length()-1;i>=0;i--){
+            result.append(sb.toString().charAt(i));
+        }
+        return result.toString();
+    }
+}
+
+169. Majority Element
+//Star
+//Core
+/*170721*/
+public class Solution {
+    public int majorityElement(int[] nums) {
+        Arrays.sort(nums);
+        return nums[(nums.length-1)/2];
+    }
+}
+
+170. Two Sum III - Data structure design - Lock
+
+171. Excel Sheet Column Number
+//Star
+//Core:T168逆向
+public class Solution {
+    public int titleToNumber(String s) {
+        int n = 1,res = 0;
+        for(int i = s.length()-1;i>=0;i--){
+            res += n*(s.charAt(i)-'A'+1);
+            n *= 26;
+        }
+        return res;
+    }
+}
+
+172. Factorial Trailing Zeroes
+//Star
+//Core:有几个0由5的数量决定
+//mark0:有几个0由5的数量决定
+public class Solution {
+    public int trailingZeroes(int n) {
+        //Key:背 Just cp
+        //https://discuss.leetcode.com/topic/6848/my-explanation-of-the-log-n-solution/4
+        int cnt = 0;
+        while(n>0){
+            //mark0:有几个0由5的数量决定
+            cnt += n/5;
+            n/=5;
+        }
+        return cnt;
+    }
+}
+
+
+173. Binary Search Tree Iterator
+/**
+ * Your BSTIterator will be called like this:
+ * BSTIterator i = new BSTIterator(root);
+ * while (i.hasNext()) v[f()] = i.next();
+ */
+ 
+/**
+ * Definition for binary tree
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+
+public class BSTIterator {
+    //Key:cp,背   https://discuss.leetcode.com/topic/6575/my-solutions-in-3-languages-with-stack/19
+    private Stack<TreeNode> stack = new Stack<TreeNode>();
+    
+    public BSTIterator(TreeNode root) {
+        pushAll(root);
+    }
+
+    /** @return whether we have a next smallest number */
+    public boolean hasNext() {
+        return !stack.isEmpty();
+    }
+
+    /** @return the next smallest number */
+    public int next() {
+        TreeNode tmpNode = stack.pop();
+        pushAll(tmpNode.right);
+        return tmpNode.val;
+    }
+    
+    private void pushAll(TreeNode node) {
+        //下面这个for是原作者sol中的写法，也真是醉了....我改写成了while
+        //for (; node != null; stack.push(node), node = node.left);
+        while(node != null){
+            stack.push(node);
+            node = node.left;
+        }
+    }
+}
+
+174. Dungeon Game - Discard
+
+175. Null
+
+176. Null
+
+177. Null
+
+178. Null
+
+179. Largest Number
+public class Solution {
+    public String largestNumber(int[] nums) {
+        //Key:Hard
+        //Key:这个方法特别巧妙
+        //https://discuss.leetcode.com/topic/8018/my-java-solution-to-share/2
+        //https://discuss.leetcode.com/topic/32442/share-my-fast-java-solution-beat-98-64/2
+        //Key:Key point:
+        /**
+        String s1 = "9";
+        String s2 = "31";
+        
+        String case1 =  s1 + s2; // 931
+        String case2 = s2 + s1; // 319
+        **/
+        if (nums == null || nums.length == 0) return "";
+        String[] strs = new String[nums.length];
+        for (int i = 0; i < nums.length; i++) {
+            strs[i] = nums[i]+"";
+        }
+        Arrays.sort(strs, new Comparator<String>() {
+            @Override
+            public int compare(String i, String j) {
+                String s1 = i+j;
+                String s2 = j+i;
+                return s1.compareTo(s2);
+            }
+        });
+        if (strs[strs.length-1].charAt(0) == '0') return "0";
+        String res = new String();
+        for (int i = 0; i < strs.length; i++) {
+            res = strs[i]+res;
+        }
+        return res;
+    
+    }
+}
+
+180. Null
+
+181. Null
+
+182. Null
+
+183. Null
+
+184. Null
+
+185. Null
+	
+186. Reverse Words in a String II - Lock
+
+187. Repeated DNA Sequences
+//Star
+//Core:用set来排除重复项
+//mark0:用set来确认哪些重复了
+//mark0.1:去除结果中的重复项
+/*170723*/
+public class Solution {
+    public List<String> findRepeatedDnaSequences(String s) {
+        //mark0:用set来确认哪些重复了
+        Set<String> set = new HashSet<>();
+        List<String> res = new ArrayList<>();
+        //mark1:因为i的边界不好确定，所以干脆写成i+9<=s.length()-1
+        for(int i = 0;i+9 <= s.length()-1;i++){
+            String tmp = s.substring(i,i+10); 
+            //mark0.1:corner:"AAAAAAAAAAAAAAAA"  !set.add(tmp)确定哪些重复了,!res.contains(tmp)去除结果中的重复项
+            if(!set.add(tmp) && !res.contains(tmp)) res.add(tmp);
+        }
+        return res;
+    }
+}
+
+public class Solution {
+    public List<String> findRepeatedDnaSequences(String s) {
+        //Key:cp,背   https://discuss.leetcode.com/topic/27517/7-lines-simple-java-o-n
+        //Key:补充解释 https://discuss.leetcode.com/topic/33745/easy-understand-and-straightforward-java-solution
+		
+        Set seen = new HashSet(), repeated = new HashSet();
+        for (int i = 0; i + 9 < s.length(); i++) {
+            String ten = s.substring(i, i + 10);
+            if (!seen.add(ten))
+                repeated.add(ten);
+        }
+        return new ArrayList(repeated);
+    }
+}
+
+188. Best Time to Buy and Sell Stock IV
+//Star
+//Core:状态机，hard
+public class Solution {
+    //Key:Hard,just cp
+    //这两个解法比较容易理解
+	//http://blog.csdn.net/linhuanmars/article/details/23236995
+	//http://www.cnblogs.com/grandyang/p/4295761.html
+    //https://discuss.leetcode.com/topic/24079/easy-understanding-and-can-be-easily-modified-to-different-situations-java-solution/2
+    //https://discuss.leetcode.com/topic/29489/clean-java-dp-o-nk-solution-with-o-k-space
+    //hold[i][k]  ith day k transaction have stock and maximum profit
+    //unhold[i][k] ith day k transaction do not have stock at hand and maximum profit
+    public int maxProfit(int k, int[] prices) {
+        if(k>prices.length/2) return maxP(prices);
+        int[][] hold = new int[prices.length][k+1];
+        int[][] unhold = new int[prices.length][k+1];
+        hold[0][0] = -prices[0];
+        for(int i=1;i<prices.length;i++) hold[i][0] = Math.max(hold[i-1][0],-prices[i]);
+        for(int j=1;j<=k;j++) hold[0][j] = -prices[0];
+        for(int i=1;i<prices.length;i++){
+            for(int j=1;j<=k;j++){
+                hold[i][j] = Math.max(unhold[i-1][j]-prices[i],hold[i-1][j]);
+                unhold[i][j] = Math.max(hold[i-1][j-1]+prices[i],unhold[i-1][j]);
+            }
+        }
+        return Math.max(hold[prices.length-1][k],unhold[prices.length-1][k]);
+    }
+    public int maxP(int[] prices){
+        int res =0;
+        for(int i=0;i<prices.length;i++){
+            if(i>0 && prices[i] > prices[i-1]){
+                res += prices[i]-prices[i-1];
+            }
+        }
+        return res;
+    }
+}
+
+189. Rotate Array
+public class Solution {
+	//Version 1:new array to store the new pos,then restore to nums
+    public void rotate(int[] nums, int k) {
+        //Test Case:[1,2,3,4],5
+        //k可以大于length-1。此题默认k是正数
+		//
+        int length = nums.length;
+        int[] arr = new int[length];
+        int tmp =0;
+        int index=0;
+        for(int i =0;i<=length-1;i++){
+            index = k+i>=length?(k+i)%length:k+i;
+            
+            arr[index] = nums[i];
+        }
+        for(int i =0;i<=length-1;i++){
+            nums[i] = arr[i];
+        }
+    }
+}
+
+190. Reverse Bits
+public class Solution {
+    // you need treat n as an unsigned value
+    public int reverseBits(int n) {
+        //Brute Force 用Stack存储n%2,再逆序相乘
+        //主要还是Bit 操作，看不懂答案
+        
+        //Key：直接调用function的解法
+        //return Integer.reverse(n);
+        
+        //https://discuss.leetcode.com/topic/42572/sharing-my-2ms-java-solution-with-explanation
+        if (n == 0) return 0;
+        int result = 0;
+        for (int i = 0; i < 32; i++) {
+            result <<= 1;
+            if ((n & 1) == 1) result++;
+            n >>= 1;
+        }
+        return result;
+        
+        
+    }
+}
+
+191. Number of 1 Bits
+public class Solution {
+    // you need to treat n as an unsigned value
+    //因为已经提到bits，所以应该是用bit相关操作比较简单，如位移操作等
+    public int hammingWeight(int n) {
+        
+        if(n==0) return 0;
+        int count = 0;
+         for(int i = 0; i < 32; i++){  
+            if ((n & 1) == 1) count++;
+            n >>= 1;
+        }
+        //count 最后多加一次，所以要减掉
+        return count;
+    }
+    /***
+     * //还有这种非算法解法
+    public class Solution {
+    // you need to treat n as an unsigned value
+    public int hammingWeight(int n) {
+        int sum=0;
+        String[] x=Integer.toBinaryString(n).split("");
+        for(int i =0 ;i< x.length;i++){
+            if(x[i].equals("1")) sum++;
+        }
+        return sum;
+    }
+    }
+    
+    **/
+}
+
+192. Null
+
+193. Null
+
+194. Null
+
+195. Null
+
+196. Null
+
+197. Null
+
+198. House Robber
+public class Solution {
+    public int rob(int[] nums) {
+        //typical DP,similar as package problem
+        if(nums == null || nums.length==0) return 0;
+        int length = nums.length;
+        int F[] = new int[length];
+        if(length ==1 ) return nums[0];
+        else if(length ==2) return Math.max(nums[1],nums[0]);
+        F[0] = nums[0];
+        F[1] = Math.max(nums[1],nums[0]);
+        for(int i=2;i<=length-1;i++){
+            F[i] = Math.max(F[i-1],F[i-2]+nums[i]);
+        }
+        return F[length-1];
+    }
+}
+
+public class Solution {
+    public int rob(int[] nums) {
+        int[] dp = new int[nums.length];
+        if(nums.length == 0) return 0;
+        dp[0] = nums[0];
+        if(nums.length == 1) return nums[0];
+        dp[1] = Math.max(nums[0],nums[1]);
+        for(int i = 2;i<=nums.length-1;i++){
+            //Key:因为隔天抢劫，dp[i-2]+nums[i]说明是两天前的状态，也就是说昨天没抢，今天抢没事。dp[i-1]意味着接着昨天的状态，不管他抢没抢，反正今天也不抢，也没事。
+            //Key:状态，和stock cooldown 一起看
+            dp[i] = Math.max(dp[i-2]+nums[i],dp[i-1]);
+        }
+        return dp[nums.length-1];
+    }
+}
+ 
+199. Binary Tree Right Side View
+//Star
+//Core:前序中左右给成中右左，然后加个depth标识一下就好了
+//mark0:
+public class Solution {
+    //Similar to  Binary Tree Inorder Traversal
+    List<Integer> list = new ArrayList<Integer>();
+    int depth = 0;
+    public List<Integer> rightSideView(TreeNode root) {
+        // if(root != null){
+        //     //这道题应该更像是那道求深度的题：Maximum Depth of Binary Tree  
+        //     /***
+        //      * 下面的是错误解法
+        //      * 
+        //      *  //思路也是错的
+        //         //把前序遍历改一下应该就可以了。改  中左右 -> 中右左,且只存“中”这个值，放弃左右child的值
+        //      * 过不了Test case:[1,2,3,4]
+        //      *               1
+        //      *       2               3
+        //      *    4   NIL       NIL    NIL
+        //      *
+        //     list.add(root.val);
+        //     if(root.right != null) rightSideView(root.right);
+        //     else rightSideView(root.left);
+        //     */
+        //     if(list.size() == depth){
+        //         list.add(root.val);
+               
+        //     }
+        //     depth++;
+        //     rightSideView(root.right);
+        //     rightSideView(root.left);
+            
+        // }
+        // return list;
+        rightSide(root,0);
+        return list;
+    }
+    
+    public void rightSide(TreeNode root,int depth) {
+        if(root != null){
+            if(list.size() == depth){
+                list.add(root.val);
+            }
+			//mark0:先right再left
+            rightSide(root.right,depth+1);
+            rightSide(root.left,depth+1);
+        }
+    }
+} 
+
+200. Number of Islands
+public class Solution {
+    //Key:Wrong
+    /**
+    public int numIslands(char[][] grid) {
+        if(grid.length == 0 || grid[0].length == 0) return 0;
+        int count = 0;
+        //Key:判断左上部分是否挨着0即可
+        for(int i = 0;i<=grid.length-1;i++){
+            for(int j = 0;j<=grid[0].length-1;j++){
+                if(grid[i][j] == '1'){
+                    //System.out.println("sdfsdf");
+                    //Key:难点在于这个判断不好写,下面的就是错误的
+                    //Corner  case:["111","010","111"] 工字型
+                    //if(i == 0 && j == 0 || i == 0 && grid[i][j-1] == '0' || j == 0 && grid[i-1][j] == '0' || i>0 && j>0 && grid[i-1][j] == '0'  grid[i][j-1] == '0') count++;
+                }
+            }
+        }
+        return count;
+    }
+    **/
+    
+    //Key:just copy
+    public int numIslands(char[][] grid) {
+        int count = 0;
+        
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[i].length; j++) {
+                if (grid[i][j] == '1') {
+                    count++;
+                    clearRestOfLand(grid, i, j);
+                }
+            }
+        }
+        return count;
+    }
+    
+    private void clearRestOfLand(char[][] grid, int i, int j) {
+        if (i < 0 || j < 0 || i >= grid.length || j >= grid[i].length || grid[i][j] == '0') return;
+        
+        grid[i][j] = '0';
+        clearRestOfLand(grid, i+1, j);
+        clearRestOfLand(grid, i-1, j);
+        clearRestOfLand(grid, i, j+1);
+        clearRestOfLand(grid, i, j-1);
+        return;
+    }
+}
+
+201. Bitwise AND of Numbers Range
+public class Solution {
+    public int rangeBitwiseAnd(int m, int n) {
+        //Key:题没读懂
+        //Key:bit,cp,背  https://discuss.leetcode.com/topic/20176/2-line-solution-with-detailed-explanation
+        while(m<n) n = n & (n-1);
+        return n;
+    }
+}
+
+
+ 
+
+
+205. Isomorphic Strings
+public class Solution {
+    public boolean isIsomorphic(String s1, String s2) {
+        //Key:My wrong version
+        /***
+        //Test case:"ab" "aa"
+        if(s.length() != t.length()) return false;
+        Map<Character,Character> map = new HashMap<>();
+        for(int i = 0;i<=s.length()-1;i++){
+            if(map.containsKey(s.charAt(i))){
+                if(map.get(s.charAt(i)) != t.charAt(i)) return false;
+            } else {
+                map.put(s.charAt(i),t.charAt(i));
+            }
+        }
+        return true;
+        ****/
+
+        //Key:cp,背 https://discuss.leetcode.com/topic/13001/short-java-solution-without-maps/2
+        int[] m = new int[512];
+        for (int i = 0; i < s1.length(); i++) {
+            if (m[s1.charAt(i)] != m[s2.charAt(i)+256]) return false;
+            m[s1.charAt(i)] = m[s2.charAt(i)+256] = i+1;
+        }
+        return true;
+        
+    }
+}
+
 516. Longest Palindromic Subsequence
 /*170527*/
 public class Solution {
@@ -10351,43 +11084,7 @@ public class Solution {
     }
 }
 
-179. Largest Number
-public class Solution {
-    public String largestNumber(int[] nums) {
-        //Key:Hard
-        //Key:这个方法特别巧妙
-        //https://discuss.leetcode.com/topic/8018/my-java-solution-to-share/2
-        //https://discuss.leetcode.com/topic/32442/share-my-fast-java-solution-beat-98-64/2
-        //Key:Key point:
-        /**
-        String s1 = "9";
-        String s2 = "31";
-        
-        String case1 =  s1 + s2; // 931
-        String case2 = s2 + s1; // 319
-        **/
-        if (nums == null || nums.length == 0) return "";
-        String[] strs = new String[nums.length];
-        for (int i = 0; i < nums.length; i++) {
-            strs[i] = nums[i]+"";
-        }
-        Arrays.sort(strs, new Comparator<String>() {
-            @Override
-            public int compare(String i, String j) {
-                String s1 = i+j;
-                String s2 = j+i;
-                return s1.compareTo(s2);
-            }
-        });
-        if (strs[strs.length-1].charAt(0) == '0') return "0";
-        String res = new String();
-        for (int i = 0; i < strs.length; i++) {
-            res = strs[i]+res;
-        }
-        return res;
-    
-    }
-}
+
 
 273. Integer to English Words
 //Key:just cp
@@ -11102,264 +11799,7 @@ public class Solution {
 
 
 
-166. Fraction to Recurring Decimal
-public class Solution {
-    public String fractionToDecimal(int numerator, int denominator) {
-        //Key:Hard,just cp,背 https://discuss.leetcode.com/topic/7876/my-clean-java-solution
-        
-        if (numerator == 0) {
-            return "0";
-        }
-        StringBuilder res = new StringBuilder();
-        // "+" or "-"
-        res.append(((numerator > 0) ^ (denominator > 0)) ? "-" : "");
-        long num = Math.abs((long)numerator);
-        long den = Math.abs((long)denominator);
-        
-        // integral part
-        res.append(num / den);
-        num %= den;
-        if (num == 0) {
-            return res.toString();
-        }
-        
-        // fractional part
-        res.append(".");
-        HashMap<Long, Integer> map = new HashMap<Long, Integer>();
-        map.put(num, res.length());
-        while (num != 0) {
-            num *= 10;
-            res.append(num / den);
-            num %= den;
-            if (map.containsKey(num)) {
-                int index = map.get(num);
-                res.insert(index, "(");
-                res.append(")");
-                break;
-            }
-            else {
-                map.put(num, res.length());
-            }
-        }
-        return res.toString();
-    }
-}
 
-167. Two Sum II - Input array is sorted
-	//Star
-    //Core:2pointers,T1 map sol也可以
-    //mark0:记得加上break; 否则会因为tmp == target后一直循环
-    /*170721*/
-    public int[] twoSum(int[] numbers, int target) {
-        int index1 = 0,index2 = numbers.length-1;
-        int[] res = new int[2];
-        while(index1 < index2){
-            int tmp = numbers[index1] + numbers[index2];
-            if(tmp == target){
-                res[0] = index1+1;
-                res[1] = index2+1;
-                //mark0:记得加上break; 否则会因为tmp == target后一直循环
-                break;
-            } else if (tmp < target){
-                index1++;
-            } else {
-                index2--;
-            }
-        }
-        return res;
-    }
-
-
-public class Solution {
-    public int[] twoSum(int[] numbers, int target) {
-        //Two pointers 只需要O(n),从两边往中间夹。因为一开始只可能小于<=target。所以省略了一些麻烦的思考。
-        //这道题必须是两个不同的index.Test Case:[2,2,3] 6 不会返回两个2.
-        //这里我用hashMap来解决，也是O(n),开辟额外空间
-        //Corner Case:[0,0,3,4] 0
-        if(numbers.length==0) return null;
-        int[] result = new int[2];
-        // HashMap<Integer,Integer> map = new HashMap<Integer,Integer>();
-        // for(int i=0;i<=numbers.length-1;i++){
-        //     if(map.containsKey(target-numbers[i])){
-        //         result[0] = map.get(target-numbers[i])+1;
-        //         result[1] = i+1;
-        //     }
-        //     map.put(numbers[i],i);
-        // }
-        
-        //Two pointers version
-        int index1=0,index2 = numbers.length-1;
-        boolean flag = false;
-        while(index1<=index2 && !flag){
-            if(numbers[index1]+numbers[index2] < target){
-                index1++;
-            } else if(numbers[index1]+numbers[index2] > target){
-                index2--;
-            } else {
-                result[0] = index1+1;
-                result[1] = index2+1;
-                flag = true;
-            }
-        }
-        return result;
-    }
-}
-
-168. Excel Sheet Column Title
-//Star
-//Core:
-//mark0
-/*170721*/
-public class Solution {
-    public String convertToTitle(int n) {
-        String res = "";
-        int remain = 0;
-        while(n != 0){
-            remain = n%26;
-            n = n/26;
-            //mark1:注意这个26进制A是从1开始的，不是0，所以和一般的十六进制(0~F)，8进制转换不一样.  corner:52 -> AZ
-            if(remain == 0){
-                res = "Z"+res;
-                n--;
-            } else {
-                //mark0:'0' 的 ASCII 不是 0,是48!!!
-                //所以('A'-'0'+1+remain) 是错的!!
-                res = (char)('A'-1+remain) + res;
-            }
-        }
-        return res;
-    }
-}
-
-//Star
-//Core:
-//mark0:注意这个26进制A是从1开始的，不是0，所以和一般的十六进制(0~F)，8进制转换不一样.
-//Coner Case:676 (26*26) 正确输出应该是YZ  25*26+26
-//Test Case:52  正确输出应为AZ
-public class Solution {
-    public String convertToTitle(int n) {
-        //Key Point
-        //类比10进制，这是26进制
-        //Test Case:
-        //More Details Input:26 Output: "A@" Expected:"Z"
-        //input ZZ
-        StringBuilder sb = new StringBuilder();
-        StringBuilder result = new StringBuilder();
-        //sb.append()加的是个逆序过程
-        //这个26进制考虑进位很麻烦
-        //Coner Case:676 (26*26) 正确输出应该是YZ  25*26+26
-        //Test Case:52  正确输出应为AZ
-        while(n !=0){
-            if(n%26 == 0){
-                sb.append((char)(26+64));
-                n -= 26;
-            } else {
-                sb.append((char)(n%26+64));
-            }
-            
-            n = n/26;
-        }
-        for(int i=sb.toString().length()-1;i>=0;i--){
-            result.append(sb.toString().charAt(i));
-        }
-        return result.toString();
-    }
-}
-
-169. Majority Element
-//Star
-//Core
-/*170721*/
-public class Solution {
-    public int majorityElement(int[] nums) {
-        Arrays.sort(nums);
-        return nums[(nums.length-1)/2];
-    }
-}
-
-170. Two Sum III - Data structure design - Lock
-
-171. Excel Sheet Column Number
-//Star
-//Core:T168逆向
-public class Solution {
-    public int titleToNumber(String s) {
-        int n = 1,res = 0;
-        for(int i = s.length()-1;i>=0;i--){
-            res += n*(s.charAt(i)-'A'+1);
-            n *= 26;
-        }
-        return res;
-    }
-}
-
-172. Factorial Trailing Zeroes
-//Star
-//Core:有几个0由5的数量决定
-//mark0:有几个0由5的数量决定
-public class Solution {
-    public int trailingZeroes(int n) {
-        //Key:背 Just cp
-        //https://discuss.leetcode.com/topic/6848/my-explanation-of-the-log-n-solution/4
-        int cnt = 0;
-        while(n>0){
-            //mark0:有几个0由5的数量决定
-            cnt += n/5;
-            n/=5;
-        }
-        return cnt;
-    }
-}
-
-
-173. Binary Search Tree Iterator
-/**
- * Your BSTIterator will be called like this:
- * BSTIterator i = new BSTIterator(root);
- * while (i.hasNext()) v[f()] = i.next();
- */
- 
-/**
- * Definition for binary tree
- * public class TreeNode {
- *     int val;
- *     TreeNode left;
- *     TreeNode right;
- *     TreeNode(int x) { val = x; }
- * }
- */
-
-public class BSTIterator {
-    //Key:cp,背   https://discuss.leetcode.com/topic/6575/my-solutions-in-3-languages-with-stack/19
-    private Stack<TreeNode> stack = new Stack<TreeNode>();
-    
-    public BSTIterator(TreeNode root) {
-        pushAll(root);
-    }
-
-    /** @return whether we have a next smallest number */
-    public boolean hasNext() {
-        return !stack.isEmpty();
-    }
-
-    /** @return the next smallest number */
-    public int next() {
-        TreeNode tmpNode = stack.pop();
-        pushAll(tmpNode.right);
-        return tmpNode.val;
-    }
-    
-    private void pushAll(TreeNode node) {
-        //下面这个for是原作者sol中的写法，也真是醉了....我改写成了while
-        //for (; node != null; stack.push(node), node = node.left);
-        while(node != null){
-            stack.push(node);
-            node = node.left;
-        }
-    }
-}
-
-174. Dungeon Game - Discard
 
 
 561. Array Partition I
@@ -11489,403 +11929,9 @@ public class Solution {
  
 	
  
- 164. Maximum Gap
- public class Solution {
-    public int maximumGap(int[] nums) {
-        //Key:cp.背  https://discuss.leetcode.com/topic/22221/radix-sort-solution-in-java-with-explanation/2
-        
-        if (nums == null || nums.length < 2) {
-            return 0;
-        }
-        
-        // m is the maximal number in nums
-        int m = nums[0];
-        for (int i = 1; i < nums.length; i++) {
-            m = Math.max(m, nums[i]);
-        }
-        
-        int exp = 1; // 1, 10, 100, 1000 ...
-        int R = 10; // 10 digits
-    
-        int[] aux = new int[nums.length];
-        
-        while (m / exp > 0) { // Go through all digits from LSB to MSB
-            int[] count = new int[R];
-            
-            for (int i = 0; i < nums.length; i++) {
-                count[(nums[i] / exp) % 10]++;
-            }
-            
-            for (int i = 1; i < count.length; i++) {
-                count[i] += count[i - 1];
-            }
-            
-            for (int i = nums.length - 1; i >= 0; i--) {
-                aux[--count[(nums[i] / exp) % 10]] = nums[i];
-            }
-            
-            for (int i = 0; i < nums.length; i++) {
-                nums[i] = aux[i];
-            }
-            exp *= 10;
-        }
-        
-        int max = 0;
-        for (int i = 1; i < aux.length; i++) {
-            max = Math.max(max, aux[i] - aux[i - 1]);
-        }
-         
-        return max;
-        
-    }
-}
-
-165. Compare Version Numbers
-public class Solution {
-    public int compareVersion(String version1, String version2) {
-        //Coner Case:考虑起来很麻烦
-        //直接粘来一个答案
-        String[] levels1 = version1.split("\\.");
-        String[] levels2 = version2.split("\\.");
-        
-        int length = Math.max(levels1.length, levels2.length);
-        for (int i=0; i<length; i++) {
-        	Integer v1 = i < levels1.length ? Integer.parseInt(levels1[i]) : 0;
-        	Integer v2 = i < levels2.length ? Integer.parseInt(levels2[i]) : 0;
-        	int compare = v1.compareTo(v2);
-        	if (compare != 0) {
-        		return compare;
-        	}
-        }
-        
-        return 0;
-    }
-}
-
-201. Bitwise AND of Numbers Range
-public class Solution {
-    public int rangeBitwiseAnd(int m, int n) {
-        //Key:题没读懂
-        //Key:bit,cp,背  https://discuss.leetcode.com/topic/20176/2-line-solution-with-detailed-explanation
-        while(m<n) n = n & (n-1);
-        return n;
-    }
-}
-
-187. Repeated DNA Sequences
-//Star
-//Core:用set来排除重复项
-//mark0:用set来确认哪些重复了
-//mark0.1:去除结果中的重复项
-/*170723*/
-public class Solution {
-    public List<String> findRepeatedDnaSequences(String s) {
-        //mark0:用set来确认哪些重复了
-        Set<String> set = new HashSet<>();
-        List<String> res = new ArrayList<>();
-        //mark1:因为i的边界不好确定，所以干脆写成i+9<=s.length()-1
-        for(int i = 0;i+9 <= s.length()-1;i++){
-            String tmp = s.substring(i,i+10); 
-            //mark0.1:corner:"AAAAAAAAAAAAAAAA"  !set.add(tmp)确定哪些重复了,!res.contains(tmp)去除结果中的重复项
-            if(!set.add(tmp) && !res.contains(tmp)) res.add(tmp);
-        }
-        return res;
-    }
-}
-
-public class Solution {
-    public List<String> findRepeatedDnaSequences(String s) {
-        //Key:cp,背   https://discuss.leetcode.com/topic/27517/7-lines-simple-java-o-n
-        //Key:补充解释 https://discuss.leetcode.com/topic/33745/easy-understand-and-straightforward-java-solution
-		
-        Set seen = new HashSet(), repeated = new HashSet();
-        for (int i = 0; i + 9 < s.length(); i++) {
-            String ten = s.substring(i, i + 10);
-            if (!seen.add(ten))
-                repeated.add(ten);
-        }
-        return new ArrayList(repeated);
-    }
-}
-
-188. Best Time to Buy and Sell Stock IV
-//Star
-//Core:状态机，hard
-public class Solution {
-    //Key:Hard,just cp
-    //这两个解法比较容易理解
-	//http://blog.csdn.net/linhuanmars/article/details/23236995
-	//http://www.cnblogs.com/grandyang/p/4295761.html
-    //https://discuss.leetcode.com/topic/24079/easy-understanding-and-can-be-easily-modified-to-different-situations-java-solution/2
-    //https://discuss.leetcode.com/topic/29489/clean-java-dp-o-nk-solution-with-o-k-space
-    //hold[i][k]  ith day k transaction have stock and maximum profit
-    //unhold[i][k] ith day k transaction do not have stock at hand and maximum profit
-    public int maxProfit(int k, int[] prices) {
-        if(k>prices.length/2) return maxP(prices);
-        int[][] hold = new int[prices.length][k+1];
-        int[][] unhold = new int[prices.length][k+1];
-        hold[0][0] = -prices[0];
-        for(int i=1;i<prices.length;i++) hold[i][0] = Math.max(hold[i-1][0],-prices[i]);
-        for(int j=1;j<=k;j++) hold[0][j] = -prices[0];
-        for(int i=1;i<prices.length;i++){
-            for(int j=1;j<=k;j++){
-                hold[i][j] = Math.max(unhold[i-1][j]-prices[i],hold[i-1][j]);
-                unhold[i][j] = Math.max(hold[i-1][j-1]+prices[i],unhold[i-1][j]);
-            }
-        }
-        return Math.max(hold[prices.length-1][k],unhold[prices.length-1][k]);
-    }
-    public int maxP(int[] prices){
-        int res =0;
-        for(int i=0;i<prices.length;i++){
-            if(i>0 && prices[i] > prices[i-1]){
-                res += prices[i]-prices[i-1];
-            }
-        }
-        return res;
-    }
-}
-
-189. Rotate Array
-public class Solution {
-	//Version 1:new array to store the new pos,then restore to nums
-    public void rotate(int[] nums, int k) {
-        //Test Case:[1,2,3,4],5
-        //k可以大于length-1。此题默认k是正数
-		//
-        int length = nums.length;
-        int[] arr = new int[length];
-        int tmp =0;
-        int index=0;
-        for(int i =0;i<=length-1;i++){
-            index = k+i>=length?(k+i)%length:k+i;
-            
-            arr[index] = nums[i];
-        }
-        for(int i =0;i<=length-1;i++){
-            nums[i] = arr[i];
-        }
-    }
-}
-
-190. Reverse Bits
-public class Solution {
-    // you need treat n as an unsigned value
-    public int reverseBits(int n) {
-        //Brute Force 用Stack存储n%2,再逆序相乘
-        //主要还是Bit 操作，看不懂答案
-        
-        //Key：直接调用function的解法
-        //return Integer.reverse(n);
-        
-        //https://discuss.leetcode.com/topic/42572/sharing-my-2ms-java-solution-with-explanation
-        if (n == 0) return 0;
-        int result = 0;
-        for (int i = 0; i < 32; i++) {
-            result <<= 1;
-            if ((n & 1) == 1) result++;
-            n >>= 1;
-        }
-        return result;
-        
-        
-    }
-}
-
-191. Number of 1 Bits
-public class Solution {
-    // you need to treat n as an unsigned value
-    //因为已经提到bits，所以应该是用bit相关操作比较简单，如位移操作等
-    public int hammingWeight(int n) {
-        
-        if(n==0) return 0;
-        int count = 0;
-         for(int i = 0; i < 32; i++){  
-            if ((n & 1) == 1) count++;
-            n >>= 1;
-        }
-        //count 最后多加一次，所以要减掉
-        return count;
-    }
-    /***
-     * //还有这种非算法解法
-    public class Solution {
-    // you need to treat n as an unsigned value
-    public int hammingWeight(int n) {
-        int sum=0;
-        String[] x=Integer.toBinaryString(n).split("");
-        for(int i =0 ;i< x.length;i++){
-            if(x[i].equals("1")) sum++;
-        }
-        return sum;
-    }
-    }
-    
-    **/
-}
  
-198. House Robber
-public class Solution {
-    public int rob(int[] nums) {
-        //typical DP,similar as package problem
-        if(nums == null || nums.length==0) return 0;
-        int length = nums.length;
-        int F[] = new int[length];
-        if(length ==1 ) return nums[0];
-        else if(length ==2) return Math.max(nums[1],nums[0]);
-        F[0] = nums[0];
-        F[1] = Math.max(nums[1],nums[0]);
-        for(int i=2;i<=length-1;i++){
-            F[i] = Math.max(F[i-1],F[i-2]+nums[i]);
-        }
-        return F[length-1];
-    }
-}
 
-public class Solution {
-    public int rob(int[] nums) {
-        int[] dp = new int[nums.length];
-        if(nums.length == 0) return 0;
-        dp[0] = nums[0];
-        if(nums.length == 1) return nums[0];
-        dp[1] = Math.max(nums[0],nums[1]);
-        for(int i = 2;i<=nums.length-1;i++){
-            //Key:因为隔天抢劫，dp[i-2]+nums[i]说明是两天前的状态，也就是说昨天没抢，今天抢没事。dp[i-1]意味着接着昨天的状态，不管他抢没抢，反正今天也不抢，也没事。
-            //Key:状态，和stock cooldown 一起看
-            dp[i] = Math.max(dp[i-2]+nums[i],dp[i-1]);
-        }
-        return dp[nums.length-1];
-    }
-}
- 
-199. Binary Tree Right Side View
-//Star
-//Core:前序中左右给成中右左，然后加个depth标识一下就好了
-//mark0:
-public class Solution {
-    //Similar to  Binary Tree Inorder Traversal
-    List<Integer> list = new ArrayList<Integer>();
-    int depth = 0;
-    public List<Integer> rightSideView(TreeNode root) {
-        // if(root != null){
-        //     //这道题应该更像是那道求深度的题：Maximum Depth of Binary Tree  
-        //     /***
-        //      * 下面的是错误解法
-        //      * 
-        //      *  //思路也是错的
-        //         //把前序遍历改一下应该就可以了。改  中左右 -> 中右左,且只存“中”这个值，放弃左右child的值
-        //      * 过不了Test case:[1,2,3,4]
-        //      *               1
-        //      *       2               3
-        //      *    4   NIL       NIL    NIL
-        //      *
-        //     list.add(root.val);
-        //     if(root.right != null) rightSideView(root.right);
-        //     else rightSideView(root.left);
-        //     */
-        //     if(list.size() == depth){
-        //         list.add(root.val);
-               
-        //     }
-        //     depth++;
-        //     rightSideView(root.right);
-        //     rightSideView(root.left);
-            
-        // }
-        // return list;
-        rightSide(root,0);
-        return list;
-    }
-    
-    public void rightSide(TreeNode root,int depth) {
-        if(root != null){
-            if(list.size() == depth){
-                list.add(root.val);
-            }
-			//mark0:先right再left
-            rightSide(root.right,depth+1);
-            rightSide(root.left,depth+1);
-        }
-    }
-} 
 
-200. Number of Islands
-public class Solution {
-    //Key:Wrong
-    /**
-    public int numIslands(char[][] grid) {
-        if(grid.length == 0 || grid[0].length == 0) return 0;
-        int count = 0;
-        //Key:判断左上部分是否挨着0即可
-        for(int i = 0;i<=grid.length-1;i++){
-            for(int j = 0;j<=grid[0].length-1;j++){
-                if(grid[i][j] == '1'){
-                    //System.out.println("sdfsdf");
-                    //Key:难点在于这个判断不好写,下面的就是错误的
-                    //Corner  case:["111","010","111"] 工字型
-                    //if(i == 0 && j == 0 || i == 0 && grid[i][j-1] == '0' || j == 0 && grid[i-1][j] == '0' || i>0 && j>0 && grid[i-1][j] == '0'  grid[i][j-1] == '0') count++;
-                }
-            }
-        }
-        return count;
-    }
-    **/
-    
-    //Key:just copy
-    public int numIslands(char[][] grid) {
-        int count = 0;
-        
-        for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid[i].length; j++) {
-                if (grid[i][j] == '1') {
-                    count++;
-                    clearRestOfLand(grid, i, j);
-                }
-            }
-        }
-        return count;
-    }
-    
-    private void clearRestOfLand(char[][] grid, int i, int j) {
-        if (i < 0 || j < 0 || i >= grid.length || j >= grid[i].length || grid[i][j] == '0') return;
-        
-        grid[i][j] = '0';
-        clearRestOfLand(grid, i+1, j);
-        clearRestOfLand(grid, i-1, j);
-        clearRestOfLand(grid, i, j+1);
-        clearRestOfLand(grid, i, j-1);
-        return;
-    }
-}
-
-205. Isomorphic Strings
-public class Solution {
-    public boolean isIsomorphic(String s1, String s2) {
-        //Key:My wrong version
-        /***
-        //Test case:"ab" "aa"
-        if(s.length() != t.length()) return false;
-        Map<Character,Character> map = new HashMap<>();
-        for(int i = 0;i<=s.length()-1;i++){
-            if(map.containsKey(s.charAt(i))){
-                if(map.get(s.charAt(i)) != t.charAt(i)) return false;
-            } else {
-                map.put(s.charAt(i),t.charAt(i));
-            }
-        }
-        return true;
-        ****/
-
-        //Key:cp,背 https://discuss.leetcode.com/topic/13001/short-java-solution-without-maps/2
-        int[] m = new int[512];
-        for (int i = 0; i < s1.length(); i++) {
-            if (m[s1.charAt(i)] != m[s2.charAt(i)+256]) return false;
-            m[s1.charAt(i)] = m[s2.charAt(i)+256] = i+1;
-        }
-        return true;
-        
-    }
-}
 
 225. Implement Stack using Queues
 public class MyStack {
@@ -14793,38 +14839,6 @@ public class Solution {
         return length1 == index1?true:false;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
