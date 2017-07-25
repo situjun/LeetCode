@@ -8410,11 +8410,38 @@ public class Solution {
 }
 
 205. Isomorphic Strings
+//Star
+//Core:containsKey()单向映射是错的，要写成双向映射   s中的char和t中的char对应一个第三方值x,比较对应的x
+//http://www.cnblogs.com/grandyang/p/4465779.html
+//mark0:corner:"ab" "aa" 或者 corner:"ab","bc"
+//他这个sol较好，s中的char和t中的char对应一个第三方值x，省去了双向映射的一些麻烦地方
+//mark0
+//mark0.2
 public class Solution {
-    public boolean isIsomorphic(String s1, String s2) {
+    /*170724*/
+    public boolean isIsomorphic(String s, String t) {
+        //Version grandyang:同时对应第三方值x
+        //mark0.1:ASCII码只有256个字符
+
+        int[] arr1 = new int[256];
+        int[] arr2 = new int[256];
+        //mark0.2:x从>0开始。array填充的都是0,如果x=0，第一对char即使符合，也还是设置为0，干扰了....
+        int x = 1;
+        if(s.length() != t.length()) return false;
+        for(int i = 0;i<=s.length()-1;i++){
+            char ss = s.charAt(i),tt = t.charAt(i);
+            if(arr1[ss-0] != arr2[tt-0]){
+                return false;
+            } 
+            arr1[ss-0] = x;
+            arr2[tt-0] = x;
+            x++;
+            
+        }
+        return true;
         //Key:My wrong version
         /***
-        //Test case:"ab" "aa"
+        //mark0:corner:"ab" "aa" 或者 corner:"ab","bc"
         if(s.length() != t.length()) return false;
         Map<Character,Character> map = new HashMap<>();
         for(int i = 0;i<=s.length()-1;i++){
@@ -8426,15 +8453,49 @@ public class Solution {
         }
         return true;
         ****/
+        //mark0:改写成双向映射太麻烦
+        /*
+        if(!map.containsKey(s.charAt(i)) && !map.containsKey(t.charAt(i))){
+                map.put(s.charAt(i),t.charAt(i));
+                map.put(t.charAt(i),s.charAt(i));
+            } else if(map.containsKey(s.charAt(i)) && map.containsKey(t.charAt(i)){
+                map.get(s.charAt(i));
+                .
+                .
+                .
+                .
+                .
+            }
+        */
 
         //Key:cp,背 https://discuss.leetcode.com/topic/13001/short-java-solution-without-maps/2
-        int[] m = new int[512];
-        for (int i = 0; i < s1.length(); i++) {
-            if (m[s1.charAt(i)] != m[s2.charAt(i)+256]) return false;
-            m[s1.charAt(i)] = m[s2.charAt(i)+256] = i+1;
-        }
-        return true;
+        /*
+            int[] m = new int[512];
+            for (int i = 0; i < s1.length(); i++) {
+                if (m[s1.charAt(i)] != m[s2.charAt(i)+256]) return false;
+                m[s1.charAt(i)] = m[s2.charAt(i)+256] = i+1;
+            }
+            return true;
+        */
         
+    }
+}
+
+206. Reverse Linked List
+public class Solution {
+    public ListNode reverseList(ListNode head) {
+        //Key point:记录下prev和current和一个临时tmp(current.next),然后current.next->prev,移动至tmp，loop循环做。
+        //Key point:为了减少head干扰，并且为了和tail node一致处理，从第二个节点开始while
+        if(head == null) return null;
+        ListNode tmp = new ListNode(0),node = head.next,prev = head;
+        while(node != null){
+            tmp = node.next;
+            node.next = prev;
+            prev = node;
+            node = tmp;
+        }
+        head.next = null;
+        return prev;
     }
 }
 
