@@ -11699,11 +11699,36 @@ public class Trie {
  */
 
  209. Minimum Size Subarray Sum
+//Star
+//Core:
+//1.brute force
+//2.2 poitners
+//3.dp
 public class Solution {
     public int minSubArrayLen(int s, int[] nums) {
         //Key:最简单是Brute Force --> O(n^2)
         //Key:2 pointers --> O(n),Just cp  https://discuss.leetcode.com/topic/18583/accepted-clean-java-o-n-solution-two-pointers
         
+		//170725
+		//Wrong
+        /*
+            int n = nums.length,index1 = 0,index2 = 0,sum = 0,res = n;
+            while(index2 <= n-1){
+                if(index1 > index2) {
+                    index2++;
+                    continue;
+                }
+                if(sum < s){
+                    sum += nums[index2];
+                    index2++;
+                } else {
+                    res = Math.min(res,index2+1-index1);
+                    sum -= nums[index1++];
+                }
+            }
+            return res;
+        */
+		
         if (nums == null || nums.length == 0) return 0;
         int i = 0, j = 0, sum = 0, min = Integer.MAX_VALUE;
         while (j < nums.length) {
