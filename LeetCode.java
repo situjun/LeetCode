@@ -745,15 +745,57 @@ public class Solution {
 }
 
 8. String to Integer (atoi)
+//Star
+//Core:if(tmp - '0' >= 0 && tmp - '0' <=9) res = res*10 + (tmp-'0');
+//Summary:"+","-"," 01 ",                
+//1."-","+"  -> mark0.1  
+//2,"-123a12 3111"  expected:"-123" 只是非数字后面的不要了 mark0
+//3.overflow
+//4.str.trim()
+//5."" -> 0
+//mark0:Corner:"-123a12 3111"  expected:"-123" 非数字字符后面的不要了，但是前面的还要....
+//mark0.1:Corner:"+1" -> "1" 这道题的确是非常没有意义的题....
+//mark0.2:trim()  corner:"    010" expected:10
+//mark0.3:"" -> 0
+//mark1:overflow
+/*170727*/
+public class Solution {
+    public int myAtoi(String str) {
+        //mark0.3:"" -> 0
+        str = str.trim();
+        int n = str.length();
+        if(n == 0) return 0;
+        //mark1:overflow
+        long res = 0;
+        boolean neg = str.charAt(0) == '-'?true:false;
+        //mark0.1:Corner:"+1" -> "1" 这道题的确是非常没有意义的题....
+        for(int i = (str.charAt(0) == '-' || str.charAt(0) == '+'?1:0);i<=n-1;i++){
+            char tmp = str.charAt(i);
+            if(tmp - '0' >= 0 && tmp - '0' <=9){
+                res = res*10 + (tmp-'0');
+                //mark1:overflow
+                if(neg && -res < Integer.MIN_VALUE) return Integer.MIN_VALUE;
+                if(!neg && res > Integer.MAX_VALUE) return Integer.MAX_VALUE;
+            } else {
+                //mark0:
+                return neg?(int)-res:(int)res;
+            }
+        }
+        return neg?(int)-res:(int)res;
+    }
+}
+
 public class Solution {
     public int myAtoi(String str) {
         //Key:背   https://discuss.leetcode.com/topic/12473/java-solution-with-4-steps-explanations/6
         
         int i = 0;
+		//mark1
         str = str.trim();        
         char[] c = str.toCharArray();
         
         int sign = 1;
+		//mark2
         if (i < c.length && (c[i] == '-' || c[i] == '+')) {
             if (c[i] == '-') {
                 sign = -1;
@@ -763,9 +805,11 @@ public class Solution {
         
         int num = 0;
         int bound = Integer.MAX_VALUE / 10;
+		//mark3
         while (i < c.length && c[i] >= '0' && c[i] <= '9') {
             int digit = c[i] - '0';
             if (num > bound || (num == bound && digit > 7)) {
+				//mark4
                 return sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
             }
             num = num * 10 + digit;
