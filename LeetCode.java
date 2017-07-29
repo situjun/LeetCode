@@ -8499,6 +8499,104 @@ public class Solution {
     }
 }
 
+207. Course Schedule
+public class Solution {
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        //Key:Hard  
+        //拓扑排序思路就是，入度为0的点持续排出。如果课程有效的话，则必然有个入度为0的课程，否则肯定全部都为环了....
+        //https://discuss.leetcode.com/topic/13854/easy-bfs-topological-sort-java
+        //Key:配合着这篇文章来看topological sort  http://www.cnblogs.com/easonliu/p/4483437.html
+        //Key:改写了点变量名称，以方便理解
+        //i->j是否存在边
+        int[][] edges = new int[numCourses][numCourses]; // i -> j
+        //每个点的入度
+        int[] indegree = new int[numCourses];
+        
+        for (int i=0; i<prerequisites.length; i++) {
+            int ready = prerequisites[i][0];
+            int pre = prerequisites[i][1];
+            //Key:先统计每个点的入度情况，实际上就是prerequisites中的后续课程情况
+            //下面的两句合起来看，如果存在edges[pre][ready]，则入度++，赋值为1只是为了与0区分，避免重复计算，其实赋值为任何数字都可以
+            if (edges[pre][ready] == 0)  indegree[ready]++; 
+            edges[pre][ready] = 1;
+        }
+        
+        int count = 0;
+        Queue<Integer> queue = new LinkedList();
+        for (int i=0; i<indegree.length; i++) {
+            //先把入度为0的加入队列
+            if (indegree[i] == 0) queue.offer(i);
+        }
+        while (!queue.isEmpty()) {
+            int course = queue.poll();
+            count++;
+            for (int i=0; i<numCourses; i++) {
+                if (edges[course][i] != 0) {
+                    if (--indegree[i] == 0)
+                        queue.offer(i);
+                }
+            }
+        }
+        return count == numCourses;
+    }
+}
+
+208. Implement Trie (Prefix Tree)
+//Key:cp,背   https://discuss.leetcode.com/topic/19221/ac-java-solution-simple-using-single-array/2
+class TrieNode {
+    public boolean isWord; 
+    public TrieNode[] children = new TrieNode[26];
+    public TrieNode() {}
+}
+
+public class Trie {
+    private TrieNode root;
+    public Trie() {
+        root = new TrieNode();
+    }
+
+    public void insert(String word) {
+        TrieNode ws = root;
+        for(int i = 0; i < word.length(); i++){
+            char c = word.charAt(i);
+            if(ws.children[c - 'a'] == null){
+                ws.children[c - 'a'] = new TrieNode();
+            }
+            ws = ws.children[c - 'a'];
+        }
+        ws.isWord = true;
+    }
+
+    public boolean search(String word) {
+        TrieNode ws = root; 
+        for(int i = 0; i < word.length(); i++){
+            char c = word.charAt(i);
+            if(ws.children[c - 'a'] == null) return false;
+            ws = ws.children[c - 'a'];
+        }
+        return ws.isWord;
+    }
+
+    public boolean startsWith(String prefix) {
+        TrieNode ws = root; 
+        for(int i = 0; i < prefix.length(); i++){
+            char c = prefix.charAt(i);
+            if(ws.children[c - 'a'] == null) return false;
+            ws = ws.children[c - 'a'];
+        }
+        return true;
+    }
+}
+
+/**
+ * Your Trie object will be instantiated and called as such:
+ * Trie obj = new Trie();
+ * obj.insert(word);
+ * boolean param_2 = obj.search(word);
+ * boolean param_3 = obj.startsWith(prefix);
+ */
+
+
 516. Longest Palindromic Subsequence
 /*170527*/
 public class Solution {
@@ -11601,47 +11699,56 @@ public class Solution {
     }
 }
 
-207. Course Schedule
+209. Minimum Size Subarray Sum
 public class Solution {
-    public boolean canFinish(int numCourses, int[][] prerequisites) {
-        //Key:Hard  
-        //拓扑排序思路就是，入度为0的点持续排出。如果课程有效的话，则必然有个入度为0的课程，否则肯定全部都为环了....
-        //https://discuss.leetcode.com/topic/13854/easy-bfs-topological-sort-java
-        //Key:配合着这篇文章来看topological sort  http://www.cnblogs.com/easonliu/p/4483437.html
-        //Key:改写了点变量名称，以方便理解
-        //i->j是否存在边
-        int[][] edges = new int[numCourses][numCourses]; // i -> j
-        //每个点的入度
-        int[] indegree = new int[numCourses];
+    public int minSubArrayLen(int s, int[] nums) {
+        //Key:最简单是Brute Force --> O(n^2)
+        //Key:2 pointers --> O(n),Just cp  https://discuss.leetcode.com/topic/18583/accepted-clean-java-o-n-solution-two-pointers
         
-        for (int i=0; i<prerequisites.length; i++) {
-            int ready = prerequisites[i][0];
-            int pre = prerequisites[i][1];
-            //Key:先统计每个点的入度情况，实际上就是prerequisites中的后续课程情况
-            //下面的两句合起来看，如果存在edges[pre][ready]，则入度++，赋值为1只是为了与0区分，避免重复计算，其实赋值为任何数字都可以
-            if (edges[pre][ready] == 0)  indegree[ready]++; 
-            edges[pre][ready] = 1;
-        }
-        
-        int count = 0;
-        Queue<Integer> queue = new LinkedList();
-        for (int i=0; i<indegree.length; i++) {
-            //先把入度为0的加入队列
-            if (indegree[i] == 0) queue.offer(i);
-        }
-        while (!queue.isEmpty()) {
-            int course = queue.poll();
-            count++;
-            for (int i=0; i<numCourses; i++) {
-                if (edges[course][i] != 0) {
-                    if (--indegree[i] == 0)
-                        queue.offer(i);
-                }
+        if (nums == null || nums.length == 0) return 0;
+        int i = 0, j = 0, sum = 0, min = Integer.MAX_VALUE;
+        while (j < nums.length) {
+            sum += nums[j++];
+            while (sum >= s) {
+                min = Math.min(min, j - i);
+                sum -= nums[i++];
             }
         }
-        return count == numCourses;
+        return min == Integer.MAX_VALUE ? 0 : min;
+        
+        
+        //Key:O(NlogN)   https://discuss.leetcode.com/topic/13749/two-ac-solutions-in-java-with-time-complexity-of-n-and-nlogn-with-explanation
+        
+        /**
+        
+        private int solveNLogN(int s, int[] nums) {
+            int[] sums = new int[nums.length + 1];
+            for (int i = 1; i < sums.length; i++) sums[i] = sums[i - 1] + nums[i - 1];
+            int minLen = Integer.MAX_VALUE;
+            for (int i = 0; i < sums.length; i++) {
+                int end = binarySearch(i + 1, sums.length - 1, sums[i] + s, sums);
+                if (end == sums.length) break;
+                if (end - i < minLen) minLen = end - i;
+            }
+            return minLen == Integer.MAX_VALUE ? 0 : minLen;
+        }
+        
+        private int binarySearch(int lo, int hi, int key, int[] sums) {
+            while (lo <= hi) {
+               int mid = (lo + hi) / 2;
+               if (sums[mid] >= key){
+                   hi = mid - 1;
+               } else {
+                   lo = mid + 1;
+               }
+            }
+            return lo;
+        }
+        
+        **/
     }
 }
+
 
 210. Course Schedule II
 public class Solution {
@@ -11879,55 +11986,6 @@ public class Solution {
 
 
 
-209. Minimum Size Subarray Sum
-public class Solution {
-    public int minSubArrayLen(int s, int[] nums) {
-        //Key:最简单是Brute Force --> O(n^2)
-        //Key:2 pointers --> O(n),Just cp  https://discuss.leetcode.com/topic/18583/accepted-clean-java-o-n-solution-two-pointers
-        
-        if (nums == null || nums.length == 0) return 0;
-        int i = 0, j = 0, sum = 0, min = Integer.MAX_VALUE;
-        while (j < nums.length) {
-            sum += nums[j++];
-            while (sum >= s) {
-                min = Math.min(min, j - i);
-                sum -= nums[i++];
-            }
-        }
-        return min == Integer.MAX_VALUE ? 0 : min;
-        
-        
-        //Key:O(NlogN)   https://discuss.leetcode.com/topic/13749/two-ac-solutions-in-java-with-time-complexity-of-n-and-nlogn-with-explanation
-        
-        /**
-        
-        private int solveNLogN(int s, int[] nums) {
-            int[] sums = new int[nums.length + 1];
-            for (int i = 1; i < sums.length; i++) sums[i] = sums[i - 1] + nums[i - 1];
-            int minLen = Integer.MAX_VALUE;
-            for (int i = 0; i < sums.length; i++) {
-                int end = binarySearch(i + 1, sums.length - 1, sums[i] + s, sums);
-                if (end == sums.length) break;
-                if (end - i < minLen) minLen = end - i;
-            }
-            return minLen == Integer.MAX_VALUE ? 0 : minLen;
-        }
-        
-        private int binarySearch(int lo, int hi, int key, int[] sums) {
-            while (lo <= hi) {
-               int mid = (lo + hi) / 2;
-               if (sums[mid] >= key){
-                   hi = mid - 1;
-               } else {
-                   lo = mid + 1;
-               }
-            }
-            return lo;
-        }
-        
-        **/
-    }
-}
 
 560. Subarray Sum Equals K
 public class Solution {
@@ -12350,60 +12408,6 @@ class MyQueue {
     }
 }
 
-208. Implement Trie (Prefix Tree)
-//Key:cp,背   https://discuss.leetcode.com/topic/19221/ac-java-solution-simple-using-single-array/2
-class TrieNode {
-    public boolean isWord; 
-    public TrieNode[] children = new TrieNode[26];
-    public TrieNode() {}
-}
-
-public class Trie {
-    private TrieNode root;
-    public Trie() {
-        root = new TrieNode();
-    }
-
-    public void insert(String word) {
-        TrieNode ws = root;
-        for(int i = 0; i < word.length(); i++){
-            char c = word.charAt(i);
-            if(ws.children[c - 'a'] == null){
-                ws.children[c - 'a'] = new TrieNode();
-            }
-            ws = ws.children[c - 'a'];
-        }
-        ws.isWord = true;
-    }
-
-    public boolean search(String word) {
-        TrieNode ws = root; 
-        for(int i = 0; i < word.length(); i++){
-            char c = word.charAt(i);
-            if(ws.children[c - 'a'] == null) return false;
-            ws = ws.children[c - 'a'];
-        }
-        return ws.isWord;
-    }
-
-    public boolean startsWith(String prefix) {
-        TrieNode ws = root; 
-        for(int i = 0; i < prefix.length(); i++){
-            char c = prefix.charAt(i);
-            if(ws.children[c - 'a'] == null) return false;
-            ws = ws.children[c - 'a'];
-        }
-        return true;
-    }
-}
-
-/**
- * Your Trie object will be instantiated and called as such:
- * Trie obj = new Trie();
- * obj.insert(word);
- * boolean param_2 = obj.search(word);
- * boolean param_3 = obj.startsWith(prefix);
- */
  
 213. House Robber II  //Math.max(startFromFirstHouse[nums.length - 1], startFromSecondHouse[nums.length]);
 public class Solution {
