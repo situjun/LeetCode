@@ -720,7 +720,7 @@ public class Solution {
         //long low = (long)(0-Math.pow(2,32));
       
         int result = 0;
-        if(x<0) flag = false;
+        if(x<0) flag = false; 
         //mark1 -> Math.abs(越界的int时，会从起始int的low范围开始返回)，所以要先把x转为long
         //如果用下面注释掉的代码，Test Case：-2147483648时，会产生错误
         //String s = Math.abs(x)+"";
