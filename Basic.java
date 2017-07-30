@@ -3,7 +3,13 @@ class Basic{
 	public static void main(String[] s){
 		//new Basic().mergeSort();
 		//new Basic().binarySearch();
-		new Basic().medianSearch();
+		//new Basic().medianSearch();
+		new Basic().insertSort();
+	}
+	public void insertSort(){
+		int[] nums = {3,1,4,5,5,2,5,6,66,33,22,1,21,13,14};
+		new InsertSort().sort(nums);
+		for(int i:nums) System.out.print(i+",");
 	}
 	public void mergeSort(){
 		int[] nums = {3,1,4,5,5,2,5,6,66,33,22,1,21,13,14};
@@ -102,3 +108,19 @@ class MedianSearch{
 	}
 }
 
+/*170730*/
+//mark0:public class InsertSort是错的 -> 因为类InsertSort是公共的, 应在名为 InsertSort.java 的文件中声明
+//public class InsertSort{
+class InsertSort{
+	public void sort(int[] nums){
+		for(int i = 1;i<=nums.length-1;i++){
+			int j = i-1,tmp = nums[i];
+			while(j >= 0 && tmp < nums[j]){
+				nums[j+1] = nums[j];
+				j--;
+			} 
+			nums[j+1] = tmp;
+		}
+	}
+	
+}
