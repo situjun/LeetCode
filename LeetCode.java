@@ -8647,6 +8647,25 @@ public class Trie {
 //1.brute force
 //2.2 poitners
 //3.dp
+
+//170730 和下面的一样
+//2pointers
+public class Solution {
+    public int minSubArrayLen(int s, int[] nums) {
+        int sum = 0,n = nums.length,begin = 0,res = Integer.MAX_VALUE;
+        for(int end = 0;end<=n-1;end++){
+            sum += nums[end];
+            while(sum >= s){
+                res = Math.min(res,end-begin+1);
+                sum -= nums[begin];
+                begin++;
+            }
+        }
+        //mark0: If there isn't one, return 0 instead.
+        return res == Integer.MAX_VALUE?0:res;
+    }
+}
+
 public class Solution {
     public int minSubArrayLen(int s, int[] nums) {
         //Key:最简单是Brute Force --> O(n^2)
