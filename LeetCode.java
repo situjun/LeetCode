@@ -7444,7 +7444,7 @@ public class MinStack {
 //Version 0 一个非常漂亮的写法，这样一来index1 和index2走的路一样长。证明貌似和环List有些相似
 //mark0:如果headA,headB有一个是null，.next会不好处理，所以一开始就给排除了
 
-/* 170810 */
+/*170810*/
 
 public class Solution {
     public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
