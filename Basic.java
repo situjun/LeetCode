@@ -1,33 +1,42 @@
 import java.util.*;
 class Basic{
 	public static void main(String[] s){
-		//new Basic().mergeSort();
-		//new Basic().binarySearch();
-		//new Basic().medianSearch();
-		new Basic().insertSort();
-	}
-	public void insertSort(){
 		int[] nums = {3,1,4,5,5,2,5,6,66,33,22,1,21,13,14};
-		new InsertSort().sort(nums);
+		int[] arr = {44,22,11,52,12,12,14,22,1,2,4};
+		int target = 5;
+		
+		//System.out.println(new Basic().binarySearch(nums,target));
+		//System.out.println(new Basic().medianSearch(nums,arr));
+		
+		//new Basic().mergeSort(nums);
+		//new Basic().insertSort(nums);
+		//new Basic().bubbleSort(nums);
+		new Basic().selectSort(nums);
+		
 		for(int i:nums) System.out.print(i+",");
 	}
-	public void mergeSort(){
-		int[] nums = {3,1,4,5,5,2,5,6,66,33,22,1,21,13,14};
+	public void bubbleSort(int[] nums){
+		new BubbleSort().sort(nums);
+	}
+	public void selectSort(int[] nums){
+		new SelectSort().sort(nums);
+	}
+	public void insertSort(int[] nums){
+		new InsertSort().sort(nums);
+	}
+	public void mergeSort(int[] nums){
 		int[] tmp = new int[nums.length];
 		new MergeSort().sort(nums,tmp,0,nums.length-1);
-		for(int i:nums) System.out.print(i+",");
 	}
-	public void binarySearch(){
-		int[] nums = {4,2,5,2,5,2,2,1,88,4,22,45,23,121,9,65};
+	public int binarySearch(int[] nums,int target){
 		Arrays.sort(nums);
-		System.out.println(new BinarySearch().search(nums,45));
+		return new BinarySearch().search(nums,target);
 	}
 	/*170714*/
-	public void medianSearch(){
-		int[] nums1 = {1,2};
-		int[] nums2 = {3,4};
-		MedianSearch obj = new MedianSearch();
-		System.out.println(obj.search(nums1,nums2));
+	public double medianSearch(int[] nums1,int[] nums2){
+		Arrays.sort(nums1);
+		Arrays.sort(nums2);
+		return new MedianSearch().search(nums1,nums2);
 	}
 }
 class BinarySearch{
@@ -123,4 +132,40 @@ class InsertSort{
 		}
 	}
 	
+}
+
+/*170812*/
+//Star:bubble要和select一起看，两者思路差不多。只与把小的往前排，还是把大的往后排，都可以
+class BubbleSort{
+	public void sort(int[] nums){
+		for(int i = nums.length-1;i>=0;i--){
+			
+			//mark0:bubbleSort是最蠢的那种两两交换，如果完全有序的话，效果要好于selection...
+			for(int j = 1;j<=i;j++){
+				if(nums[j-1] > nums[j]){
+					int tmp = nums[j];
+					nums[j] = nums[j-1];
+					nums[j-1] = tmp;
+				}
+			}
+			
+		}	
+	}
+}
+
+/*170812*/
+//Star:SelectSort是bubble的优化，swap放在内循环的外边，因此只用交换n次
+class SelectSort{
+	public void sort(int[] nums){
+		for(int i = nums.length-1;i>=0;i--){
+			int maxInd = i;
+			//mark0:选择排序中，inner loop中只保留最后的位置，最后在outer loop里交换，不用每次都交换
+			for(int j = i;j>=0;j--){
+				if(nums[j] > nums[maxInd]) maxInd = j;
+			}
+			int tmp = nums[i];
+			nums[i] = nums[maxInd];
+			nums[maxInd] = tmp;
+		}	
+	}
 }
