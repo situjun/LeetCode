@@ -16,8 +16,9 @@ class Test{
 		StackOverflowTest(++count);
 	}
 	
+	////
 	//Mark:OutOfMemoryError的原因有可能不同
-	//内存溢出解释为所需要的内存容量超过了可用内存容量，可能较好理解些
+	//内存溢出解释为所需要的内存容量超过了可用内存容量，可能较好理解些 
 	public static void outOfMemory(){
 		//Exception in thread "main" java.lang.OutOfMemoryError: Requested array size exceeds VM limit	
 		//int[] arr = new int[Integer.MAX_VALUE];
