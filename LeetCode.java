@@ -342,6 +342,33 @@ public class Solution {
 	else Keep [bRight + aLeft]
 **/
 
+/*170818*/
+class Solution {
+    /**
+     * @param A: An integer array.
+     * @param B: An integer array.
+     * @return: a double whose format is *.5 or *.0
+     */
+    public double findMedianSortedArrays(int[] A, int[] B) {
+        // write your code here
+        int n1 = A.length,n2 = B.length,left = (n1+n2+1)/2,right = (n1+n2+2)/2;
+        return (findKth(0,A,0,B,left)+findKth(0,A,0,B,right))/2.0;
+    }
+    public int findKth(int aStart,int[] A,int bStart,int[] B,int k){
+        if(aStart >=A.length) return B[bStart+k-1];
+        if(bStart >=B.length) return A[aStart+k-1];
+		if(k == 1) return Math.min(A[aStart],B[bStart]);
+		//Mark0:k/2还是(k+1)/2不是关键，白板时不用特别关注....
+        int midA = (aStart+k/2)-1,midB = (bStart+k/2)-1;
+        int midAVal = midA >= A.length?Integer.MAX_VALUE:A[midA],midBVal = midB >= B.length?Integer.MAX_VALUE:B[midB];
+        if(midAVal < midBVal)
+            return findKth(midA+1,A,bStart,B,k-k/2);
+        else 
+            return findKth(aStart,A,midB+1,B,k-k/2);
+    }
+}
+
+
 /*170618*/
 public class Solution {
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
