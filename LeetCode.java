@@ -15295,3 +15295,28 @@ public class Solution {
     }
     
 };
+
+657. Judge Route Circle
+//Star
+/*170819*/
+//Input: "UD"  Output: true 先向上，再向下 return true
+//mark0:判断UD,LR数量相等
+class Solution {
+    public boolean judgeCircle(String moves) {
+        int count1 = 0,count2 = 0;
+        for(Character c:moves.toCharArray()){
+            switch(c){
+                case 'U':count1++;
+                    break;
+                case 'L':count2++;
+                    break;
+                case 'D':count1--;
+                    break;
+                case 'R':count2--;
+                    break;
+                default:break;
+            }
+        }
+        return count1 == 0 && count2 == 0?true:false;
+    }
+}
