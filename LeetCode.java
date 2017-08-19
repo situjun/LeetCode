@@ -15317,6 +15317,6 @@ class Solution {
                 default:break;
             }
         }
-        return count1 == 0 && count2 == 0?true:false;
+        return count1 == 0 && count2 == 0;
     }
 }
