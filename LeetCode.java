@@ -1225,6 +1225,7 @@ public class Solution {
             if(index >= 0){
                 for(int i = 0;i<=strs[index].length()-1;i++){
                     tmp = tmp+String.valueOf(strs[index].charAt(i));
+					//Key:Mark4,下面的千万别写成depth++。因为depth++传进值以后才自增的。相当于传进去一个没变的值，会stackOverFlow的...
                     helper(list,strs,digits,depth+1,tmp);
                     tmp = tmp.substring(0,tmp.length()-1);
                 }
