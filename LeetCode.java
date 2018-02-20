@@ -255,6 +255,29 @@ public class Solution {
 //直到那个重复的char数量 变为1
 //mark1
 //mark2
+
+/*180216*/
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        int res = 0,begin = 0,end = 0,dupCounter = 0;
+        Map<Character,Integer> map = new HashMap<>();
+        while(end <= s.length()-1){
+            char c = s.charAt(end);
+            map.put(c,map.getOrDefault(c,0)+1);
+            if(map.get(c)>1) dupCounter++;
+            while(dupCounter >= 1){
+                char beginChar = s.charAt(begin);
+                if(map.get(beginChar) > 1) dupCounter--;
+                map.put(beginChar,map.get(beginChar)-1);
+                begin++;
+            }
+            end++;
+            res = Math.max(res,end - begin);
+        }
+        return res;
+    }
+}
+
 /*170617*/
 public class Solution {
     public int lengthOfLongestSubstring(String s) {
@@ -276,6 +299,7 @@ public class Solution {
         **/
         //Key170619:counter依旧是守门人，如果有重复的人进入，则counter++(应为底下的while(counter >0),所以counter最多也就可能加到1为止)。与T76不同的是，这次counter允许通过的char是按照“队列”顺序进入的，所以counter也要按照队列顺序将之前的char删除，直到那个重复的char数量 变为1
         if(s.equals("")) return 0;
+		//counter是重复字母的总次数，而不是字母总出现次数
         int res = Integer.MIN_VALUE,n = s.length(),begin = 0,end = 0,counter = 0;
         Map<Character,Integer> map = new HashMap<>();
         while(end<=n-1){
@@ -357,6 +381,7 @@ class Solution {
         return (findKth(0,A,0,B,left)+findKth(0,A,0,B,right))/2.0;
     }
     public int findKth(int aStart,int[] A,int bStart,int[] B,int k){
+		//k是老k-k/2得来的，A，B的搜索范围也是原先的1/2了
         if(aStart >=A.length) return B[bStart+k-1];
         if(bStart >=B.length) return A[aStart+k-1];
 		if(k == 1) return Math.min(A[aStart],B[bStart]);
@@ -496,7 +521,8 @@ public class Solution {
 		//aStart > A.length - 1,start位置大于A数组长度，意味着A中从start位置开始，不存在着这个两数组中第k大的元素，所以无需在A中找了。
 		//所以直接返回B中第k个元素
 		//Key:下面这两句是用来排除Test case的语句，非core思路内容
-		
+	
+		//k折半的同时，A，B分别搜索的范围也是折半。所以A[xxoo]不会越界
     	if (aStart > A.length - 1) return B[bStart + k - 1];            
     	if (bStart > B.length - 1) return A[aStart + k - 1];                
     	if (k == 1) return Math.min(A[aStart], B[bStart]);
@@ -633,6 +659,31 @@ public class Solution {
 //3.mark1：如果numRows == 1时，那么counter-2不适用，要单独判断下==1的情况
 //另一种sol隔几个距离取一个char。https://discuss.leetcode.com/topic/3162/easy-to-understand-java-solution 
 
+/*180216*/
+class Solution {
+    public String convert(String s, int numRows) {
+        //Corner case numRows == 1
+        if(numRows == 1) return s;
+        String res = "";
+        List<String> list = new ArrayList<>();
+        for(int i = 0;i<=numRows-1;i++) list.add("");
+        boolean down = true;
+        int row = 0,index = 0;
+        while(index <= s.length()-1){
+            list.set(row,list.get(row)+s.charAt(index));
+            index++;
+            if(row == numRows-1){
+                down = false;
+            } else if (row == 0){
+                down = true;
+            }
+            if(down) row++;
+            else row--;
+        }
+        for(String ss:list) res += ss;
+        return res;
+    }
+}
 
 /*170620*/
 public class Solution {
@@ -1287,8 +1338,11 @@ public class Solution {
         if(num.length<4)return ans;
         Arrays.sort(num);
         for(int i=0; i<num.length-3; i++){
+			//Key:Mark1,num[i]==num[i-1]是第一个数字去重
+			//注意，是i和i-1比较，而不是i和i+1比较。很关键
             if(i>0&&num[i]==num[i-1])continue;
             for(int j=i+1; j<num.length-2; j++){
+				//Key:Mark1,num[i]==num[i-1]是第二个数字去重
                 if(j>i+1&&num[j]==num[j-1])continue;
                 int low=j+1, high=num.length-1;
                 while(low<high){
@@ -1419,6 +1473,7 @@ public class Solution {
     public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
         //170622,mark1:仍然是设置一个dummy node,然后返回dummy.next。会好处理的多
         ListNode res = new ListNode(0),index = res;
+		//Mark2:和T2不同的是，T2下面的是||就可以,因为不需要比较。本题需要是&&，然后因为需要进行个比较。
         while(l1 != null && l2 != null){
             int a = l1.val,b = l2.val;
             if(a<=b){
@@ -1675,6 +1730,7 @@ public class Solution {
         if(cur != null) p1 = cur.next;
         if(p1 != null) p2 = p1.next;
         //mark1:终止条件：1.cur == null自然不用管,直接退出。2.1，cur !=null,p1 == null也不用管，因为只剩下一个值cur,根本不用动。2.2：cur != null,p1 !=null 就是以下处理过程
+		//Mark2:交换主要是cur和p1交换，pre和p2只是做个标志位。
         while(cur != null && p1 != null){
             //mark2:reverse process
             p1.next = cur;
@@ -1872,6 +1928,14 @@ public class Solution {
 //1.1 mark2需要确保i+needle.length<=haystack
 //1.2 mark1,case："aaaa","a" ->注意，一旦相等就break.否则返回的是3而不是0
 //1.3 mark3:还有case"xxxxx","" 也是对的,return 0
+
+/*20180217*/
+/*
+两种方法
+1.double loop
+2.loop+substring
+*/
+
 
 /*170622*/
 public class Solution {
@@ -2184,7 +2248,7 @@ public class Solution {
 
 33. Search in Rotated Sorted Array
 //Star
-//T33方法也可以应用在T153上，因为mark6和mark7处是串联结构，而不是else这种并联，(170711,看似串联，实为并联,mark7)所以如果两边都有序的话，这种写法更容易理解些
+//T33方法也可以应用在T153上，因为mark6和mark7处是串联结构（一边成了，另一边就不成了），而不是else这种并联，(170711,看似串联，实为并联,mark7)所以如果两边都有序的话，这种写法更容易理解些
 //http://www.cnblogs.com/grandyang/p/4325648.html
 //core:找出有序的那部分，然后分别二叉搜索 
 //core：哪边有序(outer if)？target在不在有序的那边（inner if），进而决定舍弃哪边？
@@ -2333,6 +2397,8 @@ public class Solution {
 	//mark7
 */
            
+//下面这种方法类似于猜数字游戏
+		   
 /*170624*/
 public class Solution {
     public int[] searchRange(int[] nums, int target) {
@@ -2510,11 +2576,13 @@ public class Solution {
             HashSet<Character> columns = new HashSet<Character>();
             HashSet<Character> cube = new HashSet<Character>();
             for (int j = 0; j < 9;j++){
+				//判断列合法
                 if(board[i][j]!='.' && !rows.add(board[i][j]))
                     return false;
+				//判断行合法
                 if(board[j][i]!='.' && !columns.add(board[j][i]))
                     return false;
-				//mark1:判断九宫格
+				//mark1:判断九宫格合法
                 int RowIndex = 3*(i/3);
                 int ColIndex = 3*(i%3);
                 if(board[RowIndex + j/3][ColIndex + j%3]!='.' && !cube.add(board[RowIndex + j/3][ColIndex + j%3]))
@@ -2839,6 +2907,25 @@ public class Solution {
 44. Wildcard Matching - Discard
 
 45. Jump Game II - Unsolved
+/*20180217*/
+public class Solution {
+    public int jump(int[] A) {
+        if (A.length == 1)
+            return 0;
+        int max = 0, count = 1, begin = 0, end = A[0];
+        while (end < A.length - 1) {
+            count++;
+            int index = begin;
+            for (; index <= end; index++) {
+                max = Math.max(max, index + A[index]);
+            }
+            begin = index;
+            end = max;
+        }
+        return count;
+    }
+}
+
 
 46. Permutations
 //Star
@@ -3217,7 +3304,8 @@ public class Solution {
         int n = intervals.size();
         List<Interval> res = new ArrayList<>();
         if(n <= 1) return intervals;
-        //mark1:/**
+ //mark1:
+ /**
  * Definition for an interval.
  * public class Interval {
  *     int start;
@@ -3513,7 +3601,7 @@ public class Solution {
 public class Solution {
     //Key:2 pointers  
     //Keu:难点在于k有可能大于链表总长度，所以处理起来会很麻烦
-    //My 1st wrong version
+    //My 1st wrong version  - Memory limit Exceeded
     /**
     public ListNode rotateRight(ListNode head, int k) {
         
@@ -3659,7 +3747,10 @@ public class Solution {
     }
 }
 
-64. Minimum Path Sum  //Key:注意  第一行只能从左往右走，第一列只能从上往下走!!!!
+64. Minimum Path Sum  
+/*20180218*/
+//下面的key解释好像是错的
+//key:注意  第一行元素没法从上面一行走过来，第一列没法从左面一行走过来!!!!
 public class Solution {
     public int minPathSum(int[][] grid) {
         int m =grid.length,n = grid[0].length;
@@ -3669,7 +3760,7 @@ public class Solution {
         for(int i = 1;i<=m;i++){
             for(int j = 1;j<=n;j++){
                 //Key:注意grid与dp的index关系
-                //Key:注意  第一行只能从左往右走，第一列只能从上往下走!!!!
+                //key:注意  第一行元素没法从上面一行走过来，第一列没法从左面一行走过来!!!!
                 if(i == 1) dp[i][j] = dp[i][j-1]+grid[i-1][j-1];
                 else if(j == 1) dp[i][j] = dp[i-1][j]+grid[i-1][j-1];
                 else dp[i][j] = Math.min(dp[i-1][j],dp[i][j-1])+grid[i-1][j-1];
@@ -3767,6 +3858,68 @@ public class Solution {
 }
 
 67. Add Binary
+/*20180218*/
+
+//注意下归并排序，merge 2 LinkedList和这道题中while的不同。
+
+//cp version. 思路相似，但是代码更简洁了。与自己的版本对照着比下。
+//thinking point:  
+//if (j >= 0) sum += b.charAt(j--) - '0';if (i >= 0) sum += a.charAt(i--) - '0';  --> 所以省略了后面的两个while
+public class Solution {
+    public String addBinary(String a, String b) {
+        StringBuilder sb = new StringBuilder();
+        int i = a.length() - 1, j = b.length() -1, carry = 0;
+        while (i >= 0 || j >= 0) {
+            int sum = carry;
+            if (j >= 0) sum += b.charAt(j--) - '0';
+            if (i >= 0) sum += a.charAt(i--) - '0';
+            sb.append(sum % 2);
+            carry = sum / 2;
+        }
+        if (carry != 0) sb.append(carry);
+        return sb.reverse().toString();
+    }
+}
+
+//Core:
+//mark 2.3 别忘了a.charAt(indexA)-'0'  ‘0’转为int是48
+//mark 3.3 从后往前进位，所以index需要从lengh往前。下面的是错的,配套的while也需要改成向前逼近
+class Solution {
+    public String addBinary(String a, String b) {
+        String res = "";
+        int indexA = a.length()-1,indexB = b.length()-1;
+        int sum = 0,cur = 0,carry = 0;
+        while(indexA >= 0 && indexB >= 0){
+            //mark 2.3 别忘了a.charAt(indexA)-'0'  ‘0’转为int是48
+            //mark 3.3 从后往前进位，所以index需要从lengh往前。下面的是错的,配套的while也需要改
+            // sum = (a.charAt(indexA)-'0'+b.charAt(indexB)-'0'+carry);
+            sum = (a.charAt(indexA)-'0'+b.charAt(indexB)-'0'+carry);
+            carry = sum/2;
+            cur = sum%2;
+            res += cur;
+            indexA--;
+            indexB--;
+        }
+        //System.out.println("cur"+cur+"carry"+carry);
+        while(indexA >= 0){
+            sum = (a.charAt(indexA)-'0'+carry);
+            carry = sum/2;
+            cur = sum%2;  
+            res += cur;
+            indexA--;
+        }
+        while(indexB >= 0){
+            sum = (b.charAt(indexB)-'0'+carry);
+            carry = sum/2;
+            cur = sum%2;  
+            res += cur;
+            indexB--;
+        }
+        if(carry == 1) res += 1;
+        return new StringBuilder(res).reverse().toString();
+    }
+}
+
 public class Solution {
     public String addBinary(String a, String b) {
         //Plus One 很像
@@ -4057,12 +4210,12 @@ public class Solution {
     }
 }
 
-75. Sort Colors
 public class Solution {
     public void sortColors(int[] nums) {
         //Key:Arrays.fill(tmp,1);然后用0和2来覆盖
         //1st correct version
         //Key:注意clone的用法
+        //makr0:tmp和nums一模一样。因为return void，所以要直接改变nums,只能复制下nums.
         int[] tmp = nums.clone();
         Arrays.fill(nums,1);
         int index1 = 0,index2 = nums.length-1;
@@ -4542,6 +4695,50 @@ public class Solution {
         }
         return res;
         **/
+    }
+}
+
+//cp
+public class Solution {
+    public int maximalRectangle(char[][] matrix) {
+        //Key:Ref -->https://leetcode.com/problems/largest-rectangle-in-histogram/#/description
+        //Key:cp,背   https://discuss.leetcode.com/topic/1634/a-o-n-2-solution-based-on-largest-rectangle-in-histogram
+        //Key:https://discuss.leetcode.com/topic/6650/share-my-dp-solution
+        //Key:https://discuss.leetcode.com/topic/21772/my-java-solution-based-on-maximum-rectangle-in-histogram-with-explanation
+        
+        if (matrix==null||matrix.length==0||matrix[0].length==0)
+            return 0;
+        int cLen = matrix[0].length;    // column length
+        int rLen = matrix.length;       // row length
+        // height array 
+        int[] h = new int[cLen+1];
+        h[cLen]=0;
+        int max = 0;
+        
+        
+        for (int row=0;row<rLen;row++) {
+            Stack<Integer> s = new Stack<Integer>();
+            for (int i=0;i<cLen+1;i++) {
+                if (i<cLen)
+                    if(matrix[row][i]=='1')
+                        h[i]+=1;
+                    else h[i]=0;
+                
+                if (s.isEmpty()||h[s.peek()]<=h[i])
+                    s.push(i);
+                else {
+                    while(!s.isEmpty()&&h[i]<h[s.peek()]){
+                        int top = s.pop();
+                        int area = h[top]*(s.isEmpty()?i:(i-s.peek()-1));
+                        if (area>max)
+                            max = area;
+                    }
+                    s.push(i);
+                }
+            }
+        }
+        return max;
+        
     }
 }
 
@@ -5365,6 +5562,7 @@ public class Solution {
     }
     public void helper(List<List<Integer>> list,TreeNode node,int depth){
         if(node != null){
+			//mark3:到达下一层了，所以新建一个list存储
             if(depth+1>list.size()) list.add(new ArrayList<>());
             list.get(depth).add(node.val);
             //mark2
@@ -5457,6 +5655,7 @@ public class Solution {
                 inIndex = i;
             }
         }
+		//mark1:helper分别范围
         root.left = helper(preStart + 1, inStart, inIndex - 1, preorder, inorder);
         root.right = helper(preStart + inIndex - inStart + 1, inIndex + 1, inEnd, preorder, inorder);
         return root;
@@ -5532,6 +5731,7 @@ public class Solution {
         //Key point:
         //类比于mergeSort,因为要处理low == high时需要返回一个单独的节点，所以要用<=，而不是<
         if(low<=high){
+			//mark 0.1:这句是保证balanse的关键
             int mid = (low+high)/2;
             TreeNode node = new TreeNode(arr[mid]);
             //Key point:
@@ -6984,8 +7184,7 @@ public class Solution {
         return list;
     }
     public void helper(List<Integer> list,TreeNode node){
-        if(node != null){
-            
+        if(node != null){    
             helper(list,node.left);
             helper(list,node.right);
             list.add(node.val);
@@ -7010,6 +7209,26 @@ public class Solution {
 }
 
 146. LRU Cache - Discard
+import java.util.LinkedHashMap;
+public class LRUCache {
+	private LinkedHashMap<Integer, Integer> map;
+	private final int CAPACITY;
+	public LRUCache(int capacity) {
+		CAPACITY = capacity;
+		map = new LinkedHashMap<Integer, Integer>(capacity, 0.75f, true){
+			protected boolean removeEldestEntry(Map.Entry eldest) {
+				return size() > CAPACITY;
+			}
+		};
+	}
+	public int get(int key) {
+		return map.getOrDefault(key, -1);
+	}
+	public void put(int key, int value) {
+		map.put(key, value);
+	}
+}
+
 
 147. Insertion Sort List
 
@@ -7099,6 +7318,41 @@ public class Solution {
 }
 
 149. Max Points on a Line - Discard
+//Star
+/*20180220*/
+//Just cp  https://leetcode.com/problems/max-points-on-a-line/discuss/47098/Accepted-Java-solution-easy-to-understand.
+public class Solution {
+    public int maxPoints(Point[] points) {
+        if(points.length <= 0) return 0;
+        if(points.length <= 2) return points.length;
+        int result = 0;
+        for(int i = 0; i < points.length; i++){
+            HashMap<Double, Integer> hm = new HashMap<Double, Integer>();
+            int samex = 1;
+            int samep = 0;
+            for(int j = 0; j < points.length; j++){
+                if(j != i){
+                    if((points[j].x == points[i].x) && (points[j].y == points[i].y)){
+                        samep++;
+                    }
+                    if(points[j].x == points[i].x){
+                        samex++;
+                        continue;
+                    }
+                    double k = (double)(points[j].y - points[i].y) / (double)(points[j].x - points[i].x);
+                    if(hm.containsKey(k)){
+                        hm.put(k,hm.get(k) + 1);
+                    }else{
+                        hm.put(k, 2);
+                    }
+					result = Math.max(result, hm.get(k) + samep);
+                }
+            }
+            result = Math.max(result, samex);
+        }
+        return result;
+    }
+}
 
 150. Evaluate Reverse Polish Notation
 //Star
@@ -7363,10 +7617,12 @@ public class Solution {
         int n = nums.length,low = 0,high = n-1,res = Integer.MAX_VALUE;
         while(low<=high){
             int mid = (low+high)/2;
+			//mark0.1:说明左半部分有序
             if(nums[low] <= nums[mid]){
                 res = Math.min(nums[low],res);
                 low = mid+1;
             } 
+			//mark0.2:说明右半部分有序
             if(nums[mid] <= nums[high]){
                 res = Math.min(nums[mid],res);
                 high = mid-1;
@@ -8024,6 +8280,7 @@ public class Solution {
             public int compare(String i, String j) {
                 String s1 = i+j;
                 String s2 = j+i;
+				//mark2:compareTo用法
                 return s1.compareTo(s2);
             }
         });
@@ -8251,7 +8508,7 @@ public class Solution {
  
 199. Binary Tree Right Side View
 //Star
-//Core:前序中左右给成中右左，然后加个depth标识一下就好了
+//Core:前序中左右改成中右左，然后加个depth标识一下就好了
 //mark0:
 public class Solution {
     //Similar to  Binary Tree Inorder Traversal
@@ -8325,7 +8582,6 @@ public class Solution {
     //Key:just copy
     public int numIslands(char[][] grid) {
         int count = 0;
-        
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[i].length; j++) {
                 if (grid[i][j] == '1') {
@@ -15322,3 +15578,26 @@ class Solution {
     }
 }
 
+
+Lint 46. Majority Number
+public class Solution {
+    /**
+     * @param nums: a list of integers
+     * @return: find a  majority number
+     */
+    public int majorityNumber(ArrayList<Integer> nums) {
+        // write your code
+        //Key Point: ArrayList to array
+        
+        
+        if(nums.size() == 0) return 0;
+        //Integer[] arr 而不是 int[] arr
+        Integer[] arr = new Integer[nums.size()];
+        
+        nums.toArray(arr);
+        //先排序，再找
+        Arrays.sort(arr);
+        //Corner Case:
+        return nums.size()%2 == 0?arr[(nums.size())/2]:arr[(nums.size()-1)/2];
+    }
+}
