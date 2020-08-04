@@ -81,6 +81,36 @@ public class Solution {
 //2.case:[null,null]->因为返回的是ListNode，假如传进来的参数是两个null，那么while(l1 != null || l2 != null){}这个核心方法体就会被跳过。
 //但是返回null和返回一个new ListNode(0)因该说均符合这个答案要求。
 //所以不用担心当传入两个null时会造成错误,最后return res.next直接返回一个null也是符合题意的
+/*20200725*/
+class Solution {
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        ListNode res = new ListNode(0);
+        ListNode p = new ListNode(0);
+        int sum = 0;
+        res = p;
+        while(l1 != null || l2 != null){
+            // key：p = p.next放在前头还是后头是有讲究的
+            p.next = new ListNode(0);
+            p = p.next;
+            if(l1 != null) {
+                sum += l1.val;
+                l1 = l1.next;
+            }
+            if(l2 != null) {
+                sum += l2.val;
+                l2 = l2.next;
+            }
+            // key:两处会用到，一处取值，另一处要next
+            //sum += l1 == null?0;l1.val;
+            //sum += l2 == null?0;l2.val;
+            p.val = sum%10;
+            sum = sum/10;
+        }
+        if(sum == 1) p.next = new ListNode(1);
+        return res.next;
+    }
+}
+
 /*170616*/
 public class Solution {
     public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
