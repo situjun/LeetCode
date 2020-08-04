@@ -351,7 +351,7 @@ public class Solution {
 //Star
 //170709:Core:mark1,3,4,7不好记忆，直接硬背    只是判断是否为空数组，即start>?length.而不是判断start+k>?length --> 如果所求元素正好位于所求段，容易漏掉
 //Star ~ code4.2 
-//1.规定，num1.length<=nums2.length.较短序列所有元素都被抛弃，可直接返回较长序列的第k大元素，可以不用分情况讨论了。
+//1.规定，num1.length<=nums2.length.较短序列所有元素都被抛弃，可直接返回较长序列的第k大元素，可以不用分情况讨论了。 --- 这个逻辑有问题吧，为啥这么想？
 //不用再乱七八糟的讨论了。所需的(k-1)/2位置可能大于某个数组总长度，规定A短之后，只需要考虑超过A的长度，
 //不需要再分情况讨论了。
 //2.mark0 left和right的坐标确认
@@ -367,6 +367,30 @@ public class Solution {
 	if (aMid < bMid) Keep [aRight + bLeft]     
 	else Keep [bRight + aLeft]
 **/
+
+/*200804*/
+class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        // key:不是l = (n+m)/2,r = (n+m+1)/2;  而是 l = (n+m+1)/2,r = (n+m+2)/2; l,r是第n个数
+        int n = nums1.length,m = nums2.length,l = (n+m+1)/2,r = (n+m+2)/2;
+        return (findKth(nums1,0,nums2,0,l)+findKth(nums1,0,nums2,0,r))/2.0;
+    }
+    public double findKth(int[] nums1,int start1,int[] nums2,int start2,int k){
+        // key:是在start的基础上偏移k，而不是k
+//        if(start1 > nums1.length-1) return nums2[k-1];
+        if(start1 > nums1.length-1) return nums2[start2+k-1];
+        if(start2 > nums2.length-1) return nums1[start1+k-1];
+        // key start本身就是下标了
+//        if (k == 1) return Math.min(nums1[start1-1],nums2[start2-1]);
+        if (k == 1) return Math.min(nums1[start1],nums2[start2]);
+        int mid1 = start1 + k/2 -1,mid2 = start2 + k/2 -1;
+        int mid1Val = mid1>nums1.length-1?Integer.MAX_VALUE:nums1[mid1],mid2Val = mid2>nums2.length-1?Integer.MAX_VALUE:nums2[mid2];
+        if (mid1Val < mid2Val)
+            return findKth(nums1,mid1+1,nums2,start2,k-k/2);
+        else
+            return findKth(nums1,start1,nums2,mid2+1,k-k/2);
+    }
+}
 
 /*170818*/
 class Solution {
