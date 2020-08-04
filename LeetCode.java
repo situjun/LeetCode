@@ -84,6 +84,7 @@ public class Solution {
 /*20200725*/
 class Solution {
     public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+		// key:这里必须要两个node
         ListNode res = new ListNode(0);
         ListNode p = new ListNode(0);
         int sum = 0;
